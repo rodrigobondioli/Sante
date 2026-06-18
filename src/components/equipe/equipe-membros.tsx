@@ -52,7 +52,7 @@ function MembroRow({
   const [role, setRole] = useState<BarRole>(m.role);
   const [saving, setSaving] = useState(false);
   const isOwn = m.userId === currentUserId;
-  const canEdit = isDono && m.role !== "dono" && !isOwn;
+  const canEdit = isDono && !isOwn;
 
   async function saveRole() {
     setSaving(true);
@@ -101,6 +101,7 @@ function MembroRow({
               outline: "none", colorScheme: "dark",
             }}
           >
+            <option value="dono">Dono</option>
             <option value="gerente">Gerente</option>
             <option value="bartender">Bartender</option>
             <option value="caixa">Caixa</option>
