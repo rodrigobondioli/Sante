@@ -14,6 +14,7 @@ export default function LoginPage({
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [btnHovered, setBtnHovered] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const inputStyle = (focused: boolean) => ({
     width: "100%",
@@ -123,7 +124,7 @@ export default function LoginPage({
             borderRadius: "24px",
             padding: "40px",
           }}>
-            <form action={signIn} className="flex flex-col gap-4">
+            <form action={signIn} className="flex flex-col gap-4" onSubmit={() => setLoading(true)}>
               <input
                 type="email"
                 name="email"
@@ -149,23 +150,35 @@ export default function LoginPage({
               )}
               <button
                 type="submit"
+                disabled={loading}
                 style={{
                   width: "100%",
-                  background: btnHovered ? "#3a00a8" : "#260078",
+                  background: loading ? "rgba(38,0,120,0.5)" : btnHovered ? "#3a00a8" : "#260078",
                   border: "1px solid rgba(255,255,255,0.15)",
                   borderRadius: "12px",
                   padding: "14px",
-                  color: "white",
+                  color: loading ? "rgba(255,255,255,0.5)" : "white",
                   fontWeight: "600",
                   fontSize: "14px",
-                  cursor: "pointer",
+                  cursor: loading ? "default" : "pointer",
                   letterSpacing: "0.01em",
-                  transition: "background 0.2s",
+                  transition: "background 0.2s, color 0.2s",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
                 }}
-                onMouseEnter={() => setBtnHovered(true)}
+                onMouseEnter={() => !loading && setBtnHovered(true)}
                 onMouseLeave={() => setBtnHovered(false)}
               >
-                Entrar
+                {loading && (
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ animation: "spin 0.8s linear infinite" }}>
+                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                    <circle cx="8" cy="8" r="6" stroke="rgba(255,255,255,0.3)" strokeWidth="2" />
+                    <path d="M8 2a6 6 0 0 1 6 6" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                )}
+                {loading ? "Entrando..." : "Entrar"}
               </button>
             </form>
           </div>
