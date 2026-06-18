@@ -63,91 +63,104 @@ function ordinal(n: number) {
 // ─── SPLASH ───────────────────────────────────────────────────────────────────
 function SplashScreen({
   bar,
-  produtos,
   onNext,
 }: {
   bar: Bar;
-  produtos: Produto[];
   onNext: () => void;
 }) {
-  const images = produtos
-    .filter((p) => p.imagem_url)
-    .slice(0, 9)
-    .map((p) => p.imagem_url!);
+  const DURATION = 2800;
+  const [progress, setProgress] = useState(0);
 
-  const tiles = [...images, ...Array(Math.max(0, 9 - images.length)).fill(null)];
-
-  const gradients = [
-    "#1a0a2e", "#0d1f2d", "#1a1400", "#0d2d1a",
-    "#2d0d0d", "#1a1a0d", "#0d0d2d", "#2d1a0d", "#0d2d2d",
-  ];
+  useEffect(() => {
+    const start = Date.now();
+    let raf: number;
+    const tick = () => {
+      const p = Math.min((Date.now() - start) / DURATION, 1);
+      setProgress(p);
+      if (p < 1) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        onNext();
+      }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [onNext]);
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column", background: BG, position: "relative", overflow: "hidden" }}>
-      {/* Mosaic */}
+    <div style={{
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      position: "relative",
+      overflow: "hidden",
+      background: BG,
+    }}>
+      {/* Animated gradient background */}
+      <style>{`
+        @keyframes gradShift {
+          0%   { background-position: 0% 50%; }
+          50%  { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(12px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
       <div style={{
-        flex: 1,
-        display: "grid",
-        gridTemplateColumns: "repeat(3, 1fr)",
-        gridTemplateRows: "repeat(3, 1fr)",
-        gap: 2,
-      }}>
-        {tiles.map((url, i) => (
-          <div
-            key={i}
-            style={{
-              background: url
-                ? `url(${url}) center/cover no-repeat`
-                : gradients[i % gradients.length],
-              transition: "opacity 600ms",
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Dark gradient overlay */}
+        position: "absolute", inset: 0,
+        background: "linear-gradient(135deg, #0a0a1e 0%, #0b1f10 25%, #1a0b0e 50%, #0a1525 75%, #100a1a 100%)",
+        backgroundSize: "400% 400%",
+        animation: "gradShift 5s ease infinite",
+      }} />
+      {/* Noise texture overlay */}
       <div style={{
-        position: "absolute",
-        bottom: 0, left: 0, right: 0,
-        height: "60%",
-        background: "linear-gradient(to top, #0c0c0c 45%, rgba(12,12,12,0.6) 70%, transparent)",
+        position: "absolute", inset: 0,
+        backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E\")",
+        opacity: 0.6,
         pointerEvents: "none",
       }} />
 
-      {/* Bottom content */}
-      <div style={{
-        position: "absolute",
-        bottom: 0, left: 0, right: 0,
-        padding: "0 28px 48px",
-      }}>
-        <p style={{ fontSize: 12, color: ACCENT, fontWeight: 600, textTransform: "uppercase", letterSpacing: 2, margin: "0 0 10px" }}>
+      {/* Center content */}
+      <div style={{ position: "relative", textAlign: "center", animation: "fadeIn 600ms ease both" }}>
+        <p style={{
+          fontSize: 11, color: ACCENT, fontWeight: 700,
+          textTransform: "uppercase", letterSpacing: 3,
+          margin: "0 0 16px",
+        }}>
           Bem-vindo
         </p>
-        <h1 style={{ fontSize: 38, fontWeight: 800, color: "white", margin: "0 0 8px", lineHeight: 1.05, letterSpacing: "-0.5px" }}>
+        <h1 style={{
+          fontSize: 42, fontWeight: 900, color: "white",
+          margin: 0, lineHeight: 1.0, letterSpacing: "-1px",
+          textShadow: "0 2px 32px rgba(0,0,0,0.5)",
+        }}>
           {bar.nome}
         </h1>
-        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.45)", margin: "0 0 32px", lineHeight: 1.5 }}>
-          Entre, faça seu pedido<br />e sinta-se em casa.
+        <p style={{
+          fontSize: 14, color: "rgba(255,255,255,0.38)",
+          margin: "14px 0 0", letterSpacing: "0.3px",
+        }}>
+          Mesa pronta. Cardápio a caminho.
         </p>
+      </div>
 
-        <button
-          onClick={onNext}
-          style={{
-            width: 56, height: 56,
-            borderRadius: "50%",
-            background: ACCENT,
-            border: "none",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: `0 0 24px ${ACCENT}55`,
-          }}
-        >
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-            <path d="M5 11h12M13 7l4 4-4 4" stroke="#000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
+      {/* Progress bar */}
+      <div style={{
+        position: "absolute", bottom: 48, left: 40, right: 40,
+        height: 2, background: "rgba(255,255,255,0.1)",
+        borderRadius: 99,
+      }}>
+        <div style={{
+          height: "100%", borderRadius: 99,
+          background: ACCENT,
+          width: `${progress * 100}%`,
+          transition: "width 50ms linear",
+          boxShadow: `0 0 8px ${ACCENT}88`,
+        }} />
       </div>
     </div>
   );
@@ -225,86 +238,144 @@ function WelcomeNewScreen({ bar, onConfirm }: { bar: Bar; onConfirm: (nome: stri
 function WelcomeBackScreen({
   cliente,
   ultimoProduto,
+  allProdutos,
   onContinue,
   onRepeat,
 }: {
   cliente: ClienteLocal;
   ultimoProduto: Produto | null;
+  allProdutos: Produto[];
   onContinue: () => void;
   onRepeat: (produto: Produto) => void;
 }) {
+  // Sugestões: produtos com imagem excluindo o último pedido, pega 3
+  const sugestoes = allProdutos
+    .filter((p) => p.ativo && p.imagem_url && p.id !== ultimoProduto?.id)
+    .slice(0, 3);
+
   return (
     <div style={{
       height: "100%", background: BG,
       display: "flex", flexDirection: "column",
-      padding: "64px 28px 48px",
-      justifyContent: "space-between",
+      overflow: "auto",
     }}>
-      <div>
-        <p style={{ fontSize: 12, color: ACCENT, fontWeight: 600, textTransform: "uppercase", letterSpacing: 2, margin: "0 0 20px" }}>
+      {/* Top section */}
+      <div style={{ padding: "64px 28px 28px" }}>
+        <p style={{ fontSize: 11, color: ACCENT, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2.5, margin: "0 0 16px" }}>
           De volta!
         </p>
-        <h1 style={{ fontSize: 32, fontWeight: 800, color: "white", margin: "0 0 12px", lineHeight: 1.1 }}>
+        <h1 style={{ fontSize: 34, fontWeight: 900, color: "white", margin: "0 0 10px", lineHeight: 1.05, letterSpacing: "-0.5px" }}>
           Boa noite,<br />{cliente.nome} 🥃
         </h1>
-        <p style={{ fontSize: 15, color: "rgba(255,255,255,0.42)", margin: 0, lineHeight: 1.6 }}>
+        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.38)", margin: 0, lineHeight: 1.6 }}>
           {cliente.visitas <= 1
             ? "Primeira vez aqui. Que bom ter você!"
-            : `Essa é sua ${ordinal(cliente.visitas)} visita.\nVocê faz parte da família.`}
+            : `${ordinal(cliente.visitas)} visita. Você faz parte da família.`}
         </p>
       </div>
 
+      {/* Last order */}
       {ultimoProduto && (
-        <div style={{
-          background: CARD,
-          borderRadius: 18,
-          padding: "20px",
-          border: "1px solid rgba(200,255,0,0.10)",
-        }}>
-          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", margin: "0 0 14px", textTransform: "uppercase", letterSpacing: 1 }}>
-            Da última vez você pediu
+        <div style={{ padding: "0 20px 20px" }}>
+          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", margin: "0 0 10px 4px", textTransform: "uppercase", letterSpacing: 1.2, fontWeight: 600 }}>
+            Da última vez
           </p>
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            {ultimoProduto.imagem_url && (
-              <img
-                src={ultimoProduto.imagem_url}
-                style={{ width: 56, height: 56, borderRadius: 12, objectFit: "cover", flexShrink: 0 }}
-                alt={ultimoProduto.nome}
-              />
-            )}
-            <div style={{ flex: 1 }}>
-              <p style={{ fontSize: 15, fontWeight: 700, color: "white", margin: 0 }}>{ultimoProduto.nome}</p>
-              <p style={{ fontSize: 13, color: ACCENT, margin: "3px 0 0", fontWeight: 600 }}>{fmt(ultimoProduto.preco)}</p>
+          <div style={{
+            background: CARD,
+            borderRadius: 18,
+            overflow: "hidden",
+            display: "flex",
+            alignItems: "stretch",
+            border: `1px solid rgba(200,255,0,0.12)`,
+          }}>
+            <div style={{ flex: 1, padding: "18px 16px 18px 18px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+              <p style={{ fontSize: 16, fontWeight: 700, color: "white", margin: "0 0 4px" }}>{ultimoProduto.nome}</p>
+              <p style={{ fontSize: 14, color: ACCENT, margin: "0 0 14px", fontWeight: 700 }}>{fmt(ultimoProduto.preco)}</p>
+              <button
+                onClick={() => onRepeat(ultimoProduto)}
+                style={{
+                  background: ACCENT, color: "#000",
+                  border: "none", borderRadius: 10,
+                  padding: "10px 16px",
+                  fontSize: 13, fontWeight: 800,
+                  cursor: "pointer", alignSelf: "flex-start",
+                }}
+              >
+                De novo →
+              </button>
             </div>
-            <button
-              onClick={() => onRepeat(ultimoProduto)}
-              style={{
-                background: ACCENT, color: "#000",
-                border: "none", borderRadius: 12,
-                padding: "10px 18px",
-                fontSize: 13, fontWeight: 800,
-                cursor: "pointer", whiteSpace: "nowrap",
-              }}
-            >
-              De novo
-            </button>
+            {ultimoProduto.imagem_url && (
+              <div style={{ width: 110, flexShrink: 0 }}>
+                <img
+                  src={ultimoProduto.imagem_url}
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                  alt={ultimoProduto.nome}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      <button
-        onClick={onContinue}
-        style={{
-          background: ACCENT, color: "#000",
-          border: "none", borderRadius: 16,
-          padding: "20px",
-          fontSize: 16, fontWeight: 800,
-          cursor: "pointer",
-          letterSpacing: "-0.2px",
-        }}
-      >
-        Ver cardápio →
-      </button>
+      {/* Sugestões */}
+      {sugestoes.length > 0 && (
+        <div style={{ padding: "0 20px 20px" }}>
+          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", margin: "0 0 10px 4px", textTransform: "uppercase", letterSpacing: 1.2, fontWeight: 600 }}>
+            Você pode gostar
+          </p>
+          <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 4 }}>
+            {sugestoes.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => onRepeat(p)}
+                style={{
+                  flexShrink: 0,
+                  width: 120,
+                  background: CARD,
+                  border: "none",
+                  borderRadius: 16,
+                  overflow: "hidden",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  padding: 0,
+                }}
+              >
+                {p.imagem_url && (
+                  <img
+                    src={p.imagem_url}
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                    style={{ width: "100%", height: 80, objectFit: "cover", display: "block" }}
+                    alt={p.nome}
+                  />
+                )}
+                <div style={{ padding: "10px 12px 12px" }}>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: "white", margin: "0 0 3px", lineHeight: 1.3 }}>{p.nome}</p>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: ACCENT, margin: 0 }}>{fmt(p.preco)}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* CTA */}
+      <div style={{ padding: "8px 20px 48px", marginTop: "auto" }}>
+        <button
+          onClick={onContinue}
+          style={{
+            width: "100%",
+            background: ACCENT, color: "#000",
+            border: "none", borderRadius: 16,
+            padding: "20px",
+            fontSize: 16, fontWeight: 800,
+            cursor: "pointer",
+            letterSpacing: "-0.2px",
+          }}
+        >
+          Ver cardápio completo →
+        </button>
+      </div>
     </div>
   );
 }
@@ -370,20 +441,19 @@ function CategoriesScreen({
                 background: CARD,
               }}
             >
-              {/* Background image */}
+              {/* Background image — full opacity */}
               {coverImg && (
                 <div style={{
                   position: "absolute", inset: 0,
                   backgroundImage: `url(${coverImg})`,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
-                  opacity: 0.35,
                 }} />
               )}
-              {/* Dark overlay gradient */}
+              {/* Gradient only at bottom for text legibility */}
               <div style={{
                 position: "absolute", inset: 0,
-                background: "linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 100%)",
+                background: "linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.28) 55%, transparent 100%)",
               }} />
               {/* Content */}
               <div style={{
@@ -392,13 +462,13 @@ function CategoriesScreen({
                 display: "flex",
                 alignItems: "flex-end",
                 justifyContent: "space-between",
-                padding: "20px 22px",
+                padding: "18px 20px",
               }}>
                 <div>
                   <span style={{ fontSize: 20, fontWeight: 800, color: "white", display: "block", letterSpacing: "-0.3px" }}>
                     {cat.nome}
                   </span>
-                  <span style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", marginTop: 3, display: "block" }}>
+                  <span style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", marginTop: 2, display: "block" }}>
                     {cat.produtos.length} {cat.produtos.length === 1 ? "item" : "itens"}
                   </span>
                 </div>
@@ -424,14 +494,18 @@ function CategoriesScreen({
 // ─── PRODUCTS ─────────────────────────────────────────────────────────────────
 function ProductsScreen({
   categoria,
+  allCategorias,
   onSelect,
   onBack,
+  onSwitchCategoria,
   cartCount,
   onCart,
 }: {
   categoria: CategoriaComProdutos;
+  allCategorias: CategoriaComProdutos[];
   onSelect: (p: Produto) => void;
   onBack: () => void;
+  onSwitchCategoria: (cat: CategoriaComProdutos) => void;
   cartCount: number;
   onCart: () => void;
 }) {
@@ -440,33 +514,61 @@ function ProductsScreen({
   return (
     <div style={{ height: "100%", background: BG, display: "flex", flexDirection: "column" }}>
       {/* Header */}
-      <div style={{ padding: "52px 28px 20px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexShrink: 0 }}>
-        <div>
-          <button
-            onClick={onBack}
-            style={{ background: "none", border: "none", color: "rgba(255,255,255,0.35)", fontSize: 13, cursor: "pointer", padding: 0, marginBottom: 10, display: "block" }}
-          >
-            ← Voltar
-          </button>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: "white", margin: 0 }}>
-            {categoria.nome}
-          </h1>
+      <div style={{ padding: "52px 20px 0", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
+          <div>
+            <button
+              onClick={onBack}
+              style={{ background: "none", border: "none", color: "rgba(255,255,255,0.35)", fontSize: 13, cursor: "pointer", padding: 0, marginBottom: 8, display: "block" }}
+            >
+              ← Voltar
+            </button>
+            <h1 style={{ fontSize: 24, fontWeight: 800, color: "white", margin: 0 }}>
+              {categoria.nome}
+            </h1>
+          </div>
+          {cartCount > 0 && (
+            <button
+              onClick={onCart}
+              style={{
+                background: ACCENT, color: "#000",
+                border: "none", borderRadius: 99,
+                padding: "10px 18px",
+                fontSize: 13, fontWeight: 800,
+                cursor: "pointer",
+                flexShrink: 0, marginTop: 28,
+              }}
+            >
+              🛒 {cartCount}
+            </button>
+          )}
         </div>
-        {cartCount > 0 && (
-          <button
-            onClick={onCart}
-            style={{
-              background: ACCENT, color: "#000",
-              border: "none", borderRadius: 99,
-              padding: "10px 18px",
-              fontSize: 13, fontWeight: 800,
-              cursor: "pointer",
-              flexShrink: 0, marginTop: 32,
-            }}
-          >
-            🛒 {cartCount}
-          </button>
-        )}
+        {/* Category filter chips */}
+        <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 16, marginLeft: -20, paddingLeft: 20, marginRight: -20, paddingRight: 20 }}>
+          {allCategorias.map((cat) => {
+            const active = cat.id === categoria.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => !active && onSwitchCategoria(cat)}
+                style={{
+                  flexShrink: 0,
+                  padding: "8px 16px",
+                  borderRadius: 99,
+                  border: active ? "none" : "1px solid rgba(255,255,255,0.12)",
+                  background: active ? ACCENT : "transparent",
+                  color: active ? "#000" : "rgba(255,255,255,0.5)",
+                  fontSize: 13, fontWeight: active ? 800 : 500,
+                  cursor: active ? "default" : "pointer",
+                  transition: "all 150ms",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {cat.nome}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Product list */}
@@ -878,7 +980,7 @@ export function MenuApp({
       <Toast visible={toast} />
 
       {screen === "splash" && (
-        <SplashScreen bar={bar} produtos={allProdutos} onNext={handleSplashNext} />
+        <SplashScreen bar={bar} onNext={handleSplashNext} />
       )}
       {screen === "welcome-new" && (
         <WelcomeNewScreen bar={bar} onConfirm={handleNomeConfirm} />
@@ -887,6 +989,7 @@ export function MenuApp({
         <WelcomeBackScreen
           cliente={cliente}
           ultimoProduto={ultimoProduto}
+          allProdutos={allProdutos}
           onContinue={() => setScreen("categories")}
           onRepeat={(p) => {
             setSelectedProduto(p);
@@ -907,8 +1010,10 @@ export function MenuApp({
       {screen === "products" && selectedCategoria && (
         <ProductsScreen
           categoria={selectedCategoria}
+          allCategorias={cardapio}
           onSelect={(p) => { setSelectedProduto(p); setScreen("product-detail"); }}
           onBack={() => setScreen("categories")}
+          onSwitchCategoria={(cat) => setSelectedCategoria(cat)}
           cartCount={cartCount}
           onCart={() => setScreen("cart")}
         />
