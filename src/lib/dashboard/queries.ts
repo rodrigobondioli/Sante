@@ -1,0 +1,285 @@
+import { createClient } from "@/lib/supabase/server";
+import type { Bar, BarRole, Turno } from "@/types/database";
+import { percentChange } from "@/lib/dashboard/percent-change";
+import { calcularCmv } from "@/lib/dashboard/menu-engineering";
+
+export interface CurrentBar {
+  bar: Bar;
+  role: BarRole;
+  userId: string;
+  userNome: string;
+}
+
+export async function getCurrentBar(): Promise<CurrentBar | null> {
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return null;
+
+  // bar_members tem duas FKs para profiles (user_id e convidado_por), então
+  // o embed precisa do hint do nome da constraint pra não ficar ambíguo.
+  const { data: membership } = await supabase
+    .from("bar_members")
+    .select("role, bars(*), profiles!bar_members_user_id_fkey(nome)")
+    .eq("user_id", auth.user.id)
+    .eq("ativo", true)
+    .limit(1)
+    .maybeSingle<{ role: BarRole; bars: Bar; profiles: { nome: string } | null }>();
+
+  if (!membership?.bars) return null;
+
+  return {
+    bar: membership.bars,
+    role: membership.role,
+    userId: auth.user.id,
+    userNome: membership.profiles?.nome ?? auth.user.email ?? "Usuário",
+  };
+}
+
+export async function getTurnoAtual(barId: string): Promise<Turno | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("turnos")
+    .select("*")
+    .eq("bar_id", barId)
+    .eq("status", "aberto")
+    .maybeSingle();
+
+  return data ?? null;
+}
+
+export interface KpisTurno {
+  faturamento: number;
+  comandasAbertas: number;
+  ticketMedio: number;
+}
+
+export async function getKpisTurno(turno: Turno): Promise<KpisTurno> {
+  const supabase = await createClient();
+  const { count } = await supabase
+    .from("comandas")
+    .select("id", { count: "exact", head: true })
+    .eq("turno_id", turno.id)
+    .eq("status", "aberta");
+
+  const faturamento = turno.total_vendas;
+  const comandasAbertas = count ?? 0;
+  const ticketMedio = turno.total_comandas > 0 ? faturamento / turno.total_comandas : 0;
+
+  return { faturamento, comandasAbertas, ticketMedio };
+}
+
+export interface AlertaEstoque {
+  produtoNome: string;
+  quantidadeAtual: number;
+  quantidadeMinima: number;
+}
+
+export async function getAlertasEstoque(barId: string): Promise<AlertaEstoque[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("estoque")
+    .select("quantidade_atual, quantidade_minima, produtos(nome)")
+    .eq("bar_id", barId)
+    .returns<{ quantidade_atual: number; quantidade_minima: number; produtos: { nome: string } | null }[]>();
+
+  if (!data) return [];
+
+  // quantidade_atual < quantidade_minima compara duas colunas — não dá pra
+  // expressar isso num filtro do PostgREST, então filtramos no app.
+  // Volume de estoque por bar é pequeno, então isso não é um problema de escala.
+  return data
+    .filter((row) => row.quantidade_atual < row.quantidade_minima)
+    .map((row) => ({
+      produtoNome: row.produtos?.nome ?? "Produto",
+      quantidadeAtual: row.quantidade_atual,
+      quantidadeMinima: row.quantidade_minima,
+    }));
+}
+
+export interface TopDrink {
+  produtoId: string;
+  produtoNome: string;
+  quantidadeVendida: number;
+  faturamento: number;
+  preco: number;
+  custo: number | null;
+}
+
+// Lista completa, sem limite — quem só precisa exibir um "top N" (a tabela
+// de Top Drinks) corta a lista; cálculos agregados como CMV precisam de
+// todos os produtos vendidos no turno, senão o número fica errado.
+export async function getProdutosVendidosTurno(barId: string, turnoId: string): Promise<TopDrink[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("comanda_items")
+    .select("quantidade, preco_total, produto_id, produtos(nome, preco, custo), comandas!inner(turno_id)")
+    .eq("bar_id", barId)
+    .eq("status", "ativo")
+    .eq("comandas.turno_id", turnoId)
+    .returns<
+      {
+        quantidade: number;
+        preco_total: number;
+        produto_id: string;
+        produtos: { nome: string; preco: number; custo: number | null } | null;
+      }[]
+    >();
+
+  const porProduto = new Map<string, TopDrink>();
+  for (const item of data ?? []) {
+    if (!item.produtos) continue;
+
+    const atual =
+      porProduto.get(item.produto_id) ??
+      ({
+        produtoId: item.produto_id,
+        produtoNome: item.produtos.nome,
+        quantidadeVendida: 0,
+        faturamento: 0,
+        preco: item.produtos.preco,
+        custo: item.produtos.custo,
+      } satisfies TopDrink);
+
+    atual.quantidadeVendida += Number(item.quantidade);
+    atual.faturamento += Number(item.preco_total);
+    porProduto.set(item.produto_id, atual);
+  }
+
+  return [...porProduto.values()].sort((a, b) => b.quantidadeVendida - a.quantidadeVendida);
+}
+
+export interface KpisComparacao {
+  faturamento: number | null;
+  comandas: number | null;
+  ticketMedio: number | null;
+  alertasEstoque: number | null;
+  cmv: number | null;
+}
+
+const SEM_COMPARACAO: KpisComparacao = {
+  faturamento: null,
+  comandas: null,
+  ticketMedio: null,
+  alertasEstoque: null,
+  cmv: null,
+};
+
+// Compara o turno atual com o turno fechado mais recente. Pra alertas de
+// estoque, reconstrói o nível de cada produto no momento em que o turno
+// anterior fechou a partir do audit trail real (estoque_movimentos), em vez
+// de inventar um número.
+export async function getKpisComparacao(
+  barId: string,
+  turnoAtual: Turno,
+  kpisAtual: KpisTurno,
+  alertasAtuaisCount: number,
+  produtosVendidosAtual: TopDrink[]
+): Promise<KpisComparacao> {
+  const supabase = await createClient();
+
+  const { data: turnoAnterior } = await supabase
+    .from("turnos")
+    .select("id, total_vendas, total_comandas, fechado_em")
+    .eq("bar_id", barId)
+    .eq("status", "fechado")
+    .neq("id", turnoAtual.id)
+    .order("fechado_em", { ascending: false })
+    .limit(1)
+    .maybeSingle<{
+      id: string;
+      total_vendas: number;
+      total_comandas: number;
+      fechado_em: string | null;
+    }>();
+
+  if (!turnoAnterior) return SEM_COMPARACAO;
+
+  const faturamento = percentChange(turnoAtual.total_vendas, turnoAnterior.total_vendas);
+
+  const comandasAtual = kpisAtual.comandasAbertas + turnoAtual.total_comandas;
+  const comandas = percentChange(comandasAtual, turnoAnterior.total_comandas);
+
+  const ticketMedioAnterior =
+    turnoAnterior.total_comandas > 0 ? turnoAnterior.total_vendas / turnoAnterior.total_comandas : 0;
+  const ticketMedio = percentChange(kpisAtual.ticketMedio, ticketMedioAnterior);
+
+  let alertasEstoque: number | null = null;
+  if (turnoAnterior.fechado_em) {
+    const [{ data: estoqueAtual }, { data: movimentos }] = await Promise.all([
+      supabase
+        .from("estoque")
+        .select("produto_id, quantidade_atual, quantidade_minima")
+        .eq("bar_id", barId)
+        .returns<{ produto_id: string; quantidade_atual: number; quantidade_minima: number }[]>(),
+      supabase
+        .from("estoque_movimentos")
+        .select("produto_id, quantidade")
+        .eq("bar_id", barId)
+        .gt("criado_em", turnoAnterior.fechado_em)
+        .returns<{ produto_id: string; quantidade: number }[]>(),
+    ]);
+
+    const consumidoDesdeOFechamento = new Map<string, number>();
+    for (const movimento of movimentos ?? []) {
+      consumidoDesdeOFechamento.set(
+        movimento.produto_id,
+        (consumidoDesdeOFechamento.get(movimento.produto_id) ?? 0) + Number(movimento.quantidade)
+      );
+    }
+
+    const alertasNoFechamentoAnterior = (estoqueAtual ?? []).filter((item) => {
+      const quantidadeNaEpoca =
+        item.quantidade_atual - (consumidoDesdeOFechamento.get(item.produto_id) ?? 0);
+      return quantidadeNaEpoca < item.quantidade_minima;
+    }).length;
+
+    alertasEstoque = percentChange(alertasAtuaisCount, alertasNoFechamentoAnterior);
+  }
+
+  const cmvAtual = calcularCmv(produtosVendidosAtual);
+  const produtosVendidosAnterior = await getProdutosVendidosTurno(barId, turnoAnterior.id);
+  const cmvAnterior = calcularCmv(produtosVendidosAnterior);
+  const cmv = cmvAtual !== null && cmvAnterior !== null ? percentChange(cmvAtual, cmvAnterior) : null;
+
+  return { faturamento, comandas, ticketMedio, alertasEstoque, cmv };
+}
+
+export async function getMetaMes(barId: string) {
+  const supabase = await createClient()
+  const agora = new Date()
+
+  // Current month
+  const inicioMesAtual = new Date(agora.getFullYear(), agora.getMonth(), 1).toISOString()
+  const fimMesAtual = new Date(agora.getFullYear(), agora.getMonth() + 1, 0, 23, 59, 59).toISOString()
+
+  // Last month
+  const inicioMesAnterior = new Date(agora.getFullYear(), agora.getMonth() - 1, 1).toISOString()
+  const fimMesAnterior = new Date(agora.getFullYear(), agora.getMonth(), 0, 23, 59, 59).toISOString()
+
+  const [mesAtualResult, mesAnteriorResult] = await Promise.all([
+    supabase
+      .from('turnos')
+      .select('faturamento_calculado')
+      .eq('bar_id', barId)
+      .gte('aberto_em', inicioMesAtual)
+      .lte('aberto_em', fimMesAtual)
+      .returns<{ faturamento_calculado: number | null }[]>(),
+    supabase
+      .from('turnos')
+      .select('faturamento_calculado')
+      .eq('bar_id', barId)
+      .gte('aberto_em', inicioMesAnterior)
+      .lte('aberto_em', fimMesAnterior)
+      .returns<{ faturamento_calculado: number | null }[]>(),
+  ])
+
+  const faturamentoAtual = (mesAtualResult.data ?? []).reduce((sum, t) => sum + (t.faturamento_calculado ?? 0), 0)
+  const faturamentoAnterior = (mesAnteriorResult.data ?? []).reduce((sum, t) => sum + (t.faturamento_calculado ?? 0), 0)
+
+  // Goal = last month + 10% (or last month if no previous data)
+  const meta = faturamentoAnterior > 0 ? faturamentoAnterior * 1.1 : 5000
+  const progresso = meta > 0 ? Math.min((faturamentoAtual / meta) * 100, 100) : 0
+  const falta = Math.max(meta - faturamentoAtual, 0)
+
+  return { faturamentoAtual, meta, progresso, falta, faturamentoAnterior }
+}

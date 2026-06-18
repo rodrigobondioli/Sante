@@ -1,0 +1,57 @@
+"use client";
+
+import { useState } from "react";
+import { ChevronUp } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+
+interface ComandaBottomSheetProps {
+  itemCount: number;
+  subtotal: number;
+  children: React.ReactNode;
+}
+
+export function ComandaBottomSheet({ itemCount, subtotal, children }: ComandaBottomSheetProps) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      {open && (
+        <div
+          className="animate-fade-in-up fixed inset-0 z-40 bg-black/60"
+          onClick={() => setOpen(false)}
+          aria-hidden
+        />
+      )}
+
+      <div
+        className={cn(
+          "fixed inset-x-0 bottom-0 z-50 flex max-h-[80vh] flex-col rounded-t-2xl border-t border-white/10 bg-surface-card shadow-indigo-md transition-transform duration-300 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)]",
+          open ? "translate-y-0" : "translate-y-[calc(100%-4.5rem)]"
+        )}
+      >
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="flex min-h-[4.5rem] shrink-0 items-center justify-between gap-3 px-4 transition duration-150 active:scale-[0.99]"
+        >
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 min-w-9 items-center justify-center rounded-full bg-indigo px-2 font-mono text-body-sm font-bold text-white">
+              {itemCount}
+            </span>
+            <span className="text-body-sm text-white-50">{open ? "Comanda atual" : "Ver comanda"}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-body font-mono font-bold text-white">{currency.format(subtotal)}</span>
+            <ChevronUp
+              className={cn("h-5 w-5 text-white-50 transition-transform duration-200", open && "rotate-180")}
+            />
+          </div>
+        </button>
+
+        <div className="flex-1 overflow-y-auto">{children}</div>
+      </div>
+    </>
+  );
+}
