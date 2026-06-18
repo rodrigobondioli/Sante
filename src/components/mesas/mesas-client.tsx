@@ -86,7 +86,7 @@ export function MesasClient({ mesas, barId }: { mesas: Mesa[]; barId: string }) 
             <input name="nome" placeholder="Apelido (ex: Varanda, Balcão VIP)" style={{ ...inp, flex: 1 }} />
             <input name="capacidade" placeholder="Lugares" type="number" min={1} style={{ ...inp, width: 90 }} />
             <button type="submit" style={{ ...btnPrimary, padding: "8px 14px" }}>Adicionar</button>
-            <button type="button" onClick={() => setAdding(false)} style={{ ...btnPrimary, background: "rgba(255,255,255,0.07)" }}>×</button>
+            <button type="button" onClick={() => setAdding(false)} style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.70)", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 14, cursor: "pointer" }}>×</button>
           </form>
         ) : (
           <button

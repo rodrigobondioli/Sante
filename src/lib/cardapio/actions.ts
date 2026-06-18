@@ -113,3 +113,13 @@ export async function toggleProduto(id: string, ativo: boolean) {
   await semTipo(supabase.from("produtos")).update({ ativo: !ativo }).eq("id", id);
   revalidatePath("/dashboard/cardapio");
 }
+
+export async function deletarProduto(id: string) {
+  const supabase = await createClient();
+  const { error } = await semTipo(supabase.from("produtos")).delete().eq("id", id);
+  // Se tiver FK em itens_comanda, desativa em vez de deletar
+  if (error) {
+    await semTipo(supabase.from("produtos")).update({ ativo: false }).eq("id", id);
+  }
+  revalidatePath("/dashboard/cardapio");
+}

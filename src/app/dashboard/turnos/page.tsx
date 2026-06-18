@@ -31,7 +31,7 @@ export default async function TurnosPage() {
   const turnos = await getTurnos(current.bar.id);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", padding: "32px", gap: "24px" }}>
+    <div style={{ display: "flex", flexDirection: "column", padding: "32px 40px", gap: "24px" }}>
 
       {/* Header */}
       <div>
@@ -39,6 +39,9 @@ export default async function TurnosPage() {
         <h1 style={{ fontSize: "22px", fontWeight: 600, color: "#ffffff", margin: "6px 0 0" }}>
           Turnos
         </h1>
+        <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.45)", margin: "6px 0 0" }}>
+          Registro de todos os turnos abertos e fechados.
+        </p>
       </div>
 
       {/* Table card */}

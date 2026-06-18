@@ -9,6 +9,7 @@ import {
   criarProduto,
   editarProduto,
   toggleProduto,
+  deletarProduto,
 } from "@/lib/cardapio/actions";
 import { getImagemAutomatica } from "@/lib/cardapio/drink-images";
 import { ImageUpload } from "./image-upload";
@@ -53,8 +54,15 @@ const btnPrimary: React.CSSProperties = {
 };
 
 const btnSecondary: React.CSSProperties = {
-  ...btnPrimary,
   background: "rgba(255,255,255,0.07)",
+  color: "rgba(255,255,255,0.70)",
+  border: "none",
+  borderRadius: 8,
+  padding: "9px 18px",
+  fontSize: 13,
+  fontWeight: 500,
+  cursor: "pointer",
+  whiteSpace: "nowrap",
 };
 
 const iconBtn: React.CSSProperties = {
@@ -96,9 +104,8 @@ function ProdutoForm({
 
   return (
     <div style={{
-      background: "rgba(255,255,255,0.03)",
-      border: "1px solid rgba(255,255,255,0.08)",
-      borderRadius: 10,
+      background: "rgba(255,255,255,0.04)",
+      borderRadius: 12,
       padding: 16,
       marginBottom: 10,
     }}>
@@ -243,6 +250,16 @@ function ProdutoRow({
               : <Eye style={{ width: 13, height: 13 }} />}
           </button>
         </form>
+        <form action={deletarProduto.bind(null, produto.id)}>
+          <button
+            type="submit"
+            onClick={e => { if (!window.confirm(`Deletar "${produto.nome}"?`)) e.preventDefault(); }}
+            style={{ ...iconBtn, color: "rgba(239,68,68,0.6)" }}
+            title="Deletar produto"
+          >
+            <Trash2 style={{ width: 13, height: 13 }} />
+          </button>
+        </form>
       </div>
     </div>
   );
@@ -295,7 +312,7 @@ function CategoriaItem({
         padding: "8px 12px",
         borderRadius: 8,
         cursor: "pointer",
-        background: selected ? "rgba(38,0,120,0.35)" : "transparent",
+        background: selected ? "rgba(200,255,0,0.08)" : "transparent",
         transition: "background 0.1s",
       }}
       className="group"
