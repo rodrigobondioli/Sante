@@ -100,20 +100,19 @@ export function ImageUpload({ currentUrl, autoUrl, onUpload }: ImageUploadProps)
               <X style={{ width: 10, height: 10 }} />
             </button>
           )}
-          {!isAuto && (
-            <button
-              type="button"
-              onClick={() => inputRef.current?.click()}
-              style={{
-                position: "absolute", bottom: 4, right: 4,
-                background: "rgba(0,0,0,0.65)", border: "none", borderRadius: 4,
-                color: "rgba(255,255,255,0.70)", cursor: "pointer", padding: "3px 5px",
-                fontSize: 10,
-              }}
-            >
-              Trocar
-            </button>
-          )}
+          {/* Trocar sempre visível — permite substituir inclusive imagens automáticas */}
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            style={{
+              position: "absolute", bottom: 4, right: 4,
+              background: "rgba(0,0,0,0.65)", border: "none", borderRadius: 4,
+              color: "rgba(255,255,255,0.70)", cursor: "pointer", padding: "3px 5px",
+              fontSize: 10,
+            }}
+          >
+            Trocar
+          </button>
         </div>
       ) : (
         /* Upload zone */

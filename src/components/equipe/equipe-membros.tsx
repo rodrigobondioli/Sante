@@ -19,21 +19,17 @@ export type MembroRow = {
 };
 
 const ROLE_LABELS: Record<BarRole, string> = {
-  dono: "Dono", gerente: "Gerente", bartender: "Bartender", caixa: "Caixa",
+  dono: "Dono", gerente: "Gerente", bar_manager: "Bar Manager", bartender: "Bartender", garcom: "Garçom", caixa: "Caixa",
 };
 
+// Fundo uniforme — só o texto diferencia o role
 const ROLE_COLORS: Record<BarRole, string> = {
-  dono:      "rgba(255,255,255,0.90)",
-  gerente:   "rgba(160,130,255,0.9)",
-  bartender: "rgba(96,165,250,0.9)",
-  caixa:     "rgba(251,191,36,0.9)",
-};
-
-const ROLE_BG: Record<BarRole, string> = {
-  dono:      "rgba(38,0,120,0.20)",
-  gerente:   "rgba(38,0,120,0.30)",
-  bartender: "rgba(29,78,216,0.20)",
-  caixa:     "rgba(120,80,0,0.25)",
+  dono:        "rgba(255,255,255,0.85)",
+  gerente:     "rgba(160,130,255,0.9)",
+  bar_manager: "rgba(249,115,22,0.9)",
+  bartender:   "rgba(96,165,250,0.9)",
+  garcom:      "rgba(52,211,153,0.9)",
+  caixa:       "rgba(251,191,36,0.9)",
 };
 
 const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -103,7 +99,9 @@ function MembroRow({
           >
             <option value="dono">Dono</option>
             <option value="gerente">Gerente</option>
+            <option value="bar_manager">Bar Manager</option>
             <option value="bartender">Bartender</option>
+            <option value="garcom">Garçom</option>
             <option value="caixa">Caixa</option>
           </select>
           <button onClick={saveRole} disabled={saving} style={{ ...BTN_ICON, color: "rgba(74,222,128,0.9)", padding: 4 }}>
@@ -116,7 +114,7 @@ function MembroRow({
       ) : (
         <span style={{
           fontSize: 11, fontWeight: 600, padding: "4px 12px", borderRadius: 99,
-          background: ROLE_BG[m.role], color: ROLE_COLORS[m.role], display: "inline-block",
+          background: "rgba(255,255,255,0.07)", color: ROLE_COLORS[m.role], display: "inline-block",
         }}>
           {ROLE_LABELS[m.role]}
         </span>

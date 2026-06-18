@@ -51,7 +51,9 @@ export default async function EquipePage() {
                   <label style={{ ...LABEL, display: "block", marginBottom: 6 }}>Função</label>
                   <select name="role" defaultValue="bartender" style={{ ...INPUT, colorScheme: "dark" }}>
                     <option value="gerente">Gerente</option>
+                    <option value="bar_manager">Bar Manager</option>
                     <option value="bartender">Bartender</option>
+                    <option value="garcom">Garçom</option>
                     <option value="caixa">Caixa</option>
                   </select>
                 </div>

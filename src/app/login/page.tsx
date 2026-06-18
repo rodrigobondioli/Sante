@@ -94,6 +94,13 @@ export default function LoginPage({
           animation: 'orb2 40s ease-in-out infinite',
         }} />
 
+        {/* Versão — top-right */}
+        <div className="absolute top-8 right-8">
+          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.25)", fontWeight: 500, letterSpacing: "0.04em" }}>
+            Versão 1.0
+          </span>
+        </div>
+
         {/* Logo — top-left */}
         <div className="absolute top-8 left-8">
           <Image

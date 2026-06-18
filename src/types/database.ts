@@ -1,4 +1,4 @@
-export type BarRole = "dono" | "gerente" | "bartender" | "caixa";
+export type BarRole = "dono" | "gerente" | "bar_manager" | "bartender" | "garcom" | "caixa";
 
 export type ComandaStatus =
   | "aberta"
