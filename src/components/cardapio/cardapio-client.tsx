@@ -362,11 +362,11 @@ export function CardapioClient({ cardapio }: { cardapio: CategoriaComProdutosAdm
   const selectedGrupo = cardapio.find(g => g.categoria.id === selectedId);
 
   return (
-    <div style={{ display: "flex", gap: 0, height: "calc(100vh - 160px)", overflow: "hidden" }}>
+    <div style={{ display: "flex", gap: 0, height: "100%", overflow: "hidden" }}>
 
       {/* ── Left: category list ── */}
       <div style={{
-        width: 220,
+        width: 240,
         flexShrink: 0,
         borderRight: "1px solid rgba(255,255,255,0.06)",
         paddingRight: 16,
