@@ -53,8 +53,8 @@ export function PeriodoSeletor({ current }: { current: PeriodoSearchParams }) {
               border: "none",
               cursor: "pointer",
               transition: "all 0.15s",
-              background: isActive ? "#260078" : "transparent",
-              color: isActive ? "#ffffff" : "rgba(255,255,255,0.38)",
+              background: isActive ? "#c8ff00" : "transparent",
+              color: isActive ? "#000" : "rgba(255,255,255,0.38)",
             }}
           >
             {opcao.label}
@@ -99,8 +99,8 @@ export function PeriodoSeletor({ current }: { current: PeriodoSearchParams }) {
               padding: "3px 12px",
               borderRadius: "99px",
               border: "none",
-              background: "#260078",
-              color: "white",
+              background: "#c8ff00",
+              color: "#000",
               cursor: "pointer",
               opacity: (!inicio || !fim) ? 0.4 : 1,
             }}

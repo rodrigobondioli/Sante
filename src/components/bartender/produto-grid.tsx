@@ -149,8 +149,8 @@ export function ProdutoGrid({ cardapio, comandaId }: { cardapio: CategoriaComPro
                       whiteSpace: "nowrap",
                       flexShrink: 0,
                       transition: "all 0.15s",
-                      background: active ? "#260078" : "transparent",
-                      color: active ? "rgba(255,255,255,0.90)" : "rgba(255,255,255,0.45)",
+                      background: active ? "#c8ff00" : "transparent",
+                      color: active ? "#000" : "rgba(255,255,255,0.45)",
                     }}
                   >
                     {grupo.categoria.nome}

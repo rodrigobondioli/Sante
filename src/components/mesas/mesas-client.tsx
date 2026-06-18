@@ -12,8 +12,8 @@ const inp: React.CSSProperties = {
 };
 
 const btnPrimary: React.CSSProperties = {
-  background: "#260078", color: "white", border: "none", borderRadius: 8,
-  padding: "8px 16px", fontSize: 13, fontWeight: 500, cursor: "pointer", whiteSpace: "nowrap",
+  background: "#c8ff00", color: "#000", border: "none", borderRadius: 8,
+  padding: "8px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap",
 };
 
 const iconBtn: React.CSSProperties = {

@@ -76,12 +76,12 @@ export function ComandaConteudo({ comanda, itens, subtotal }: ComandaConteudoPro
             style={{
               width: '100%',
               padding: '14px',
-              background: '#260078',
-              color: 'white',
+              background: '#c8ff00',
+              color: '#000',
               border: 'none',
               borderRadius: 10,
               fontSize: 15,
-              fontWeight: 600,
+              fontWeight: 700,
               cursor: itens.length === 0 ? 'not-allowed' : 'pointer',
               opacity: itens.length === 0 ? 0.4 : 1,
             }}

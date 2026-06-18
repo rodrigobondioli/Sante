@@ -41,13 +41,13 @@ const lbl: React.CSSProperties = {
 };
 
 const btnPrimary: React.CSSProperties = {
-  background: "#260078",
-  color: "white",
+  background: "#c8ff00",
+  color: "#000",
   border: "none",
   borderRadius: 8,
   padding: "9px 18px",
   fontSize: 13,
-  fontWeight: 500,
+  fontWeight: 700,
   cursor: "pointer",
   whiteSpace: "nowrap",
 };

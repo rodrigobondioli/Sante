@@ -153,16 +153,16 @@ export default function LoginPage({
                 disabled={loading}
                 style={{
                   width: "100%",
-                  background: loading ? "rgba(38,0,120,0.5)" : btnHovered ? "#3a00a8" : "#260078",
-                  border: "1px solid rgba(255,255,255,0.15)",
+                  background: loading ? "rgba(200,255,0,0.4)" : btnHovered ? "#d8ff33" : "#c8ff00",
+                  border: "none",
                   borderRadius: "12px",
                   padding: "14px",
-                  color: loading ? "rgba(255,255,255,0.5)" : "white",
-                  fontWeight: "600",
+                  color: loading ? "rgba(0,0,0,0.4)" : "#000",
+                  fontWeight: "700",
                   fontSize: "14px",
                   cursor: loading ? "default" : "pointer",
                   letterSpacing: "0.01em",
-                  transition: "background 0.2s, color 0.2s",
+                  transition: "background 0.15s",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -174,8 +174,8 @@ export default function LoginPage({
                 {loading && (
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ animation: "spin 0.8s linear infinite" }}>
                     <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-                    <circle cx="8" cy="8" r="6" stroke="rgba(255,255,255,0.3)" strokeWidth="2" />
-                    <path d="M8 2a6 6 0 0 1 6 6" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                    <circle cx="8" cy="8" r="6" stroke="rgba(0,0,0,0.2)" strokeWidth="2" />
+                    <path d="M8 2a6 6 0 0 1 6 6" stroke="rgba(0,0,0,0.6)" strokeWidth="2" strokeLinecap="round" />
                   </svg>
                 )}
                 {loading ? "Entrando..." : "Entrar"}

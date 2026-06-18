@@ -63,9 +63,9 @@ export default async function EquipePage() {
       {/* Convidar */}
       {isDono && (
         <form action={convidarMembro} style={{
-          background: "rgba(255,255,255,0.03)",
-          border: "1px solid rgba(255,255,255,0.07)",
-          borderRadius: 16, padding: "20px 22px",
+          background: "rgba(255,255,255,0.04)",
+          border: "none",
+          borderRadius: 12, padding: "20px 22px",
           display: "flex", gap: 10, alignItems: "flex-end",
           marginBottom: 32, flexWrap: "wrap",
         }}>
@@ -129,8 +129,8 @@ export default async function EquipePage() {
             {ranking.map((m, i) => (
               <div key={m.id} style={{
                 display: "flex", alignItems: "center", gap: 16,
-                background: i === 0 ? "rgba(200,255,0,0.05)" : "rgba(255,255,255,0.03)",
-                border: `1px solid ${i === 0 ? "rgba(200,255,0,0.15)" : "rgba(255,255,255,0.06)"}`,
+                background: i === 0 ? "rgba(200,255,0,0.06)" : "rgba(255,255,255,0.04)",
+                border: "none",
                 borderRadius: 12, padding: "14px 18px",
               }}>
                 <span style={{ fontSize: 18, fontWeight: 900, color: i === 0 ? "#c8ff00" : "rgba(255,255,255,0.25)", minWidth: 28 }}>
@@ -159,8 +159,8 @@ export default async function EquipePage() {
           {ativos.map((m) => (
             <div key={m.id} style={{
               display: "flex", alignItems: "center", gap: 14,
-              background: "rgba(255,255,255,0.03)",
-              border: "1px solid rgba(255,255,255,0.06)",
+              background: "rgba(255,255,255,0.04)",
+              border: "none",
               borderRadius: 12, padding: "14px 18px",
             }}>
               {/* Avatar */}
@@ -252,10 +252,10 @@ export default async function EquipePage() {
               {inativos.map((m) => (
                 <div key={m.id} style={{
                   display: "flex", alignItems: "center", gap: 14,
-                  background: "rgba(255,255,255,0.02)",
-                  border: "1px solid rgba(255,255,255,0.04)",
+                  background: "rgba(255,255,255,0.04)",
+                  border: "none",
                   borderRadius: 12, padding: "12px 18px",
-                  opacity: 0.5,
+                  opacity: 0.45,
                 }}>
                   <div style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(255,255,255,0.05)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: "rgba(255,255,255,0.4)", flexShrink: 0 }}>
                     {m.nome[0]?.toUpperCase() ?? "?"}
@@ -267,7 +267,7 @@ export default async function EquipePage() {
                   <span style={{ fontSize: 11, color: "rgba(255,255,255,0.25)" }}>Inativo</span>
                   {isDono && (
                     <form action={reativarMembro.bind(null, m.id)}>
-                      <button type="submit" style={{ background: "none", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8, color: "rgba(255,255,255,0.4)", fontSize: 12, padding: "4px 12px", cursor: "pointer" }}>
+                      <button type="submit" style={{ background: "#c8ff00", border: "none", borderRadius: 8, color: "#000", fontSize: 12, fontWeight: 700, padding: "5px 14px", cursor: "pointer" }}>
                         Reativar
                       </button>
                     </form>
