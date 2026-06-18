@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { submeterPedido } from "@/lib/menu/actions";
 import type { Bar, Mesa, Categoria, Produto } from "@/types/database";
 
 type CategoriaComProdutos = Categoria & { produtos: Produto[] };
@@ -748,16 +749,79 @@ function ProductDetailScreen({
 function CartScreen({
   cliente,
   cart,
+  bar,
   mesa,
   onBack,
+  onPedidoEnviado,
 }: {
   cliente: ClienteLocal | null;
   cart: CartItem[];
+  bar: Bar;
   mesa: Mesa;
   onBack: () => void;
+  onPedidoEnviado: () => void;
 }) {
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
   const total = cart.reduce((acc, i) => acc + i.produto.preco * i.quantidade, 0);
   const mesaLabel = mesa.nome ?? `Mesa ${mesa.numero}`;
+
+  const handleEnviar = async () => {
+    setSubmitting(true);
+    setError(null);
+    try {
+      await submeterPedido({
+        barId: bar.id,
+        mesaId: mesa.id,
+        nomeCliente: cliente?.nome ?? null,
+        itens: cart.map((i) => ({
+          produto_id: i.produto.id,
+          nome: i.produto.nome,
+          preco: i.produto.preco,
+          quantidade: i.quantidade,
+        })),
+      });
+      setSuccess(true);
+      setTimeout(() => onPedidoEnviado(), 2800);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao enviar pedido.");
+      setSubmitting(false);
+    }
+  };
+
+  // ── Tela de sucesso ──
+  if (success) {
+    return (
+      <div style={{
+        height: "100%", background: BG,
+        display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        padding: "0 40px", textAlign: "center", fontFamily: FONT,
+      }}>
+        <div style={{
+          width: 88, height: 88, borderRadius: "50%",
+          background: `radial-gradient(circle, ${ACCENT}22 0%, transparent 70%)`,
+          border: `2px solid ${ACCENT}44`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 38, marginBottom: 28,
+        }}>
+          ✓
+        </div>
+        <h2 style={{ fontSize: 28, fontWeight: 900, color: "white", margin: "0 0 12px", letterSpacing: "-0.5px" }}>
+          Pedido enviado!
+        </h2>
+        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.4)", margin: 0, lineHeight: 1.7 }}>
+          O bartender já recebeu.<br />
+          Relaxa que vem aí.
+        </p>
+        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.2)", marginTop: 40 }}>
+          {mesaLabel} · {fmt(total)}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ height: "100%", background: BG, display: "flex", flexDirection: "column", fontFamily: FONT }}>
@@ -829,18 +893,28 @@ function CartScreen({
           <span style={{ fontSize: 14, color: "rgba(255,255,255,0.4)" }}>Total a pagar</span>
           <span style={{ fontSize: 28, fontWeight: 900, color: "white", letterSpacing: "-0.8px" }}>{fmt(total)}</span>
         </div>
+        {error && (
+          <p style={{ fontSize: 12, color: "#ff6b6b", textAlign: "center", margin: "0 0 12px" }}>
+            {error}
+          </p>
+        )}
         <button
+          onClick={handleEnviar}
+          disabled={submitting}
           style={{
             width: "100%", padding: "20px", borderRadius: 16,
-            background: ACCENT, border: "none", color: "#000",
-            fontSize: 16, fontWeight: 900, cursor: "pointer",
+            background: submitting ? "rgba(200,255,0,0.4)" : ACCENT,
+            border: "none", color: "#000",
+            fontSize: 16, fontWeight: 900,
+            cursor: submitting ? "default" : "pointer",
             letterSpacing: "-0.3px", fontFamily: FONT,
+            transition: "background 200ms",
           }}
         >
-          Fechar a conta e pagar →
+          {submitting ? "Enviando..." : "Fazer pedido →"}
         </button>
         <p style={{ fontSize: 11, color: "rgba(255,255,255,0.18)", textAlign: "center", margin: "14px 0 0" }}>
-          Pagamento em breve
+          O bartender recebe o pedido na hora
         </p>
       </div>
     </div>
@@ -990,8 +1064,13 @@ export function MenuApp({
         <CartScreen
           cliente={cliente}
           cart={cart}
+          bar={bar}
           mesa={mesa}
           onBack={() => setScreen(selectedCategoria ? "products" : "categories")}
+          onPedidoEnviado={() => {
+            setCart([]);
+            setScreen("categories");
+          }}
         />
       )}
     </div>

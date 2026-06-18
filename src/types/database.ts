@@ -254,6 +254,24 @@ export interface EstoqueMovimento {
   criado_em: string;
 }
 
+export interface ItemPedidoCliente {
+  produto_id: string;
+  nome: string;
+  preco: number;
+  quantidade: number;
+}
+
+export interface PedidoCliente {
+  id: string;
+  bar_id: string;
+  mesa_id: string | null;
+  nome_cliente: string | null;
+  itens: ItemPedidoCliente[];
+  total: number;
+  status: "pendente" | "em_preparo" | "pronto" | "entregue" | "cancelado";
+  created_at: string;
+}
+
 type TableDef<Row, Insert = Partial<Row>, Update = Partial<Row>> = {
   Row: Row;
   Insert: Insert;
@@ -281,6 +299,21 @@ export interface Database {
       comanda_items: TableDef<ComandaItem>;
       pagamentos: TableDef<Pagamento>;
       estoque_movimentos: TableDef<EstoqueMovimento>;
+      pedidos_cliente: {
+        Row: PedidoCliente;
+        Insert: {
+          id?: string;
+          bar_id: string;
+          mesa_id?: string | null;
+          nome_cliente?: string | null;
+          itens: ItemPedidoCliente[];
+          total?: number;
+          status?: string;
+          created_at?: string;
+        };
+        Update: Partial<PedidoCliente>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
