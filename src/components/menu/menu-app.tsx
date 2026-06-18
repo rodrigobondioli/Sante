@@ -28,9 +28,10 @@ interface ClienteLocal {
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const ACCENT = "#c8ff00";
-const BG = "#0c0c0c";
-const CARD = "#161616";
-const CARD2 = "#1e1e1e";
+const BG     = "#0c0c0c";
+const CARD   = "#181818";
+const CARD2  = "#222222";
+const FONT   = "var(--font-geist, -apple-system, 'Helvetica Neue', sans-serif)";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function storageKey(barSlug: string) {
@@ -61,13 +62,7 @@ function ordinal(n: number) {
 }
 
 // ─── SPLASH ───────────────────────────────────────────────────────────────────
-function SplashScreen({
-  bar,
-  onNext,
-}: {
-  bar: Bar;
-  onNext: () => void;
-}) {
+function SplashScreen({ bar, onNext }: { bar: Bar; onNext: () => void }) {
   const DURATION = 2800;
   const [progress, setProgress] = useState(0);
 
@@ -90,59 +85,62 @@ function SplashScreen({
   return (
     <div style={{
       height: "100%",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      position: "relative",
-      overflow: "hidden",
+      display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      position: "relative", overflow: "hidden",
       background: BG,
     }}>
-      {/* Animated gradient background */}
       <style>{`
         @keyframes gradShift {
           0%   { background-position: 0% 50%; }
           50%  { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
         }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(12px); }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(16px); }
           to   { opacity: 1; transform: translateY(0); }
         }
       `}</style>
+
+      {/* Animated gradient */}
       <div style={{
         position: "absolute", inset: 0,
-        background: "linear-gradient(135deg, #0a0a1e 0%, #0b1f10 25%, #1a0b0e 50%, #0a1525 75%, #100a1a 100%)",
+        background: "linear-gradient(135deg, #0a0a20 0%, #081508 25%, #160810 50%, #080f1a 75%, #0a0a20 100%)",
         backgroundSize: "400% 400%",
-        animation: "gradShift 5s ease infinite",
+        animation: "gradShift 6s ease infinite",
       }} />
-      {/* Noise texture overlay */}
+
+      {/* Subtle radial glow */}
       <div style={{
-        position: "absolute", inset: 0,
-        backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E\")",
-        opacity: 0.6,
+        position: "absolute",
+        width: 320, height: 320,
+        borderRadius: "50%",
+        background: `radial-gradient(circle, ${ACCENT}18 0%, transparent 70%)`,
+        top: "50%", left: "50%",
+        transform: "translate(-50%, -60%)",
         pointerEvents: "none",
       }} />
 
-      {/* Center content */}
-      <div style={{ position: "relative", textAlign: "center", animation: "fadeIn 600ms ease both" }}>
+      {/* Content */}
+      <div style={{ position: "relative", textAlign: "center", animation: "fadeUp 500ms 200ms both", padding: "0 32px" }}>
         <p style={{
           fontSize: 11, color: ACCENT, fontWeight: 700,
-          textTransform: "uppercase", letterSpacing: 3,
-          margin: "0 0 16px",
+          textTransform: "uppercase", letterSpacing: "0.25em",
+          margin: "0 0 18px", fontFamily: FONT,
         }}>
           Bem-vindo
         </p>
         <h1 style={{
-          fontSize: 42, fontWeight: 900, color: "white",
-          margin: 0, lineHeight: 1.0, letterSpacing: "-1px",
-          textShadow: "0 2px 32px rgba(0,0,0,0.5)",
+          fontSize: 44, fontWeight: 900, color: "white",
+          margin: 0, lineHeight: 0.95,
+          letterSpacing: "-1.5px",
+          fontFamily: FONT,
         }}>
           {bar.nome}
         </h1>
         <p style={{
-          fontSize: 14, color: "rgba(255,255,255,0.38)",
-          margin: "14px 0 0", letterSpacing: "0.3px",
+          fontSize: 14, color: "rgba(255,255,255,0.35)",
+          margin: "18px 0 0", lineHeight: 1.6, fontFamily: FONT,
         }}>
           Mesa pronta. Cardápio a caminho.
         </p>
@@ -150,16 +148,15 @@ function SplashScreen({
 
       {/* Progress bar */}
       <div style={{
-        position: "absolute", bottom: 48, left: 40, right: 40,
-        height: 2, background: "rgba(255,255,255,0.1)",
-        borderRadius: 99,
+        position: "absolute", bottom: 52, left: 48, right: 48,
+        height: 2, background: "rgba(255,255,255,0.08)", borderRadius: 99,
       }}>
         <div style={{
           height: "100%", borderRadius: 99,
           background: ACCENT,
           width: `${progress * 100}%`,
-          transition: "width 50ms linear",
-          boxShadow: `0 0 8px ${ACCENT}88`,
+          transition: "width 60ms linear",
+          boxShadow: `0 0 10px ${ACCENT}66`,
         }} />
       </div>
     </div>
@@ -175,22 +172,23 @@ function WelcomeNewScreen({ bar, onConfirm }: { bar: Bar; onConfirm: (nome: stri
     <div style={{
       height: "100%", background: BG,
       display: "flex", flexDirection: "column",
-      padding: "64px 28px 48px",
+      padding: "72px 28px 52px",
       justifyContent: "space-between",
+      fontFamily: FONT,
     }}>
       <div>
-        <p style={{ fontSize: 12, color: ACCENT, fontWeight: 600, textTransform: "uppercase", letterSpacing: 2, margin: "0 0 20px" }}>
+        <p style={{ fontSize: 11, color: ACCENT, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 22px" }}>
           {bar.nome}
         </p>
-        <h1 style={{ fontSize: 30, fontWeight: 800, color: "white", margin: "0 0 12px", lineHeight: 1.15 }}>
+        <h1 style={{ fontSize: 32, fontWeight: 900, color: "white", margin: "0 0 14px", lineHeight: 1.1, letterSpacing: "-0.5px" }}>
           Antes de começar,<br />como posso te chamar?
         </h1>
-        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.38)", margin: 0, lineHeight: 1.6 }}>
+        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.35)", margin: 0, lineHeight: 1.65 }}>
           Vou lembrar de você nas próximas visitas.
         </p>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <input
           autoFocus
           value={nome}
@@ -199,32 +197,27 @@ function WelcomeNewScreen({ bar, onConfirm }: { bar: Bar; onConfirm: (nome: stri
           placeholder="Seu nome"
           style={{
             background: CARD2,
-            border: `1px solid ${valid ? "rgba(200,255,0,0.2)" : "rgba(255,255,255,0.07)"}`,
+            border: `1.5px solid ${valid ? "rgba(200,255,0,0.3)" : "rgba(255,255,255,0.06)"}`,
             borderRadius: 16,
             padding: "20px 22px",
-            fontSize: 20,
-            fontWeight: 500,
-            color: "white",
-            outline: "none",
+            fontSize: 20, fontWeight: 500,
+            color: "white", outline: "none",
             colorScheme: "dark",
-            width: "100%",
-            boxSizing: "border-box",
+            width: "100%", boxSizing: "border-box",
             transition: "border-color 200ms",
+            fontFamily: FONT,
           }}
         />
         <button
           onClick={() => valid && onConfirm(nome.trim())}
           style={{
-            background: valid ? ACCENT : "rgba(255,255,255,0.06)",
-            color: valid ? "#000" : "rgba(255,255,255,0.2)",
-            border: "none",
-            borderRadius: 16,
-            padding: "20px",
-            fontSize: 16,
-            fontWeight: 800,
+            background: valid ? ACCENT : "rgba(255,255,255,0.05)",
+            color: valid ? "#000" : "rgba(255,255,255,0.18)",
+            border: "none", borderRadius: 16,
+            padding: "20px", fontSize: 16, fontWeight: 800,
             cursor: valid ? "pointer" : "default",
             transition: "all 250ms",
-            letterSpacing: "-0.2px",
+            letterSpacing: "-0.3px", fontFamily: FONT,
           }}
         >
           Continuar →
@@ -248,57 +241,52 @@ function WelcomeBackScreen({
   onContinue: () => void;
   onRepeat: (produto: Produto) => void;
 }) {
-  // Sugestões: produtos com imagem excluindo o último pedido, pega 3
   const sugestoes = allProdutos
     .filter((p) => p.ativo && p.imagem_url && p.id !== ultimoProduto?.id)
-    .slice(0, 3);
+    .slice(0, 4);
 
   return (
     <div style={{
       height: "100%", background: BG,
       display: "flex", flexDirection: "column",
-      overflow: "auto",
+      overflow: "auto", fontFamily: FONT,
     }}>
-      {/* Top section */}
-      <div style={{ padding: "64px 28px 28px" }}>
-        <p style={{ fontSize: 11, color: ACCENT, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2.5, margin: "0 0 16px" }}>
+      {/* Greeting */}
+      <div style={{ padding: "68px 28px 32px" }}>
+        <p style={{ fontSize: 11, color: ACCENT, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 18px" }}>
           De volta!
         </p>
-        <h1 style={{ fontSize: 34, fontWeight: 900, color: "white", margin: "0 0 10px", lineHeight: 1.05, letterSpacing: "-0.5px" }}>
+        <h1 style={{ fontSize: 36, fontWeight: 900, color: "white", margin: "0 0 10px", lineHeight: 1.0, letterSpacing: "-0.8px" }}>
           Boa noite,<br />{cliente.nome} 🥃
         </h1>
-        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.38)", margin: 0, lineHeight: 1.6 }}>
+        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.35)", margin: 0, lineHeight: 1.6 }}>
           {cliente.visitas <= 1
             ? "Primeira vez aqui. Que bom ter você!"
-            : `${ordinal(cliente.visitas)} visita. Você faz parte da família.`}
+            : `${ordinal(cliente.visitas)} visita — você faz parte da família.`}
         </p>
       </div>
 
       {/* Last order */}
       {ultimoProduto && (
         <div style={{ padding: "0 20px 20px" }}>
-          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", margin: "0 0 10px 4px", textTransform: "uppercase", letterSpacing: 1.2, fontWeight: 600 }}>
+          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.28)", margin: "0 0 10px 2px", textTransform: "uppercase", letterSpacing: "0.15em", fontWeight: 600 }}>
             Da última vez
           </p>
           <div style={{
-            background: CARD,
-            borderRadius: 18,
-            overflow: "hidden",
-            display: "flex",
-            alignItems: "stretch",
-            border: `1px solid rgba(200,255,0,0.12)`,
+            background: CARD, borderRadius: 20, overflow: "hidden",
+            display: "flex", alignItems: "stretch",
+            border: "1px solid rgba(200,255,0,0.1)",
           }}>
-            <div style={{ flex: 1, padding: "18px 16px 18px 18px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-              <p style={{ fontSize: 16, fontWeight: 700, color: "white", margin: "0 0 4px" }}>{ultimoProduto.nome}</p>
-              <p style={{ fontSize: 14, color: ACCENT, margin: "0 0 14px", fontWeight: 700 }}>{fmt(ultimoProduto.preco)}</p>
+            <div style={{ flex: 1, padding: "18px 16px 18px 20px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+              <p style={{ fontSize: 16, fontWeight: 700, color: "white", margin: "0 0 4px", lineHeight: 1.2 }}>{ultimoProduto.nome}</p>
+              <p style={{ fontSize: 15, color: ACCENT, margin: "0 0 16px", fontWeight: 800 }}>{fmt(ultimoProduto.preco)}</p>
               <button
                 onClick={() => onRepeat(ultimoProduto)}
                 style={{
-                  background: ACCENT, color: "#000",
-                  border: "none", borderRadius: 10,
-                  padding: "10px 16px",
-                  fontSize: 13, fontWeight: 800,
-                  cursor: "pointer", alignSelf: "flex-start",
+                  background: ACCENT, color: "#000", border: "none",
+                  borderRadius: 10, padding: "9px 16px",
+                  fontSize: 13, fontWeight: 800, cursor: "pointer",
+                  alignSelf: "flex-start", fontFamily: FONT,
                 }}
               >
                 De novo →
@@ -321,37 +309,32 @@ function WelcomeBackScreen({
       {/* Sugestões */}
       {sugestoes.length > 0 && (
         <div style={{ padding: "0 20px 20px" }}>
-          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", margin: "0 0 10px 4px", textTransform: "uppercase", letterSpacing: 1.2, fontWeight: 600 }}>
+          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.28)", margin: "0 0 10px 2px", textTransform: "uppercase", letterSpacing: "0.15em", fontWeight: 600 }}>
             Você pode gostar
           </p>
-          <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 4 }}>
+          <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 4, scrollbarWidth: "none" }}>
             {sugestoes.map((p) => (
               <button
                 key={p.id}
                 onClick={() => onRepeat(p)}
                 style={{
-                  flexShrink: 0,
-                  width: 120,
-                  background: CARD,
-                  border: "none",
-                  borderRadius: 16,
-                  overflow: "hidden",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  padding: 0,
+                  flexShrink: 0, width: 130,
+                  background: CARD, border: "none",
+                  borderRadius: 16, overflow: "hidden",
+                  cursor: "pointer", textAlign: "left", padding: 0,
                 }}
               >
                 {p.imagem_url && (
                   <img
                     src={p.imagem_url}
                     onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-                    style={{ width: "100%", height: 80, objectFit: "cover", display: "block" }}
+                    style={{ width: "100%", height: 88, objectFit: "cover", display: "block" }}
                     alt={p.nome}
                   />
                 )}
-                <div style={{ padding: "10px 12px 12px" }}>
-                  <p style={{ fontSize: 12, fontWeight: 700, color: "white", margin: "0 0 3px", lineHeight: 1.3 }}>{p.nome}</p>
-                  <p style={{ fontSize: 12, fontWeight: 700, color: ACCENT, margin: 0 }}>{fmt(p.preco)}</p>
+                <div style={{ padding: "10px 12px 13px" }}>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: "white", margin: "0 0 3px", lineHeight: 1.3, fontFamily: FONT }}>{p.nome}</p>
+                  <p style={{ fontSize: 13, fontWeight: 800, color: ACCENT, margin: 0, fontFamily: FONT }}>{fmt(p.preco)}</p>
                 </div>
               </button>
             ))}
@@ -360,17 +343,14 @@ function WelcomeBackScreen({
       )}
 
       {/* CTA */}
-      <div style={{ padding: "8px 20px 48px", marginTop: "auto" }}>
+      <div style={{ padding: "8px 20px 52px", marginTop: "auto" }}>
         <button
           onClick={onContinue}
           style={{
-            width: "100%",
-            background: ACCENT, color: "#000",
-            border: "none", borderRadius: 16,
-            padding: "20px",
-            fontSize: 16, fontWeight: 800,
-            cursor: "pointer",
-            letterSpacing: "-0.2px",
+            width: "100%", background: ACCENT, color: "#000",
+            border: "none", borderRadius: 16, padding: "20px",
+            fontSize: 16, fontWeight: 800, cursor: "pointer",
+            letterSpacing: "-0.3px", fontFamily: FONT,
           }}
         >
           Ver cardápio completo →
@@ -393,36 +373,29 @@ function CategoriesScreen({
   onCart: () => void;
 }) {
   return (
-    <div style={{
-      height: "100%", background: BG,
-      display: "flex", flexDirection: "column",
-      overflow: "hidden",
-    }}>
+    <div style={{ height: "100%", background: BG, display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: FONT }}>
       {/* Header */}
-      <div style={{ padding: "56px 28px 20px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexShrink: 0 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 800, color: "white", margin: 0, lineHeight: 1.15 }}>
+      <div style={{ padding: "60px 24px 20px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexShrink: 0 }}>
+        <h1 style={{ fontSize: 30, fontWeight: 900, color: "white", margin: 0, lineHeight: 1.1, letterSpacing: "-0.6px" }}>
           Qual vai ser a<br />boa de hoje?
         </h1>
         {cartCount > 0 && (
           <button
             onClick={onCart}
             style={{
-              background: ACCENT, color: "#000",
-              border: "none", borderRadius: 99,
-              padding: "10px 18px",
-              fontSize: 13, fontWeight: 800,
-              cursor: "pointer",
-              display: "flex", alignItems: "center", gap: 6,
-              flexShrink: 0, marginTop: 4,
+              background: ACCENT, color: "#000", border: "none", borderRadius: 99,
+              padding: "10px 18px", fontSize: 13, fontWeight: 800,
+              cursor: "pointer", flexShrink: 0, marginTop: 4,
+              display: "flex", alignItems: "center", gap: 6, fontFamily: FONT,
             }}
           >
-            🛒 {cartCount} {cartCount === 1 ? "item" : "itens"}
+            🛒 {cartCount}
           </button>
         )}
       </div>
 
-      {/* Category cards — fill remaining height */}
-      <div style={{ flex: 1, overflow: "hidden", padding: "0 20px 32px", display: "flex", flexDirection: "column", gap: 10 }}>
+      {/* Cards */}
+      <div style={{ flex: 1, overflow: "hidden", padding: "0 16px 32px", display: "flex", flexDirection: "column", gap: 10 }}>
         {cardapio.map((cat) => {
           const coverImg = cat.produtos.find((p) => p.imagem_url)?.imagem_url ?? null;
           return (
@@ -430,56 +403,42 @@ function CategoriesScreen({
               key={cat.id}
               onClick={() => onSelect(cat)}
               style={{
-                flex: 1,
-                position: "relative",
-                borderRadius: 20,
-                overflow: "hidden",
-                border: "none",
-                cursor: "pointer",
-                textAlign: "left",
-                padding: 0,
-                background: CARD,
+                flex: 1, position: "relative", borderRadius: 22,
+                overflow: "hidden", border: "none", cursor: "pointer",
+                textAlign: "left", padding: 0, background: CARD2,
               }}
             >
-              {/* Background image — full opacity */}
               {coverImg && (
                 <div style={{
                   position: "absolute", inset: 0,
                   backgroundImage: `url(${coverImg})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
+                  backgroundSize: "cover", backgroundPosition: "center",
                 }} />
               )}
-              {/* Gradient only at bottom for text legibility */}
               <div style={{
                 position: "absolute", inset: 0,
-                background: "linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.28) 55%, transparent 100%)",
+                background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.3) 55%, transparent 100%)",
               }} />
-              {/* Content */}
               <div style={{
-                position: "relative",
-                height: "100%",
-                display: "flex",
-                alignItems: "flex-end",
-                justifyContent: "space-between",
-                padding: "18px 20px",
+                position: "relative", height: "100%",
+                display: "flex", alignItems: "flex-end",
+                justifyContent: "space-between", padding: "16px 18px",
               }}>
                 <div>
-                  <span style={{ fontSize: 20, fontWeight: 800, color: "white", display: "block", letterSpacing: "-0.3px" }}>
+                  <span style={{ fontSize: 21, fontWeight: 800, color: "white", display: "block", letterSpacing: "-0.4px" }}>
                     {cat.nome}
                   </span>
-                  <span style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", marginTop: 2, display: "block" }}>
+                  <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 3, display: "block" }}>
                     {cat.produtos.length} {cat.produtos.length === 1 ? "item" : "itens"}
                   </span>
                 </div>
                 <div style={{
-                  width: 36, height: 36, borderRadius: "50%",
-                  background: ACCENT,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  flexShrink: 0,
+                  width: 38, height: 38, borderRadius: "50%",
+                  background: ACCENT, display: "flex",
+                  alignItems: "center", justifyContent: "center", flexShrink: 0,
                 }}>
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M3 8h10M9 4l4 4-4 4" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M3 8h10M9 4l4 4-4 4" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
               </div>
@@ -510,112 +469,137 @@ function ProductsScreen({
   onCart: () => void;
 }) {
   const ativos = categoria.produtos.filter((p) => p.ativo);
+  const heroCover = ativos.find((p) => p.imagem_url)?.imagem_url ?? null;
 
   return (
-    <div style={{ height: "100%", background: BG, display: "flex", flexDirection: "column" }}>
-      {/* Header */}
-      <div style={{ padding: "52px 20px 0", flexShrink: 0 }}>
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
-          <div>
-            <button
-              onClick={onBack}
-              style={{ background: "none", border: "none", color: "rgba(255,255,255,0.35)", fontSize: 13, cursor: "pointer", padding: 0, marginBottom: 8, display: "block" }}
-            >
-              ← Voltar
-            </button>
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: "white", margin: 0 }}>
-              {categoria.nome}
-            </h1>
-          </div>
-          {cartCount > 0 && (
-            <button
-              onClick={onCart}
-              style={{
-                background: ACCENT, color: "#000",
-                border: "none", borderRadius: 99,
-                padding: "10px 18px",
-                fontSize: 13, fontWeight: 800,
-                cursor: "pointer",
-                flexShrink: 0, marginTop: 28,
-              }}
-            >
-              🛒 {cartCount}
-            </button>
-          )}
-        </div>
-        {/* Category filter chips */}
-        <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 16, marginLeft: -20, paddingLeft: 20, marginRight: -20, paddingRight: 20 }}>
-          {allCategorias.map((cat) => {
-            const active = cat.id === categoria.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => !active && onSwitchCategoria(cat)}
-                style={{
-                  flexShrink: 0,
-                  padding: "8px 16px",
-                  borderRadius: 99,
-                  border: active ? "none" : "1px solid rgba(255,255,255,0.12)",
-                  background: active ? ACCENT : "transparent",
-                  color: active ? "#000" : "rgba(255,255,255,0.5)",
-                  fontSize: 13, fontWeight: active ? 800 : 500,
-                  cursor: active ? "default" : "pointer",
-                  transition: "all 150ms",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {cat.nome}
-              </button>
-            );
-          })}
+    <div style={{ height: "100%", background: BG, display: "flex", flexDirection: "column", fontFamily: FONT }}>
+
+      {/* Hero */}
+      <div style={{ position: "relative", height: 210, flexShrink: 0, overflow: "hidden" }}>
+        {heroCover ? (
+          <img
+            src={heroCover}
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = "0"; }}
+            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            alt=""
+          />
+        ) : (
+          <div style={{ width: "100%", height: "100%", background: CARD2 }} />
+        )}
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "linear-gradient(to top, #0c0c0c 0%, rgba(12,12,12,0.45) 55%, rgba(12,12,12,0.15) 100%)",
+        }} />
+        <button
+          onClick={onBack}
+          style={{
+            position: "absolute", top: 54, left: 16,
+            background: "rgba(0,0,0,0.5)", backdropFilter: "blur(12px)",
+            border: "none", borderRadius: 99, padding: "8px 16px",
+            color: "white", fontSize: 13, fontWeight: 500,
+            cursor: "pointer", fontFamily: FONT,
+          }}
+        >
+          ← Voltar
+        </button>
+        {cartCount > 0 && (
+          <button
+            onClick={onCart}
+            style={{
+              position: "absolute", top: 54, right: 16,
+              background: ACCENT, color: "#000",
+              border: "none", borderRadius: 99, padding: "8px 18px",
+              fontSize: 13, fontWeight: 800, cursor: "pointer", fontFamily: FONT,
+            }}
+          >
+            🛒 {cartCount}
+          </button>
+        )}
+        <div style={{ position: "absolute", bottom: 16, left: 20 }}>
+          <h1 style={{ fontSize: 28, fontWeight: 900, color: "white", margin: 0, letterSpacing: "-0.8px", lineHeight: 1 }}>
+            {categoria.nome}
+          </h1>
+          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", margin: "5px 0 0" }}>
+            {ativos.length} {ativos.length === 1 ? "opção" : "opções"}
+          </p>
         </div>
       </div>
 
-      {/* Product list */}
-      <div style={{ flex: 1, overflow: "auto", padding: "4px 20px 40px", display: "flex", flexDirection: "column", gap: 10 }}>
+      {/* Filter chips */}
+      <div style={{
+        display: "flex", gap: 8, overflowX: "auto",
+        padding: "14px 16px",
+        flexShrink: 0, scrollbarWidth: "none",
+      }}>
+        {allCategorias.map((cat) => {
+          const active = cat.id === categoria.id;
+          return (
+            <button
+              key={cat.id}
+              onClick={() => !active && onSwitchCategoria(cat)}
+              style={{
+                flexShrink: 0, padding: "7px 16px",
+                borderRadius: 99,
+                border: active ? "none" : "1px solid rgba(255,255,255,0.1)",
+                background: active ? ACCENT : "rgba(255,255,255,0.04)",
+                color: active ? "#000" : "rgba(255,255,255,0.5)",
+                fontSize: 13, fontWeight: active ? 700 : 400,
+                cursor: active ? "default" : "pointer",
+                whiteSpace: "nowrap", fontFamily: FONT,
+              }}
+            >
+              {cat.nome}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 2-column grid */}
+      <div style={{
+        flex: 1, overflow: "auto",
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: 10, padding: "2px 16px 60px",
+        alignContent: "start",
+      }}>
         {ativos.map((produto) => (
           <button
             key={produto.id}
             onClick={() => onSelect(produto)}
             style={{
-              display: "flex",
-              alignItems: "stretch",
-              background: CARD,
-              border: "none",
-              borderRadius: 18,
-              overflow: "hidden",
-              cursor: "pointer",
-              textAlign: "left",
-              minHeight: 96,
-              padding: 0,
+              background: CARD, border: "none", borderRadius: 18,
+              overflow: "hidden", cursor: "pointer",
+              textAlign: "left", padding: 0,
+              display: "flex", flexDirection: "column",
             }}
           >
-            {/* Text side */}
-            <div style={{ flex: 1, padding: "16px 16px 16px 18px", display: "flex", flexDirection: "column", justifyContent: "center", minWidth: 0 }}>
-              <p style={{ fontSize: 15, fontWeight: 700, color: "white", margin: "0 0 5px", lineHeight: 1.3 }}>{produto.nome}</p>
-              {produto.descricao && (
-                <p style={{
-                  fontSize: 12, color: "rgba(255,255,255,0.38)", margin: "0 0 8px",
-                  overflow: "hidden", display: "-webkit-box",
-                  WebkitLineClamp: 2, WebkitBoxOrient: "vertical", lineHeight: 1.5,
-                }}>
-                  {produto.descricao}
-                </p>
-              )}
-              <p style={{ fontSize: 16, fontWeight: 800, color: ACCENT, margin: 0 }}>{fmt(produto.preco)}</p>
-            </div>
-            {/* Image side */}
-            <div style={{ width: 100, flexShrink: 0, position: "relative" }}>
+            <div style={{ position: "relative", paddingBottom: "72%" }}>
               {produto.imagem_url ? (
                 <img
                   src={produto.imagem_url}
-                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                  onError={(e) => {
+                    const parent = (e.currentTarget as HTMLImageElement).parentElement;
+                    if (parent) parent.style.background = CARD2;
+                    (e.currentTarget as HTMLImageElement).style.display = "none";
+                  }}
+                  style={{
+                    position: "absolute", inset: 0,
+                    width: "100%", height: "100%",
+                    objectFit: "cover", display: "block",
+                  }}
                   alt={produto.nome}
                 />
               ) : (
-                <div style={{ width: "100%", height: "100%", background: CARD2 }} />
+                <div style={{ position: "absolute", inset: 0, background: CARD2 }} />
               )}
+            </div>
+            <div style={{ padding: "11px 13px 14px", flex: 1 }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: "white", margin: "0 0 5px", lineHeight: 1.3 }}>
+                {produto.nome}
+              </p>
+              <p style={{ fontSize: 14, fontWeight: 800, color: ACCENT, margin: 0 }}>
+                {fmt(produto.preco)}
+              </p>
             </div>
           </button>
         ))}
@@ -641,12 +625,13 @@ function ProductDetailScreen({
   const [qty, setQty] = useState(1);
 
   return (
-    <div style={{ height: "100%", background: BG, display: "flex", flexDirection: "column", overflow: "auto" }}>
+    <div style={{ height: "100%", background: BG, display: "flex", flexDirection: "column", overflow: "auto", fontFamily: FONT }}>
       {/* Hero */}
-      <div style={{ position: "relative", height: 320, flexShrink: 0 }}>
+      <div style={{ position: "relative", height: 340, flexShrink: 0 }}>
         {produto.imagem_url ? (
           <img
             src={produto.imagem_url}
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
             style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
             alt={produto.nome}
           />
@@ -655,33 +640,27 @@ function ProductDetailScreen({
         )}
         <div style={{
           position: "absolute", inset: 0,
-          background: "linear-gradient(to top, #0c0c0c 0%, rgba(12,12,12,0.3) 60%, transparent)",
+          background: "linear-gradient(to top, #0c0c0c 0%, rgba(12,12,12,0.2) 60%, transparent)",
         }} />
-
         <button
           onClick={onBack}
           style={{
             position: "absolute", top: 52, left: 20,
-            background: "rgba(0,0,0,0.55)",
-            backdropFilter: "blur(12px)",
-            border: "none", borderRadius: 99,
-            padding: "9px 16px",
-            color: "white", fontSize: 13, cursor: "pointer",
+            background: "rgba(0,0,0,0.55)", backdropFilter: "blur(12px)",
+            border: "none", borderRadius: 99, padding: "9px 16px",
+            color: "white", fontSize: 13, cursor: "pointer", fontFamily: FONT,
           }}
         >
           ← Voltar
         </button>
-
         {cartCount > 0 && (
           <button
             onClick={onCart}
             style={{
               position: "absolute", top: 52, right: 20,
-              background: ACCENT,
-              border: "none", borderRadius: 99,
-              padding: "9px 16px",
-              color: "#000", fontSize: 13, fontWeight: 800,
-              cursor: "pointer",
+              background: ACCENT, border: "none", borderRadius: 99,
+              padding: "9px 16px", color: "#000",
+              fontSize: 13, fontWeight: 800, cursor: "pointer", fontFamily: FONT,
             }}
           >
             🛒 {cartCount}
@@ -690,77 +669,61 @@ function ProductDetailScreen({
       </div>
 
       {/* Content */}
-      <div style={{ padding: "22px 28px 140px" }}>
-        {/* Badge */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-          <span style={{
-            fontSize: 11, padding: "4px 12px", borderRadius: 99,
-            background: "rgba(200,255,0,0.10)",
-            color: ACCENT,
-            fontWeight: 600, letterSpacing: 0.5,
-          }}>
-            Especialidade da casa
-          </span>
-        </div>
-
-        <h1 style={{ fontSize: 32, fontWeight: 800, color: "white", margin: "0 0 10px", lineHeight: 1.05, letterSpacing: "-0.5px" }}>
+      <div style={{ padding: "24px 24px 160px" }}>
+        <h1 style={{ fontSize: 30, fontWeight: 900, color: "white", margin: "0 0 10px", lineHeight: 1.05, letterSpacing: "-0.5px" }}>
           {produto.nome}
         </h1>
-
         {produto.descricao && (
-          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.45)", margin: "0 0 24px", lineHeight: 1.7 }}>
+          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.45)", margin: "0 0 20px", lineHeight: 1.7 }}>
             {produto.descricao}
           </p>
         )}
-
-        <p style={{ fontSize: 28, fontWeight: 800, color: "white", margin: "0 0 32px", letterSpacing: "-0.5px" }}>
+        <p style={{ fontSize: 30, fontWeight: 900, color: "white", margin: "0 0 32px", letterSpacing: "-0.5px" }}>
           {fmt(produto.preco)}
         </p>
 
-        {/* Quantity picker */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-          <span style={{ fontSize: 14, color: "rgba(255,255,255,0.4)", fontWeight: 500 }}>Quantidade</span>
+        {/* Qty picker */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span style={{ fontSize: 14, color: "rgba(255,255,255,0.4)" }}>Quantidade</span>
           <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
             <button
               onClick={() => setQty(Math.max(1, qty - 1))}
               style={{
-                width: 40, height: 40, borderRadius: "50%",
-                background: CARD2, border: "none",
-                color: "white", fontSize: 20,
+                width: 42, height: 42, borderRadius: "50%",
+                background: CARD2, border: "none", color: "white", fontSize: 22,
                 cursor: qty > 1 ? "pointer" : "default",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                opacity: qty > 1 ? 1 : 0.3,
+                opacity: qty > 1 ? 1 : 0.3, fontFamily: FONT,
               }}
             >−</button>
-            <span style={{ fontSize: 22, fontWeight: 800, color: "white", minWidth: 24, textAlign: "center" }}>{qty}</span>
+            <span style={{ fontSize: 22, fontWeight: 800, color: "white", minWidth: 28, textAlign: "center" }}>{qty}</span>
             <button
               onClick={() => setQty(qty + 1)}
               style={{
-                width: 40, height: 40, borderRadius: "50%",
-                background: ACCENT, border: "none",
-                color: "#000", fontSize: 20,
+                width: 42, height: 42, borderRadius: "50%",
+                background: ACCENT, border: "none", color: "#000", fontSize: 22,
                 cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center",
+                display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT,
               }}
             >+</button>
           </div>
         </div>
       </div>
 
-      {/* Fixed bottom */}
+      {/* Fixed CTA */}
       <div style={{
         position: "fixed", bottom: 0, left: 0, right: 0,
-        padding: "16px 28px 36px",
+        padding: "16px 20px 40px",
         background: `linear-gradient(to top, ${BG} 70%, transparent)`,
         display: "flex", gap: 10,
       }}>
         <button
           onClick={onBack}
           style={{
-            flex: 1, padding: "17px",
-            borderRadius: 16, background: CARD,
-            border: "none", color: "rgba(255,255,255,0.6)",
-            fontSize: 15, fontWeight: 600, cursor: "pointer",
+            flex: 1, padding: "17px", borderRadius: 16,
+            background: CARD, border: "none",
+            color: "rgba(255,255,255,0.55)",
+            fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: FONT,
           }}
         >
           Voltar
@@ -768,11 +731,10 @@ function ProductDetailScreen({
         <button
           onClick={() => onAdd(produto, qty)}
           style={{
-            flex: 2.5, padding: "17px",
-            borderRadius: 16, background: ACCENT,
-            border: "none", color: "#000",
-            fontSize: 15, fontWeight: 800,
-            cursor: "pointer", letterSpacing: "-0.2px",
+            flex: 2.5, padding: "17px", borderRadius: 16,
+            background: ACCENT, border: "none", color: "#000",
+            fontSize: 15, fontWeight: 900, cursor: "pointer",
+            letterSpacing: "-0.3px", fontFamily: FONT,
           }}
         >
           Pedir agora · {fmt(produto.preco * qty)}
@@ -798,22 +760,21 @@ function CartScreen({
   const mesaLabel = mesa.nome ?? `Mesa ${mesa.numero}`;
 
   return (
-    <div style={{ height: "100%", background: BG, display: "flex", flexDirection: "column" }}>
+    <div style={{ height: "100%", background: BG, display: "flex", flexDirection: "column", fontFamily: FONT }}>
       {/* Header */}
-      <div style={{ padding: "52px 28px 24px", flexShrink: 0 }}>
+      <div style={{ padding: "52px 24px 24px", flexShrink: 0 }}>
         <button
           onClick={onBack}
-          style={{ background: "none", border: "none", color: "rgba(255,255,255,0.35)", fontSize: 13, cursor: "pointer", padding: 0, marginBottom: 20, display: "block" }}
+          style={{ background: "none", border: "none", color: "rgba(255,255,255,0.35)", fontSize: 13, cursor: "pointer", padding: 0, marginBottom: 22, display: "block", fontFamily: FONT }}
         >
           ← Continuar pedindo
         </button>
-
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <div style={{
             width: 52, height: 52, borderRadius: "50%",
             background: `linear-gradient(135deg, ${ACCENT}, #80e000)`,
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 20, fontWeight: 800, color: "#000", flexShrink: 0,
+            fontSize: 21, fontWeight: 900, color: "#000", flexShrink: 0,
           }}>
             {cliente?.nome?.[0]?.toUpperCase() ?? "?"}
           </div>
@@ -823,7 +784,7 @@ function CartScreen({
             </p>
             <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: "3px 0 0" }}>
               {cliente && cliente.visitas > 1
-                ? `Seja bem-vindo de volta · ${ordinal(cliente.visitas)} visita`
+                ? `${ordinal(cliente.visitas)} visita · ${mesaLabel}`
                 : mesaLabel}
             </p>
           </div>
@@ -831,20 +792,21 @@ function CartScreen({
       </div>
 
       {/* Items */}
-      <div style={{ flex: 1, overflow: "auto", padding: "0 28px" }}>
-        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: 1.2, margin: "0 0 16px", fontWeight: 600 }}>
+      <div style={{ flex: 1, overflow: "auto", padding: "0 24px" }}>
+        <p style={{ fontSize: 10, color: "rgba(255,255,255,0.28)", textTransform: "uppercase", letterSpacing: "0.15em", margin: "0 0 18px", fontWeight: 600 }}>
           Sua consumação
         </p>
         {cart.map((item) => (
-          <div key={item.produto.id} style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
+          <div key={item.produto.id} style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 18 }}>
             {item.produto.imagem_url ? (
               <img
                 src={item.produto.imagem_url}
-                style={{ width: 52, height: 52, borderRadius: 10, objectFit: "cover", flexShrink: 0 }}
+                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                style={{ width: 54, height: 54, borderRadius: 12, objectFit: "cover", flexShrink: 0 }}
                 alt={item.produto.nome}
               />
             ) : (
-              <div style={{ width: 52, height: 52, borderRadius: 10, background: CARD2, flexShrink: 0 }} />
+              <div style={{ width: 54, height: 54, borderRadius: 12, background: CARD2, flexShrink: 0 }} />
             )}
             <div style={{ flex: 1 }}>
               <p style={{ fontSize: 14, fontWeight: 600, color: "white", margin: 0, lineHeight: 1.3 }}>
@@ -862,24 +824,22 @@ function CartScreen({
       </div>
 
       {/* Footer */}
-      <div style={{ padding: "20px 28px 40px", borderTop: "1px solid rgba(255,255,255,0.06)", flexShrink: 0 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <span style={{ fontSize: 15, color: "rgba(255,255,255,0.45)" }}>Total a pagar</span>
-          <span style={{ fontSize: 26, fontWeight: 800, color: "white", letterSpacing: "-0.5px" }}>{fmt(total)}</span>
+      <div style={{ padding: "20px 24px 44px", borderTop: "1px solid rgba(255,255,255,0.06)", flexShrink: 0 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+          <span style={{ fontSize: 14, color: "rgba(255,255,255,0.4)" }}>Total a pagar</span>
+          <span style={{ fontSize: 28, fontWeight: 900, color: "white", letterSpacing: "-0.8px" }}>{fmt(total)}</span>
         </div>
         <button
           style={{
-            width: "100%", padding: "20px",
-            borderRadius: 16, background: ACCENT,
-            border: "none", color: "#000",
-            fontSize: 16, fontWeight: 800,
-            cursor: "pointer", letterSpacing: "-0.2px",
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            width: "100%", padding: "20px", borderRadius: 16,
+            background: ACCENT, border: "none", color: "#000",
+            fontSize: 16, fontWeight: 900, cursor: "pointer",
+            letterSpacing: "-0.3px", fontFamily: FONT,
           }}
         >
           Fechar a conta e pagar →
         </button>
-        <p style={{ fontSize: 12, color: "rgba(255,255,255,0.2)", textAlign: "center", margin: "14px 0 0" }}>
+        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.18)", textAlign: "center", margin: "14px 0 0" }}>
           Pagamento em breve
         </p>
       </div>
@@ -892,16 +852,16 @@ function Toast({ visible }: { visible: boolean }) {
   return (
     <div style={{
       position: "fixed", top: 56, left: "50%",
-      transform: `translateX(-50%) translateY(${visible ? 0 : -20}px)`,
+      transform: `translateX(-50%) translateY(${visible ? 0 : -16}px)`,
       opacity: visible ? 1 : 0,
-      transition: "all 300ms cubic-bezier(0.34, 1.56, 0.64, 1)",
-      background: ACCENT,
-      color: "#000", padding: "10px 22px",
-      borderRadius: 99, fontSize: 13, fontWeight: 800,
+      transition: "all 280ms cubic-bezier(0.34, 1.56, 0.64, 1)",
+      background: ACCENT, color: "#000",
+      padding: "10px 22px", borderRadius: 99,
+      fontSize: 13, fontWeight: 800,
       zIndex: 200, pointerEvents: "none",
-      whiteSpace: "nowrap",
+      whiteSpace: "nowrap", fontFamily: FONT,
     }}>
-      🔥 Pedido recebido!
+      🔥 Adicionado!
     </div>
   );
 }
@@ -959,7 +919,6 @@ export function MenuApp({
       if (exists) return prev.map((i) => i.produto.id === produto.id ? { ...i, quantidade: i.quantidade + qty } : i);
       return [...prev, { produto, quantidade: qty }];
     });
-    // Save last produto id
     if (cliente) {
       const updated = { ...cliente, ultimoProdutoId: produto.id };
       setCliente(updated);
@@ -976,7 +935,7 @@ export function MenuApp({
     : null;
 
   return (
-    <div style={{ height: "100%", position: "relative", overflow: "hidden", fontFamily: "var(--font-geist, system-ui, sans-serif)" }}>
+    <div style={{ height: "100%", position: "relative", overflow: "hidden", fontFamily: FONT }}>
       <Toast visible={toast} />
 
       {screen === "splash" && (
