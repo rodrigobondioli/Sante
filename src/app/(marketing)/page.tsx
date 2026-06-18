@@ -105,7 +105,7 @@ export default function Home() {
           overline="Operação em números"
           title={
             <>
-              Bares que rodam <span className="text-gradient">com o Santé.</span>
+              Bares que rodam <span className="text-gradient">com o Superbar.</span>
             </>
           }
           className="mx-auto max-w-2xl"
@@ -179,8 +179,8 @@ export default function Home() {
       </section>
 
       <footer className="text-body-sm flex flex-col items-center gap-2 px-8 py-12 text-center text-white-50">
-        <span className="font-semibold text-white">Santé</span>
-        <span>© {new Date().getFullYear()} Santé. Todos os direitos reservados.</span>
+        <span className="font-semibold text-white">Superbar</span>
+        <span>© {new Date().getFullYear()} Superbar. Todos os direitos reservados.</span>
       </footer>
     </>
   );

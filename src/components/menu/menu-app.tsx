@@ -35,7 +35,7 @@ const FONT   = "var(--font-geist, -apple-system, 'Helvetica Neue', sans-serif)";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function storageKey(barSlug: string) {
-  return `sante_menu_${barSlug}`;
+  return `superbar_menu_${barSlug}`;
 }
 
 function readCliente(barSlug: string): ClienteLocal | null {

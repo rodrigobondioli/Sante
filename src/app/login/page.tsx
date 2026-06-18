@@ -99,7 +99,7 @@ export default function LoginPage({
             src="/santé-logo.svg"
             width={80}
             height={27}
-            alt="Santé"
+            alt="Superbar"
             priority
           />
         </div>
@@ -107,7 +107,7 @@ export default function LoginPage({
         {/* Center content */}
         <div style={{ position: "relative", zIndex: 10 }} className="flex flex-col items-center justify-center flex-1 px-4 pb-16">
           <h1 className="text-3xl font-semibold text-white mb-2">
-            Seja bem-vindo ao Santé
+            Seja bem-vindo ao Superbar
           </h1>
           <p className="text-sm text-white/50 mb-8">
             The operating system for premium bars.

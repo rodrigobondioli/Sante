@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Santé",
+  title: "Superbar",
   description: "OS unificado para bares premium",
 };
 

@@ -1,4 +1,4 @@
-# DESIGN.md — Santé
+# DESIGN.md — Superbar
 
 > Este arquivo é o contrato visual do produto. Toda UI gerada deve seguir estas regras.
 > Fonte de verdade para Claude Code e qualquer agente de codificação.
@@ -7,7 +7,7 @@
 
 ## 1. Identidade
 
-**Produto**: Santé — OS unificado para bares premium  
+**Produto**: Superbar — OS unificado para bares premium  
 **Posicionamento visual**: Dark. Minimal. Operacional. Sem ruído.  
 **Referência estética**: Human Academy (humanacademy.com.br) — pill nav, gradient hero, cards arredondados, tipografia bold  
 **Princípio**: Cada elemento que não serve à operação é removido.

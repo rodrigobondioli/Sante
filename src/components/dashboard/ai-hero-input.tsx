@@ -51,7 +51,7 @@ export function AiHeroInput({ barId }: { barId: string }) {
             value={question}
             onChange={e => setQuestion(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && ask(question)}
-            placeholder="Pergunte ao Santé..."
+            placeholder="Pergunte ao Superbar..."
             style={{
               flex: 1,
               background: 'none',
@@ -144,7 +144,7 @@ export function AiHeroInput({ barId }: { barId: string }) {
       )}
 
       <p style={{ marginTop: '12px', fontSize: '11px', color: 'rgba(255,255,255,0.2)', textAlign: 'center' }}>
-        ✦ Powered by Santé AI
+        ✦ Powered by Superbar AI
       </p>
     </div>
   )

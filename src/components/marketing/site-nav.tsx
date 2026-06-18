@@ -12,7 +12,7 @@ export function SiteNav() {
   return (
     <NavPill className="flex w-[min(640px,calc(100vw-2rem))] items-center justify-between gap-6">
       <Link href="/" className="text-sm font-semibold tracking-tight text-white">
-        Santé
+        Superbar
       </Link>
 
       <ul className="hidden items-center gap-6 sm:flex">

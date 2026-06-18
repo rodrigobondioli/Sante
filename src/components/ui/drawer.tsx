@@ -70,7 +70,7 @@ function SuporteContent() {
     <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
       {[
         { icon:'💬', title:'Chat ao vivo', desc:'Resposta em até 5 minutos', action:'Iniciar chat' },
-        { icon:'📧', title:'E-mail', desc:'suporte@sante.app', action:'Enviar e-mail' },
+        { icon:'📧', title:'E-mail', desc:'suporte@superbar.com.br', action:'Enviar e-mail' },
         { icon:'📖', title:'Central de ajuda', desc:'Documentação e tutoriais', action:'Acessar' },
         { icon:'🎥', title:'Agendar chamada', desc:'30 min com nossa equipe', action:'Agendar' },
       ].map(item => (
