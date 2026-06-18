@@ -6,8 +6,8 @@ const config: Record<
   CategoriaMenu,
   { label: string; variant: "indigo" | "success" | "neutral" | "error"; descricao: string }
 > = {
-  star: { label: "Star", variant: "indigo", descricao: "Alto volume + alta margem" },
-  cash_cow: { label: "Cash Cow", variant: "success", descricao: "Alto volume + margem média" },
+  star: { label: "Star", variant: "success", descricao: "Alto volume + alta margem" },
+  cash_cow: { label: "Cash Cow", variant: "indigo", descricao: "Alto volume + margem média" },
   slow: { label: "Slow", variant: "neutral", descricao: "Baixo volume" },
   problema: { label: "Problema", variant: "error", descricao: "Margem muito baixa" },
   sem_dados: { label: "Sem dados", variant: "neutral", descricao: "Sem custo cadastrado" },
