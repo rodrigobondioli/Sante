@@ -1,0 +1,299 @@
+"use client";
+
+import { useEffect, useState, useCallback, useTransition } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { atualizarStatusPedido } from "@/lib/menu/actions";
+import type { PedidoCliente, ItemPedidoCliente } from "@/types/database";
+
+const ACCENT = "#c8ff00";
+const BG2    = "rgba(255,255,255,0.04)";
+const BORDER = "rgba(255,255,255,0.07)";
+const FONT   = "var(--font-geist, -apple-system, 'Helvetica Neue', sans-serif)";
+
+const STATUS_LABELS: Record<PedidoCliente["status"], string> = {
+  pendente:   "Novo",
+  em_preparo: "Em preparo",
+  pronto:     "Pronto",
+  entregue:   "Entregue",
+  cancelado:  "Cancelado",
+};
+
+const STATUS_COLORS: Record<PedidoCliente["status"], string> = {
+  pendente:   "#f97316",
+  em_preparo: "#818cf8",
+  pronto:     "#4ade80",
+  entregue:   "rgba(255,255,255,0.3)",
+  cancelado:  "rgba(255,255,255,0.2)",
+};
+
+function tempo(created_at: string) {
+  const diff = Math.floor((Date.now() - new Date(created_at).getTime()) / 60000);
+  if (diff < 1) return "agora";
+  if (diff < 60) return `${diff}min`;
+  return `${Math.floor(diff / 60)}h${diff % 60 > 0 ? `${diff % 60}min` : ""}`;
+}
+
+function fmt(v: number) {
+  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+function PedidoCard({
+  pedido,
+  isNew,
+}: {
+  pedido: PedidoCliente;
+  isNew: boolean;
+}) {
+  const [, startTransition] = useTransition();
+  const [localStatus, setLocalStatus] = useState(pedido.status);
+  const itens = pedido.itens as ItemPedidoCliente[];
+
+  const atualizar = (novoStatus: PedidoCliente["status"]) => {
+    setLocalStatus(novoStatus);
+    startTransition(async () => {
+      try {
+        await atualizarStatusPedido(pedido.id, novoStatus as "em_preparo" | "pronto" | "entregue" | "cancelado");
+      } catch {
+        setLocalStatus(pedido.status); // rollback
+      }
+    });
+  };
+
+  const isDone = localStatus === "entregue" || localStatus === "cancelado";
+
+  return (
+    <div style={{
+      background: isNew ? "rgba(200,255,0,0.05)" : BG2,
+      border: `1px solid ${isNew ? "rgba(200,255,0,0.2)" : BORDER}`,
+      borderRadius: 16,
+      padding: "18px 20px",
+      fontFamily: FONT,
+      opacity: isDone ? 0.45 : 1,
+      transition: "opacity 400ms, border-color 600ms, background 600ms",
+    }}>
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
+        <div>
+          <p style={{ fontSize: 15, fontWeight: 800, color: "white", margin: 0, letterSpacing: "-0.3px" }}>
+            {pedido.nome_cliente ?? "Cliente"}
+          </p>
+          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", margin: "3px 0 0" }}>
+            Mesa · {tempo(pedido.created_at)}
+          </p>
+        </div>
+        <span style={{
+          fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 99,
+          background: `${STATUS_COLORS[localStatus]}18`,
+          color: STATUS_COLORS[localStatus],
+          border: `1px solid ${STATUS_COLORS[localStatus]}30`,
+          letterSpacing: "0.03em",
+        }}>
+          {STATUS_LABELS[localStatus]}
+        </span>
+      </div>
+
+      {/* Itens */}
+      <div style={{ marginBottom: 16 }}>
+        {itens.map((item, i) => (
+          <div key={i} style={{
+            display: "flex", justifyContent: "space-between", alignItems: "center",
+            padding: "7px 0",
+            borderBottom: i < itens.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
+          }}>
+            <span style={{ fontSize: 13, color: "rgba(255,255,255,0.8)" }}>
+              <span style={{ color: ACCENT, fontWeight: 800, marginRight: 6 }}>{item.quantidade}×</span>
+              {item.nome}
+            </span>
+            <span style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", flexShrink: 0 }}>
+              {fmt(item.preco * item.quantidade)}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Total */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <span style={{ fontSize: 12, color: "rgba(255,255,255,0.3)" }}>Total</span>
+        <span style={{ fontSize: 16, fontWeight: 900, color: "white", letterSpacing: "-0.4px" }}>
+          {fmt(pedido.total)}
+        </span>
+      </div>
+
+      {/* Ações */}
+      {!isDone && (
+        <div style={{ display: "flex", gap: 8 }}>
+          {localStatus === "pendente" && (
+            <>
+              <button
+                onClick={() => atualizar("cancelado")}
+                style={{
+                  flex: 1, padding: "11px", borderRadius: 10,
+                  background: "rgba(255,255,255,0.05)", border: "none",
+                  color: "rgba(255,255,255,0.4)", fontSize: 13, fontWeight: 600,
+                  cursor: "pointer", fontFamily: FONT,
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => atualizar("em_preparo")}
+                style={{
+                  flex: 2, padding: "11px", borderRadius: 10,
+                  background: ACCENT, border: "none",
+                  color: "#000", fontSize: 13, fontWeight: 900,
+                  cursor: "pointer", fontFamily: FONT,
+                }}
+              >
+                Aceitar →
+              </button>
+            </>
+          )}
+          {localStatus === "em_preparo" && (
+            <button
+              onClick={() => atualizar("pronto")}
+              style={{
+                flex: 1, padding: "11px", borderRadius: 10,
+                background: "rgba(74,222,128,0.12)",
+                border: "1px solid rgba(74,222,128,0.25)",
+                color: "#4ade80", fontSize: 13, fontWeight: 800,
+                cursor: "pointer", fontFamily: FONT,
+              }}
+            >
+              ✓ Marcar como pronto
+            </button>
+          )}
+          {localStatus === "pronto" && (
+            <button
+              onClick={() => atualizar("entregue")}
+              style={{
+                flex: 1, padding: "11px", borderRadius: 10,
+                background: "rgba(255,255,255,0.06)", border: BORDER,
+                color: "rgba(255,255,255,0.6)", fontSize: 13, fontWeight: 700,
+                cursor: "pointer", fontFamily: FONT,
+              }}
+            >
+              Confirmar entrega
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function FilaPedidos({ barId }: { barId: string }) {
+  const [pedidos, setPedidos] = useState<PedidoCliente[]>([]);
+  const [newIds, setNewIds] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
+
+  const carregarPedidos = useCallback(async () => {
+    const supabase = createClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data } = await (supabase.from("pedidos_cliente") as any)
+      .select("*")
+      .eq("bar_id", barId)
+      .in("status", ["pendente", "em_preparo", "pronto"])
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setPedidos((data as PedidoCliente[]) ?? []);
+    setLoading(false);
+  }, [barId]);
+
+  useEffect(() => {
+    carregarPedidos();
+
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`pedidos_bar_${barId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "pedidos_cliente",
+          filter: `bar_id=eq.${barId}`,
+        },
+        (payload) => {
+          const novo = payload.new as PedidoCliente;
+          setPedidos((prev) => [novo, ...prev]);
+          setNewIds((prev) => new Set([...prev, novo.id]));
+          setTimeout(() => {
+            setNewIds((prev) => {
+              const next = new Set(prev);
+              next.delete(novo.id);
+              return next;
+            });
+          }, 5000);
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "pedidos_cliente",
+          filter: `bar_id=eq.${barId}`,
+        },
+        (payload) => {
+          const atualizado = payload.new as PedidoCliente;
+          setPedidos((prev) =>
+            prev.map((p) => (p.id === atualizado.id ? atualizado : p))
+          );
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [barId, carregarPedidos]);
+
+  const ativos   = pedidos.filter(p => p.status === "pendente" || p.status === "em_preparo");
+  const prontos  = pedidos.filter(p => p.status === "pronto");
+
+  if (loading) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 120, color: "rgba(255,255,255,0.3)", fontSize: 13, fontFamily: FONT }}>
+        Carregando fila...
+      </div>
+    );
+  }
+
+  if (pedidos.length === 0) {
+    return (
+      <div style={{
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        height: 140, gap: 10, fontFamily: FONT,
+      }}>
+        <div style={{ fontSize: 28 }}>🍸</div>
+        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.3)", margin: 0 }}>
+          Nenhum pedido ainda. Aguardando...
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      {ativos.length > 0 && (
+        <>
+          <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "0.15em", margin: "0 0 4px", fontFamily: FONT }}>
+            {ativos.length} pedido{ativos.length > 1 ? "s" : ""} ativo{ativos.length > 1 ? "s" : ""}
+          </p>
+          {ativos.map(p => (
+            <PedidoCard key={p.id} pedido={p} isNew={newIds.has(p.id)} />
+          ))}
+        </>
+      )}
+
+      {prontos.length > 0 && (
+        <>
+          <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(74,222,128,0.5)", textTransform: "uppercase", letterSpacing: "0.15em", margin: "12px 0 4px", fontFamily: FONT }}>
+            {prontos.length} pronto{prontos.length > 1 ? "s" : ""} para entregar
+          </p>
+          {prontos.map(p => (
+            <PedidoCard key={p.id} pedido={p} isNew={false} />
+          ))}
+        </>
+      )}
+    </div>
+  );
+}

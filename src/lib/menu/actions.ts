@@ -38,3 +38,14 @@ export async function submeterPedido({
   if (error) throw new Error(error.message);
   return data.id;
 }
+
+export async function atualizarStatusPedido(
+  pedidoId: string,
+  status: "em_preparo" | "pronto" | "entregue" | "cancelado"
+): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await semTipo(supabase.from("pedidos_cliente"))
+    .update({ status })
+    .eq("id", pedidoId);
+  if (error) throw new Error(error.message);
+}

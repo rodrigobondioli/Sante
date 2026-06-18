@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getCurrentBar, getTurnoAtual } from "@/lib/dashboard/queries";
 import { getMesasComStatus, getComandaBalcao } from "@/lib/bartender/queries";
 import { abrirComanda } from "@/lib/bartender/actions";
+import { FilaPedidos } from "@/components/bartender/fila-pedidos";
 
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -40,7 +41,30 @@ export default async function BartenderPage() {
   const totalOcupadas = mesas.filter(m => m.comanda !== null).length + (comandaBalcao ? 1 : 0);
 
   return (
-    <div style={{ padding: "24px 28px", height: "100%", overflowY: "auto" }}>
+    <div style={{ display: "flex", height: "100%", overflow: "hidden" }}>
+
+      {/* ── Coluna esquerda: Fila de pedidos ── */}
+      <div style={{
+        width: 360, flexShrink: 0,
+        borderRight: "1px solid rgba(255,255,255,0.06)",
+        display: "flex", flexDirection: "column",
+        overflow: "hidden",
+      }}>
+        <div style={{ padding: "20px 20px 12px", borderBottom: "1px solid rgba(255,255,255,0.06)", flexShrink: 0 }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "0.12em", margin: 0 }}>
+            Fila de pedidos
+          </p>
+          <p style={{ fontSize: 16, fontWeight: 700, color: "white", margin: "4px 0 0" }}>
+            Tempo real
+          </p>
+        </div>
+        <div style={{ flex: 1, overflowY: "auto", padding: "16px 16px 24px" }}>
+          <FilaPedidos barId={current.bar.id} />
+        </div>
+      </div>
+
+      {/* ── Coluna direita: Mesas ── */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "24px 28px" }}>
 
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
@@ -187,6 +211,8 @@ export default async function BartenderPage() {
           );
         })()}
       </div>
+
+      </div> {/* fim coluna direita */}
     </div>
   );
 }
