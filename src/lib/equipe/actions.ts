@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentBar } from "@/lib/dashboard/queries";
 import type { BarRole } from "@/types/database";
 
@@ -67,7 +68,8 @@ export async function convidarMembro(
   const email    = (formData.get("email") as string ?? "").trim();
   const role     = formData.get("role") as BarRole;
 
-  if (!email || !role) return { error: "E-mail e função são obrigatórios." };
+  if (!nome && !email) return { error: "Informe pelo menos o nome do membro." };
+  if (!role) return { error: "Selecione uma função." };
 
   const nomeCompleto = [nome, sobrenome].filter(Boolean).join(" ") || null;
 
@@ -79,6 +81,15 @@ export async function convidarMembro(
 
     const supabase = await createClient();
 
+    // Sem e-mail — cria direto como membro sem conta
+    if (!email) {
+      await semTipo(supabase.from("bar_members"))
+        .insert({ bar_id: current.bar.id, role, nome: nomeCompleto });
+      revalidatePath("/dashboard/equipe");
+      return { ok: true };
+    }
+
+    // Com e-mail — tenta vincular a uma conta existente
     const { data: profile } = await supabase
       .from("profiles")
       .select("id")
@@ -86,7 +97,11 @@ export async function convidarMembro(
       .maybeSingle() as { data: { id: string } | null };
 
     if (!profile) {
-      return { error: "Usuário não encontrado. Peça para ele criar conta primeiro em superbar.com.br/login e tente novamente." };
+      // Cria o membro sem conta por enquanto (user_id nulo)
+      await semTipo(supabase.from("bar_members"))
+        .insert({ bar_id: current.bar.id, role, nome: nomeCompleto ?? email.split("@")[0] });
+      revalidatePath("/dashboard/equipe");
+      return { ok: true };
     }
 
     const { data: existing } = await semTipo(supabase.from("bar_members"))

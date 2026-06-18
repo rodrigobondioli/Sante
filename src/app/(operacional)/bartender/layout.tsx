@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentBar } from "@/lib/dashboard/queries";
-import { signOut } from "@/lib/auth/actions";
+import { OperadorShell } from "@/components/bartender/operador-shell";
+import type { MembroSimples } from "@/components/bartender/operador-shell";
 
 export default async function BartenderLayout({
   children,
@@ -16,37 +17,31 @@ export default async function BartenderLayout({
 
   if (!current) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, background: '#0a0a10', padding: '0 16px', textAlign: 'center' }}>
-        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.80)' }}>Nenhum bar vinculado a esse usuário ainda.</p>
-        <form action={signOut}>
-          <button style={{ fontSize: 13, color: 'rgba(255,255,255,0.50)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
-            Sair
-          </button>
-        </form>
+      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, background: "#0a0a10", padding: "0 16px", textAlign: "center" }}>
+        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.80)" }}>Nenhum bar vinculado a esse usuário ainda.</p>
       </div>
     );
   }
 
+  // Busca membros ativos para a tela "Quem é você?"
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: rows } = await (supabase.from("bar_members") as any)
+    .select("id, nome, role, profiles(nome)")
+    .eq("bar_id", current.bar.id)
+    .eq("ativo", true)
+    .order("created_at", { ascending: true }) as {
+      data: { id: string; nome: string | null; role: string; profiles: { nome: string } | null }[] | null
+    };
+
+  const membros: MembroSimples[] = (rows ?? []).map(r => ({
+    id: r.id,
+    nome: r.nome ?? r.profiles?.nome ?? "Sem nome",
+    role: r.role,
+  }));
+
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#0a0a10' }}>
-      <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(10,10,16,0.95)', backdropFilter: 'blur(20px)', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>{current.bar.nome}</span>
-          <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 10px', borderRadius: 99, background: 'rgba(38,0,120,0.30)', color: 'rgba(160,130,255,0.9)' }}>Bartender</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>{current.userNome}</span>
-          <form action={signOut}>
-            <button
-              type="submit"
-              style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', background: 'none', border: 'none', cursor: 'pointer' }}
-            >
-              Sair
-            </button>
-          </form>
-        </div>
-      </header>
-      <main style={{ flex: 1, overflow: 'hidden' }}>{children}</main>
-    </div>
+    <OperadorShell membros={membros} barNome={current.bar.nome}>
+      {children}
+    </OperadorShell>
   );
 }

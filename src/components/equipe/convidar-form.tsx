@@ -31,7 +31,9 @@ export function ConvidarForm() {
           background: "rgba(52,211,153,0.10)", border: "1px solid rgba(52,211,153,0.25)",
           borderRadius: 8, padding: "10px 14px", marginBottom: 14,
         }}>
-          <p style={{ fontSize: 13, color: "rgba(52,211,153,0.9)", margin: 0 }}>Membro adicionado com sucesso!</p>
+          <p style={{ fontSize: 13, color: "rgba(52,211,153,0.9)", margin: 0 }}>
+            Membro adicionado com sucesso!
+          </p>
         </div>
       )}
 
@@ -51,8 +53,8 @@ export function ConvidarForm() {
         {/* Linha 2: E-mail + Função + Botão */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 160px auto", gap: 10, alignItems: "flex-end" }}>
           <div>
-            <label style={{ ...LABEL, display: "block", marginBottom: 6 }}>E-mail *</label>
-            <input name="email" type="email" required placeholder="nome@email.com" style={INPUT} />
+            <label style={{ ...LABEL, display: "block", marginBottom: 6 }}>E-mail <span style={{ color: "rgba(255,255,255,0.25)", fontWeight: 400 }}>(opcional)</span></label>
+            <input name="email" type="email" placeholder="nome@email.com" style={INPUT} />
           </div>
           <div>
             <label style={{ ...LABEL, display: "block", marginBottom: 6 }}>Função *</label>
