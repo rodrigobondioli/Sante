@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, BarChart3, History, UtensilsCrossed, TableProperties, Users } from "lucide-react";
+import { LayoutDashboard, BarChart3, History, UtensilsCrossed, TableProperties, Users, MonitorSmartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { BarRole } from "@/types/database";
 import { Drawer } from "@/components/ui/drawer";
@@ -85,7 +85,27 @@ export function DashboardSidebar({ barNome }: DashboardSidebarProps) {
         })}
       </nav>
 
-      <div style={{ marginTop:'auto', padding:'16px', borderTop:'1px solid rgba(255,255,255,0.06)', display:'flex', flexDirection:'column', gap:'4px' }}>
+      {/* Modo Bartender */}
+      <div style={{ padding: '12px 16px' }}>
+        <Link
+          href="/bartender"
+          style={{
+            display: "flex", alignItems: "center", gap: 10,
+            padding: "10px 12px", borderRadius: 10,
+            background: "rgba(38,0,120,0.25)",
+            border: "1px solid rgba(124,58,237,0.25)",
+            color: "rgba(160,130,255,0.9)",
+            fontSize: 13, fontWeight: 600,
+            textDecoration: "none",
+            transition: "background 0.15s",
+          }}
+        >
+          <MonitorSmartphone style={{ width: 15, height: 15 }} />
+          Modo Bartender
+        </Link>
+      </div>
+
+      <div style={{ padding:'16px', borderTop:'1px solid rgba(255,255,255,0.06)', display:'flex', flexDirection:'column', gap:'4px' }}>
         {[
           { icon:'🎧', label:'Suporte', type:'suporte' as const },
           { icon:'💡', label:'Sugestão', type:'sugestao' as const },

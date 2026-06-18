@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { signOut } from "@/lib/auth/actions";
 
 export type MembroSimples = { id: string; nome: string; role: string };
@@ -110,7 +111,13 @@ export function OperadorShell({
         backdropFilter: "blur(20px)",
         flexShrink: 0,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <Link
+            href="/dashboard"
+            style={{ fontSize: 12, color: "rgba(255,255,255,0.25)", textDecoration: "none" }}
+          >
+            ← Dashboard
+          </Link>
           <span style={{ fontSize: 14, fontWeight: 600, color: "white" }}>{barNome}</span>
           <span style={{
             fontSize: 11, fontWeight: 500, padding: "3px 10px", borderRadius: 99,
