@@ -65,7 +65,7 @@ export function AiHeroInput({ barId }: { barId: string }) {
             onClick={() => ask(question)}
             disabled={loading}
             style={{
-              background: '#c8ff00',
+              background: '#260078',
               border: 'none',
               borderRadius: '10px',
               width: '38px',
@@ -79,9 +79,9 @@ export function AiHeroInput({ barId }: { barId: string }) {
             }}
           >
             {loading ? (
-              <span style={{ color: '#000', fontSize: '16px' }}>·</span>
+              <span style={{ color: 'white', fontSize: '16px' }}>·</span>
             ) : (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8"/>
                 <path d="m21 21-4.35-4.35"/>
               </svg>

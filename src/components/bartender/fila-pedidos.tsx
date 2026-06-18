@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { atualizarStatusPedido } from "@/lib/menu/actions";
 import type { PedidoCliente, ItemPedidoCliente } from "@/types/database";
 
-const ACCENT = "#c8ff00";
+const ACCENT = "#260078";
 const BG2    = "rgba(255,255,255,0.04)";
 const BORDER = "rgba(255,255,255,0.07)";
 const FONT   = "var(--font-geist, -apple-system, 'Helvetica Neue', sans-serif)";
@@ -140,7 +140,7 @@ function PedidoCard({
                 style={{
                   flex: 2, padding: "11px", borderRadius: 10,
                   background: ACCENT, border: "none",
-                  color: "#000", fontSize: 13, fontWeight: 900,
+                  color: "white", fontSize: 13, fontWeight: 900,
                   cursor: "pointer", fontFamily: FONT,
                 }}
               >

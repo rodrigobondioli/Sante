@@ -137,7 +137,7 @@ export function MesasClient({ mesas, barId }: { mesas: Mesa[]; barId: string }) 
             onClick={() => setAdding(true)}
             style={{
               display: "flex", alignItems: "center", gap: 6,
-              background: "#c8ff00", color: "#000", border: "none",
+              background: "#260078", color: "white", border: "none",
               borderRadius: 8, padding: "7px 14px",
               fontSize: 13, fontWeight: 700, cursor: "pointer",
             }}
@@ -212,7 +212,7 @@ export function MesasClient({ mesas, barId }: { mesas: Mesa[]; barId: string }) 
               </div>
               <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
                 <button type="submit" style={{
-                  flex: 1, background: "#c8ff00", color: "#000", border: "none",
+                  flex: 1, background: "#260078", color: "white", border: "none",
                   borderRadius: 8, padding: "10px", fontSize: 13, fontWeight: 700, cursor: "pointer",
                 }}>
                   Adicionar

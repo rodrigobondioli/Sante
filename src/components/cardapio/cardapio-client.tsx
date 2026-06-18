@@ -42,8 +42,8 @@ const lbl: React.CSSProperties = {
 };
 
 const btnPrimary: React.CSSProperties = {
-  background: "#c8ff00",
-  color: "#000",
+  background: "#260078",
+  color: "white",
   border: "none",
   borderRadius: 8,
   padding: "9px 18px",
@@ -312,7 +312,7 @@ function CategoriaItem({
         padding: "8px 12px",
         borderRadius: 8,
         cursor: "pointer",
-        background: selected ? "rgba(200,255,0,0.08)" : "transparent",
+        background: selected ? "rgba(38,0,120,0.35)" : "transparent",
         transition: "background 0.1s",
       }}
       className="group"

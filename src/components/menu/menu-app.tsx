@@ -28,7 +28,7 @@ interface ClienteLocal {
 }
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
-const ACCENT = "#c8ff00";
+const ACCENT = "#260078";
 const BG     = "#0c0c0c";
 const CARD   = "#181818";
 const CARD2  = "#222222";
@@ -284,7 +284,7 @@ function WelcomeBackScreen({
               <button
                 onClick={() => onRepeat(ultimoProduto)}
                 style={{
-                  background: ACCENT, color: "#000", border: "none",
+                  background: ACCENT, color: "white", border: "none",
                   borderRadius: 10, padding: "9px 16px",
                   fontSize: 13, fontWeight: 800, cursor: "pointer",
                   alignSelf: "flex-start", fontFamily: FONT,
@@ -348,7 +348,7 @@ function WelcomeBackScreen({
         <button
           onClick={onContinue}
           style={{
-            width: "100%", background: ACCENT, color: "#000",
+            width: "100%", background: ACCENT, color: "white",
             border: "none", borderRadius: 16, padding: "20px",
             fontSize: 16, fontWeight: 800, cursor: "pointer",
             letterSpacing: "-0.3px", fontFamily: FONT,
@@ -384,7 +384,7 @@ function CategoriesScreen({
           <button
             onClick={onCart}
             style={{
-              background: ACCENT, color: "#000", border: "none", borderRadius: 99,
+              background: ACCENT, color: "white", border: "none", borderRadius: 99,
               padding: "10px 18px", fontSize: 13, fontWeight: 800,
               cursor: "pointer", flexShrink: 0, marginTop: 4,
               display: "flex", alignItems: "center", gap: 6, fontFamily: FONT,
@@ -508,7 +508,7 @@ function ProductsScreen({
             onClick={onCart}
             style={{
               position: "absolute", top: 54, right: 16,
-              background: ACCENT, color: "#000",
+              background: ACCENT, color: "white",
               border: "none", borderRadius: 99, padding: "8px 18px",
               fontSize: 13, fontWeight: 800, cursor: "pointer", fontFamily: FONT,
             }}
@@ -660,7 +660,7 @@ function ProductDetailScreen({
             style={{
               position: "absolute", top: 52, right: 20,
               background: ACCENT, border: "none", borderRadius: 99,
-              padding: "9px 16px", color: "#000",
+              padding: "9px 16px", color: "white",
               fontSize: 13, fontWeight: 800, cursor: "pointer", fontFamily: FONT,
             }}
           >
@@ -702,7 +702,7 @@ function ProductDetailScreen({
               onClick={() => setQty(qty + 1)}
               style={{
                 width: 42, height: 42, borderRadius: "50%",
-                background: ACCENT, border: "none", color: "#000", fontSize: 22,
+                background: ACCENT, border: "none", color: "white", fontSize: 22,
                 cursor: "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT,
               }}
@@ -733,7 +733,7 @@ function ProductDetailScreen({
           onClick={() => onAdd(produto, qty)}
           style={{
             flex: 2.5, padding: "17px", borderRadius: 16,
-            background: ACCENT, border: "none", color: "#000",
+            background: ACCENT, border: "none", color: "white",
             fontSize: 15, fontWeight: 900, cursor: "pointer",
             letterSpacing: "-0.3px", fontFamily: FONT,
           }}
@@ -838,7 +838,7 @@ function CartScreen({
             width: 52, height: 52, borderRadius: "50%",
             background: `linear-gradient(135deg, ${ACCENT}, #80e000)`,
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 21, fontWeight: 900, color: "#000", flexShrink: 0,
+            fontSize: 21, fontWeight: 900, color: "white", flexShrink: 0,
           }}>
             {cliente?.nome?.[0]?.toUpperCase() ?? "?"}
           </div>
@@ -903,8 +903,8 @@ function CartScreen({
           disabled={submitting}
           style={{
             width: "100%", padding: "20px", borderRadius: 16,
-            background: submitting ? "rgba(200,255,0,0.4)" : ACCENT,
-            border: "none", color: "#000",
+            background: submitting ? "rgba(38,0,120,0.50)" : ACCENT,
+            border: "none", color: "white",
             fontSize: 16, fontWeight: 900,
             cursor: submitting ? "default" : "pointer",
             letterSpacing: "-0.3px", fontFamily: FONT,
@@ -929,7 +929,7 @@ function Toast({ visible }: { visible: boolean }) {
       transform: `translateX(-50%) translateY(${visible ? 0 : -16}px)`,
       opacity: visible ? 1 : 0,
       transition: "all 280ms cubic-bezier(0.34, 1.56, 0.64, 1)",
-      background: ACCENT, color: "#000",
+      background: ACCENT, color: "white",
       padding: "10px 22px", borderRadius: 99,
       fontSize: 13, fontWeight: 800,
       zIndex: 200, pointerEvents: "none",

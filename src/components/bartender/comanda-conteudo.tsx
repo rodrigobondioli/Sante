@@ -76,8 +76,8 @@ export function ComandaConteudo({ comanda, itens, subtotal }: ComandaConteudoPro
             style={{
               width: '100%',
               padding: '14px',
-              background: '#c8ff00',
-              color: '#000',
+              background: '#260078',
+              color: 'white',
               border: 'none',
               borderRadius: 10,
               fontSize: 15,

@@ -28,8 +28,8 @@ export function NovaComandaButton() {
         style={{
           display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
           width: "100%", padding: "14px",
-          background: "#c8ff00", border: "none", borderRadius: 12,
-          color: "#000", fontSize: 15, fontWeight: 700, cursor: "pointer",
+          background: "#260078", border: "none", borderRadius: 12,
+          color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer",
         }}
       >
         <Plus style={{ width: 18, height: 18 }} />
@@ -105,8 +105,8 @@ export function NovaComandaButton() {
                   type="submit"
                   style={{
                     flex: 2, padding: "12px",
-                    background: "#c8ff00", border: "none", borderRadius: 10,
-                    color: "#000", fontSize: 14, fontWeight: 700, cursor: "pointer",
+                    background: "#260078", border: "none", borderRadius: 10,
+                    color: "white", fontSize: 14, fontWeight: 700, cursor: "pointer",
                   }}
                 >
                   Abrir comanda

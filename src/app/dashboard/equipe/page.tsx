@@ -13,14 +13,14 @@ const ROLE_LABELS: Record<BarRole, string> = {
 };
 
 const ROLE_COLORS: Record<BarRole, string> = {
-  dono:      "rgba(200,255,0,0.9)",
+  dono:      "rgba(255,255,255,0.90)",
   gerente:   "rgba(160,130,255,0.9)",
   bartender: "rgba(96,165,250,0.9)",
   caixa:     "rgba(251,191,36,0.9)",
 };
 
 const ROLE_BG: Record<BarRole, string> = {
-  dono:      "rgba(200,255,0,0.10)",
+  dono:      "rgba(38,0,120,0.20)",
   gerente:   "rgba(38,0,120,0.30)",
   bartender: "rgba(29,78,216,0.20)",
   caixa:     "rgba(120,80,0,0.25)",
@@ -232,11 +232,11 @@ export default async function EquipePage() {
                     display: "flex", alignItems: "center", gap: 12,
                     padding: "12px 14px",
                     borderRadius: 8,
-                    background: i === 0 ? "rgba(200,255,0,0.06)" : "rgba(255,255,255,0.02)",
+                    background: i === 0 ? "rgba(38,0,120,0.20)" : "rgba(255,255,255,0.02)",
                   }}>
                     <span style={{
                       fontSize: 14, fontWeight: 700,
-                      color: i === 0 ? "#c8ff00" : "rgba(255,255,255,0.20)",
+                      color: i === 0 ? "#260078" : "rgba(255,255,255,0.20)",
                       minWidth: 24, flexShrink: 0,
                     }}>
                       {i + 1}º
@@ -249,7 +249,7 @@ export default async function EquipePage() {
                         {m.totalComandas} cmd · TM {fmt(m.ticketMedio)}
                       </p>
                     </div>
-                    <p style={{ fontSize: 14, fontWeight: 700, color: i === 0 ? "#c8ff00" : "white", margin: 0, flexShrink: 0, fontVariantNumeric: "tabular-nums" }}>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: i === 0 ? "#260078" : "white", margin: 0, flexShrink: 0, fontVariantNumeric: "tabular-nums" }}>
                       {fmt(m.totalVendas)}
                     </p>
                   </div>

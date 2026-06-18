@@ -5,7 +5,7 @@
 import type { CSSProperties } from "react";
 
 // ─── Colors ───────────────────────────────────────────────────────────────────
-export const ACCENT  = "#c8ff00";
+export const ACCENT  = "#260078";
 export const BG      = "#0a0a10";
 export const C_WHITE = "#ffffff";
 export const C_MUTED = "rgba(255,255,255,0.45)";
@@ -47,7 +47,7 @@ export const SUBTITLE: CSSProperties = {
 // ─── Buttons ──────────────────────────────────────────────────────────────────
 export const BTN_PRIMARY: CSSProperties = {
   background: ACCENT,
-  color: "#000",
+  color: "white",
   border: "none",
   borderRadius: 8,
   padding: "9px 18px",
