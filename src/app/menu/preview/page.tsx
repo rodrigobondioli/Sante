@@ -38,7 +38,7 @@ const IMG = {
   negroni:     "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&q=80",
   gin:         "https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=600&q=80",
   old:         "https://images.unsplash.com/photo-1546171753-97d7676e4602?w=600&q=80",
-  margarita:   "https://images.unsplash.com/photo-1560963805-6c64417bd2f4?w=600&q=80",
+  margarita:   "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&q=80",
   mojito:      "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=600&q=80",
   aperol:      "https://images.unsplash.com/photo-1570197571499-166b36435e9f?w=600&q=80",
   whisky:      "https://images.unsplash.com/photo-1527281400683-1aae777175f8?w=600&q=80",

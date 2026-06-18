@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(python3 *)",
+      "Bash(NEXT_PUBLIC_SUPABASE_URL=\"https://placeholder.supabase.co\" NEXT_PUBLIC_SUPABASE_ANON_KEY=\"placeholder\" python3 *)",
+      "Bash(node *)",
+      "Bash(curl -sS -m 5 https://supabase.com)",
+      "Bash(nslookup qxxxfneklzbzgwcpkhg.supabase.co)",
+      "Read(//private/var/run/**)",
+      "Bash(curl -sS -m 5 https://1.1.1.1 -o /dev/null -w \"%{http_code}\\\\n\")",
+      "Bash(nslookup supabase.co)",
+      "Bash(nslookup abcdefghijklmnopqrst.supabase.co)",
+      "Bash(curl -sS \"https://1.1.1.1/dns-query?name=qxxxfneklzbzgwcpkhg.supabase.co&type=A\" -H \"accept: application/dns-json\" -m 5)",
+      "Bash(nslookup qxxxfneklzbzgwgcpkhg.supabase.co)",
+      "Bash(curl -sS \"https://1.1.1.1/dns-query?name=qxxxfneklzbzgwgcpkhg.supabase.co&type=A\" -H \"accept: application/dns-json\" -m 5)",
+      "Bash(grep -oE '^SUPABASE_SERVICE_ROLE_KEY=.{0,20}' .env.local)",
+      "Bash(grep -oE '^NEXT_PUBLIC_SUPABASE_ANON_KEY=.{0,20}' .env.local)",
+      "Bash(git mv *)",
+      "Bash(npx skills *)",
+      "mcp__claude_ai_Figma__whoami",
+      "mcp__claude_ai_Figma__get_metadata",
+      "Bash(grep -iE \"alert-triangle|triangle-alert|arrow-right$|bell\\\\.js|settings\\\\.js\")",
+      "Bash(grep -iE \"^arrow-right\\\\.mjs$|^bell\\\\.mjs$|^settings\\\\.mjs$|^sparkles\\\\.mjs$|^users\\\\.mjs$\")",
+      "Bash(grep -iE \"^circle-help\\\\.mjs$|^help-circle\\\\.mjs$\")",
+      "Bash(grep -iE \"^search\\\\.mjs$|^minus\\\\.mjs$|^martini\\\\.mjs$|^chevron-up\\\\.mjs$|^cup-soda\\\\.mjs$\")",
+      "Bash(npx tsc *)",
+      "Bash(echo \"started, pid $!\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/login)",
+      "Bash(kill %1)",
+      "Bash(lsof -ti:3000 -ti:3001)",
+      "Bash(xargs -r kill -9)",
+      "Bash(lsof -i:3000 -i:3001)",
+      "Bash(curl *)",
+      "Bash(lsof -ti:3000)",
+      "Bash(echo \"started pid $!\")"
+    ]
+  }
+}

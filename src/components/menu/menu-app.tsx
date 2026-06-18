@@ -328,7 +328,7 @@ function CategoriesScreen({
       overflow: "hidden",
     }}>
       {/* Header */}
-      <div style={{ padding: "56px 28px 24px", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+      <div style={{ padding: "56px 28px 20px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexShrink: 0 }}>
         <h1 style={{ fontSize: 28, fontWeight: 800, color: "white", margin: 0, lineHeight: 1.15 }}>
           Qual vai ser a<br />boa de hoje?
         </h1>
@@ -350,36 +350,72 @@ function CategoriesScreen({
         )}
       </div>
 
-      {/* Category list */}
-      <div style={{ flex: 1, overflow: "auto", padding: "0 28px 40px", display: "flex", flexDirection: "column", gap: 10 }}>
-        {cardapio.map((cat, i) => (
-          <button
-            key={cat.id}
-            onClick={() => onSelect(cat)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "22px 22px",
-              borderRadius: 16,
-              background: i === 0 ? ACCENT : CARD,
-              border: "none",
-              cursor: "pointer",
-              textAlign: "left",
-              transition: "opacity 100ms",
-            }}
-          >
-            <div>
-              <span style={{ fontSize: 17, fontWeight: 700, color: i === 0 ? "#000" : "white", display: "block" }}>
-                {cat.nome}
-              </span>
-              <span style={{ fontSize: 12, color: i === 0 ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.35)", marginTop: 2, display: "block" }}>
-                {cat.produtos.length} {cat.produtos.length === 1 ? "item" : "itens"}
-              </span>
-            </div>
-            <span style={{ fontSize: 20, color: i === 0 ? "#000" : "rgba(255,255,255,0.25)", fontWeight: 300 }}>→</span>
-          </button>
-        ))}
+      {/* Category cards — fill remaining height */}
+      <div style={{ flex: 1, overflow: "hidden", padding: "0 20px 32px", display: "flex", flexDirection: "column", gap: 10 }}>
+        {cardapio.map((cat) => {
+          const coverImg = cat.produtos.find((p) => p.imagem_url)?.imagem_url ?? null;
+          return (
+            <button
+              key={cat.id}
+              onClick={() => onSelect(cat)}
+              style={{
+                flex: 1,
+                position: "relative",
+                borderRadius: 20,
+                overflow: "hidden",
+                border: "none",
+                cursor: "pointer",
+                textAlign: "left",
+                padding: 0,
+                background: CARD,
+              }}
+            >
+              {/* Background image */}
+              {coverImg && (
+                <div style={{
+                  position: "absolute", inset: 0,
+                  backgroundImage: `url(${coverImg})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  opacity: 0.35,
+                }} />
+              )}
+              {/* Dark overlay gradient */}
+              <div style={{
+                position: "absolute", inset: 0,
+                background: "linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 100%)",
+              }} />
+              {/* Content */}
+              <div style={{
+                position: "relative",
+                height: "100%",
+                display: "flex",
+                alignItems: "flex-end",
+                justifyContent: "space-between",
+                padding: "20px 22px",
+              }}>
+                <div>
+                  <span style={{ fontSize: 20, fontWeight: 800, color: "white", display: "block", letterSpacing: "-0.3px" }}>
+                    {cat.nome}
+                  </span>
+                  <span style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", marginTop: 3, display: "block" }}>
+                    {cat.produtos.length} {cat.produtos.length === 1 ? "item" : "itens"}
+                  </span>
+                </div>
+                <div style={{
+                  width: 36, height: 36, borderRadius: "50%",
+                  background: ACCENT,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0,
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 8h10M9 4l4 4-4 4" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+              </div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -434,35 +470,27 @@ function ProductsScreen({
       </div>
 
       {/* Product list */}
-      <div style={{ flex: 1, overflow: "auto", padding: "4px 28px 40px", display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ flex: 1, overflow: "auto", padding: "4px 20px 40px", display: "flex", flexDirection: "column", gap: 10 }}>
         {ativos.map((produto) => (
           <button
             key={produto.id}
             onClick={() => onSelect(produto)}
             style={{
               display: "flex",
-              alignItems: "center",
-              gap: 16,
+              alignItems: "stretch",
               background: CARD,
               border: "none",
-              borderRadius: 16,
-              padding: 14,
+              borderRadius: 18,
+              overflow: "hidden",
               cursor: "pointer",
               textAlign: "left",
-              transition: "opacity 100ms",
+              minHeight: 96,
+              padding: 0,
             }}
           >
-            {produto.imagem_url ? (
-              <img
-                src={produto.imagem_url}
-                style={{ width: 76, height: 76, borderRadius: 12, objectFit: "cover", flexShrink: 0 }}
-                alt={produto.nome}
-              />
-            ) : (
-              <div style={{ width: 76, height: 76, borderRadius: 12, background: CARD2, flexShrink: 0 }} />
-            )}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontSize: 15, fontWeight: 700, color: "white", margin: "0 0 4px", lineHeight: 1.3 }}>{produto.nome}</p>
+            {/* Text side */}
+            <div style={{ flex: 1, padding: "16px 16px 16px 18px", display: "flex", flexDirection: "column", justifyContent: "center", minWidth: 0 }}>
+              <p style={{ fontSize: 15, fontWeight: 700, color: "white", margin: "0 0 5px", lineHeight: 1.3 }}>{produto.nome}</p>
               {produto.descricao && (
                 <p style={{
                   fontSize: 12, color: "rgba(255,255,255,0.38)", margin: "0 0 8px",
@@ -472,7 +500,20 @@ function ProductsScreen({
                   {produto.descricao}
                 </p>
               )}
-              <p style={{ fontSize: 15, fontWeight: 800, color: ACCENT, margin: 0 }}>{fmt(produto.preco)}</p>
+              <p style={{ fontSize: 16, fontWeight: 800, color: ACCENT, margin: 0 }}>{fmt(produto.preco)}</p>
+            </div>
+            {/* Image side */}
+            <div style={{ width: 100, flexShrink: 0, position: "relative" }}>
+              {produto.imagem_url ? (
+                <img
+                  src={produto.imagem_url}
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                  alt={produto.nome}
+                />
+              ) : (
+                <div style={{ width: "100%", height: "100%", background: CARD2 }} />
+              )}
             </div>
           </button>
         ))}
