@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, BarChart3, History, UtensilsCrossed, TableProperties } from "lucide-react";
+import { LayoutDashboard, BarChart3, History, UtensilsCrossed, TableProperties, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { BarRole } from "@/types/database";
 import { Drawer } from "@/components/ui/drawer";
@@ -14,6 +14,7 @@ const links = [
   { href: "/dashboard/turnos", label: "Turnos", icon: History },
   { href: "/dashboard/cardapio", label: "Cardápio", icon: UtensilsCrossed },
   { href: "/dashboard/mesas", label: "Mesas", icon: TableProperties },
+  { href: "/dashboard/equipe", label: "Equipe", icon: Users },
 ];
 
 interface DashboardSidebarProps {
