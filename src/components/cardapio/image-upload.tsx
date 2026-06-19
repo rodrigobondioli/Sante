@@ -12,12 +12,13 @@ interface ImageUploadProps {
 
 export function ImageUpload({ currentUrl, autoUrl, onUpload }: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(currentUrl ?? null);
+  const [autoFailed, setAutoFailed] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const displayUrl = preview ?? autoUrl ?? null;
-  const isAuto = !preview && !!autoUrl;
+  const displayUrl = preview ?? (!autoFailed ? autoUrl : null) ?? null;
+  const isAuto = !preview && !!autoUrl && !autoFailed;
 
   async function handleFile(file: File) {
     if (!file.type.startsWith("image/")) {
@@ -73,7 +74,10 @@ export function ImageUpload({ currentUrl, autoUrl, onUpload }: ImageUploadProps)
           <img
             src={displayUrl}
             alt="Preview"
-            onError={() => { setPreview(null); onUpload(null); }}
+            onError={() => {
+              if (isAuto) { setAutoFailed(true); }
+              else { setPreview(null); onUpload(null); }
+            }}
             style={{ width: 80, height: 80, borderRadius: 8, objectFit: "cover", display: "block" }}
           />
           {isAuto && (
