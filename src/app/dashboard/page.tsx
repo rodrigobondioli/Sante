@@ -123,7 +123,7 @@ export default async function DashboardPage() {
   ];
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col" style={{ overflowX: "hidden", width: "100%" }}>
 
       {/* Hero — flat, plano, sem orbs */}
       <div
@@ -173,10 +173,10 @@ export default async function DashboardPage() {
           <div
             key={kpi.label}
             className="animate-fade-in-up"
-            style={{ background: "var(--bg-elevated)", padding: "16px 20px", animationDelay: `${i * 60}ms` }}
+            style={{ background: "var(--bg-elevated)", padding: "14px 16px", animationDelay: `${i * 60}ms`, minWidth: 0 }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <p style={overline}>{kpi.label}</p>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+              <p style={{ ...overline, fontSize: "10px" }}>{kpi.label}</p>
               {kpi.estimado && (
                 <span style={{
                   fontSize: "9px", fontWeight: 500,
@@ -188,13 +188,19 @@ export default async function DashboardPage() {
                 }}>estimado</span>
               )}
             </div>
-            <p style={{
-              fontSize: "28px", fontWeight: 600,
-              color: "var(--fg)",
-              fontFamily: "var(--font-mono)",
-              fontVariantNumeric: "tabular-nums",
-              marginTop: "8px",
-            }}>{kpi.value}</p>
+            <p
+              className="text-[20px] lg:text-[26px]"
+              style={{
+                fontWeight: 600,
+                color: "var(--fg)",
+                fontFamily: "var(--font-mono)",
+                fontVariantNumeric: "tabular-nums",
+                marginTop: "6px",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >{kpi.value}</p>
             <TrendText percent={kpi.percent} invert={kpi.invert} />
           </div>
         ))}
@@ -204,14 +210,12 @@ export default async function DashboardPage() {
       <div className="px-5 lg:px-8" style={{ paddingTop: 24, paddingBottom: 32, display: "flex", flexDirection: "column", gap: "24px" }}>
 
         {/* Section header */}
-        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-          <h2 style={{
-            fontSize: "15px", fontWeight: 500,
-            color: "var(--fg)",
-            fontFamily: "var(--font-mono)",
-          }}>Visão do turno</h2>
+        <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
+          <h2 style={{ fontSize: "15px", fontWeight: 500, color: "var(--fg)", fontFamily: "var(--font-mono)" }}>
+            Visão do turno
+          </h2>
           <p style={{ fontSize: "12px", color: "var(--fg-subtle)" }}>
-            Dados em tempo real · {dataFormatada}
+            Tempo real · {dataFormatada}
           </p>
         </div>
 
@@ -248,16 +252,15 @@ export default async function DashboardPage() {
               </p>
               <p style={{ ...overline, marginBottom: "16px" }}>por margem · turno atual</p>
             </div>
-            <div style={{ overflowX: "auto" }}>
-            <table className="w-full text-left" style={{ minWidth: 360 }}>
+            <table className="w-full text-left">
               <thead>
                 <tr style={overline}>
-                  <th className="font-medium" style={{ padding: "4px 24px" }}>#</th>
+                  <th className="font-medium" style={{ padding: "4px 16px" }}>#</th>
                   <th className="font-medium" style={{ padding: "4px 8px" }}>Drink</th>
-                  <th className="font-medium" style={{ padding: "4px 8px" }}>Tag</th>
-                  <th className="text-right font-medium" style={{ padding: "4px 8px" }}>Qtde</th>
-                  <th className="text-right font-medium" style={{ padding: "4px 8px" }}>Margem</th>
-                  <th className="text-right font-medium" style={{ padding: "4px 24px" }}>Receita</th>
+                  <th className="hidden sm:table-cell font-medium" style={{ padding: "4px 8px" }}>Tag</th>
+                  <th className="hidden sm:table-cell text-right font-medium" style={{ padding: "4px 8px" }}>Qtde</th>
+                  <th className="hidden lg:table-cell text-right font-medium" style={{ padding: "4px 8px" }}>Margem</th>
+                  <th className="text-right font-medium" style={{ padding: "4px 16px" }}>Receita</th>
                 </tr>
               </thead>
               <tbody>
@@ -267,16 +270,16 @@ export default async function DashboardPage() {
                     style={{ borderBottom: "1px solid var(--border)" }}
                     className="hover:bg-white/[0.02]"
                   >
-                    <td style={{ fontSize: "12px", color: "var(--fg-subtle)", padding: "10px 24px", fontFamily: "var(--font-mono)" }}>{i + 1}</td>
-                    <td style={{ fontSize: "13px", color: "var(--fg)", padding: "10px 8px" }}>{produto.produtoNome}</td>
-                    <td style={{ padding: "10px 8px" }}>
+                    <td style={{ fontSize: "12px", color: "var(--fg-subtle)", padding: "10px 16px", fontFamily: "var(--font-mono)" }}>{i + 1}</td>
+                    <td style={{ fontSize: "13px", color: "var(--fg)", padding: "10px 8px", maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{produto.produtoNome}</td>
+                    <td className="hidden sm:table-cell" style={{ padding: "10px 8px" }}>
                       <CategoriaBadge categoria={produto.categoria} />
                     </td>
-                    <td className="text-right" style={{ fontSize: "12px", color: "var(--fg-muted)", padding: "10px 8px", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums" }}>
-                      {produto.quantidadeVendida} un.
+                    <td className="hidden sm:table-cell text-right" style={{ fontSize: "12px", color: "var(--fg-muted)", padding: "10px 8px", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums" }}>
+                      {produto.quantidadeVendida}
                     </td>
                     <td
-                      className={cn("text-right", produto.categoria === "problema" ? "text-error" : "")}
+                      className={cn("hidden lg:table-cell text-right", produto.categoria === "problema" ? "text-error" : "")}
                       style={{
                         fontSize: "12px", padding: "10px 8px",
                         color: produto.categoria === "problema" ? undefined : "var(--fg-muted)",
@@ -285,21 +288,20 @@ export default async function DashboardPage() {
                     >
                       {produto.margemPercentual !== null ? `${percent.format(produto.margemPercentual)}%` : "—"}
                     </td>
-                    <td className="text-right" style={{ fontSize: "12px", color: "var(--fg)", padding: "10px 24px", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums" }}>
+                    <td className="text-right" style={{ fontSize: "12px", color: "var(--fg)", padding: "10px 16px", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums" }}>
                       {currency.format(produto.faturamento)}
                     </td>
                   </tr>
                 ))}
                 {produtosTop5.length === 0 && (
                   <tr>
-                    <td colSpan={6} style={{ fontSize: "13px", color: "var(--fg-muted)", padding: "16px 24px" }}>
+                    <td colSpan={6} style={{ fontSize: "13px", color: "var(--fg-muted)", padding: "16px 16px" }}>
                       Nenhuma venda neste turno ainda.
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
-            </div>
             <div className="h-3" />
           </div>
         </div>
@@ -310,8 +312,8 @@ export default async function DashboardPage() {
           {/* CMV */}
           <div style={card}>
             <p style={{ ...overline, marginBottom: "12px" }}>CMV do mês</p>
-            <p style={{
-              fontSize: "32px", fontWeight: 600,
+            <p className="text-[24px] lg:text-[32px]" style={{
+              fontWeight: 600,
               color: "var(--fg)",
               fontFamily: "var(--font-mono)",
               fontVariantNumeric: "tabular-nums",
@@ -333,8 +335,8 @@ export default async function DashboardPage() {
             return (
               <div style={card}>
                 <p style={{ ...overline, margin: 0 }}>Meta do mês</p>
-                <p style={{
-                  fontSize: "28px", fontWeight: 600,
+                <p className="text-[20px] lg:text-[26px]" style={{
+                  fontWeight: 600,
                   color: "var(--fg)",
                   fontFamily: "var(--font-mono)",
                   fontVariantNumeric: "tabular-nums",
