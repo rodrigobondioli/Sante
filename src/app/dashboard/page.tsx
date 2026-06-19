@@ -4,6 +4,7 @@ import { BarChart } from "@/components/ui/bar-chart";
 import { CategoriaBadge } from "@/components/dashboard/categoria-badge";
 import { AlertasBell } from "@/components/dashboard/alertas-bell";
 import { AiHeroInput } from "@/components/dashboard/ai-hero-input";
+import { LiveBar } from "@/components/dashboard/live-bar";
 import { cn } from "@/lib/utils";
 import {
   getCurrentBar,
@@ -13,6 +14,7 @@ import {
   getKpisComparacao,
   getProdutosVendidosTurno,
   getMetaMes,
+  getLiveStats,
 } from "@/lib/dashboard/queries";
 import { categorizarProdutos, calcularCmv } from "@/lib/dashboard/menu-engineering";
 import { getFaturamentoPorDia, getComparacaoPeriodo, getProdutosVendidosPeriodo } from "@/lib/dashboard/relatorios";
@@ -66,11 +68,12 @@ export default async function DashboardPage() {
     );
   }
 
-  const [kpis, alertas, produtosVendidos, metaMes] = await Promise.all([
+  const [kpis, alertas, produtosVendidos, metaMes, liveStats] = await Promise.all([
     getKpisTurno(turno),
     getAlertasEstoque(current.bar.id),
     getProdutosVendidosTurno(current.bar.id, turno.id),
     getMetaMes(current.bar.id),
+    getLiveStats(current.bar.id, turno.id),
   ]);
 
   const comparacao = await getKpisComparacao(
@@ -163,6 +166,16 @@ export default async function DashboardPage() {
 
         <AiHeroInput barId={current.bar.id} />
       </div>
+
+      {/* Faixa Ao Vivo */}
+      <LiveBar
+        turnoId={turno.id}
+        barId={current.bar.id}
+        faturamentoInicial={kpis.faturamento}
+        pessoasInicial={kpis.comandasAbertas}
+        mesasInicial={liveStats.mesas}
+        drinksInicial={liveStats.drinks}
+      />
 
       {/* KPI strip */}
       <div className="px-5 py-4 lg:p-0">

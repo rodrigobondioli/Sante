@@ -123,7 +123,17 @@
   .animate-fade-in-up {
     animation: fade-in-up 280ms cubic-bezier(0.23, 1, 0.32, 1) both;
   }
+
+  @keyframes live-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+  .animate-live-pulse {
+    animation: live-pulse 1.8s ease-in-out infinite;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .animate-fade-in-up { animation: none; }
+    .animate-live-pulse { animation: none; }
   }
 }

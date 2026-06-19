@@ -248,6 +248,36 @@ export async function getKpisComparacao(
   return { faturamento, comandas, ticketMedio, alertasEstoque, cmv };
 }
 
+export interface LiveStats {
+  mesas: number;
+  drinks: number;
+}
+
+export async function getLiveStats(barId: string, turnoId: string): Promise<LiveStats> {
+  const supabase = await createClient();
+
+  const { data: comandas } = await supabase
+    .from("comandas")
+    .select("mesa_id")
+    .eq("turno_id", turnoId)
+    .eq("status", "aberta")
+    .returns<{ mesa_id: string | null }[]>();
+
+  const mesas = new Set((comandas ?? []).map(c => c.mesa_id).filter(Boolean)).size;
+
+  const { data: items } = await supabase
+    .from("comanda_items")
+    .select("quantidade, comandas!inner(turno_id)")
+    .eq("bar_id", barId)
+    .eq("status", "ativo")
+    .eq("comandas.turno_id", turnoId)
+    .returns<{ quantidade: number; comandas: { turno_id: string } | null }[]>();
+
+  const drinks = (items ?? []).reduce((s, i) => s + Number(i.quantidade), 0);
+
+  return { mesas, drinks };
+}
+
 export async function getMetaMes(barId: string) {
   const supabase = await createClient()
   const agora = new Date()
