@@ -51,7 +51,7 @@ async function run() {
 
   // ── Produtos ─────────────────────────────────────────────────
   const produtos = [
-    // Drinques — já existem Caipirinha e Gin Tônica
+    // Drinques — já existe Gin Tônica; Caipirinha vira "Caipirinha de Limão" com variantes
     { nome: "Negroni",            preco: 42, custo: 13, cat: CAT_DRINQUES },
     { nome: "Aperol Spritz",      preco: 36, custo: 10, cat: CAT_DRINQUES },
     { nome: "Mojito",             preco: 32, custo: 9,  cat: CAT_DRINQUES },
@@ -60,7 +60,7 @@ async function run() {
     { nome: "Cosmopolitan",       preco: 36, custo: 10, cat: CAT_DRINQUES },
     { nome: "Daiquiri de Morango",preco: 32, custo: 9,  cat: CAT_DRINQUES },
     { nome: "Margarita",          preco: 34, custo: 10, cat: CAT_DRINQUES },
-    { nome: "Caipiroska",         preco: 30, custo: 8,  cat: CAT_DRINQUES },
+    // Caipiroska removida como produto — é variante da Caipirinha de Limão
     { nome: "Sex on the Beach",   preco: 30, custo: 8,  cat: CAT_DRINQUES },
     { nome: "Whisky Sour",        preco: 42, custo: 13, cat: CAT_DRINQUES },
     { nome: "Dry Martini",        preco: 44, custo: 13, cat: CAT_DRINQUES },
