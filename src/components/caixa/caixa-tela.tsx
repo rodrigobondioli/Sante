@@ -25,56 +25,99 @@ const METODO_LABEL: Record<PagamentoMetodo, string> = {
 
 // ─── Insights bar ────────────────────────────────────────────────────────────
 
-function InsightsBar({ insights }: { insights: CaixaInsights }) {
-  const kpis = [
-    { label: "Faturado no turno", value: currency.format(insights.totalTurno), color: "#c8ff00" },
-    { label: "Comandas pagas", value: String(insights.comandasPagas), color: "rgba(74,222,128,0.9)" },
-    { label: "Ticket médio", value: currency.format(insights.ticketMedio), color: "white" },
-  ];
+const METODO_ICON: Record<PagamentoMetodo, string> = {
+  pix: "⚡",
+  dinheiro: "💵",
+  debito: "💳",
+  credito: "💳",
+  cortesia: "🎁",
+};
 
+function InsightsBar({ insights }: { insights: CaixaInsights }) {
   return (
     <div style={{
-      background: "rgba(255,255,255,0.03)",
+      background: "#0d0d1a",
       borderBottom: "1px solid rgba(255,255,255,0.06)",
-      padding: "14px 24px",
-      display: "flex",
-      gap: 0,
-      overflowX: "auto",
+      padding: "20px 24px 16px",
     }}>
-      {kpis.map((k, i) => (
-        <div key={k.label} style={{
-          flex: 1, minWidth: 110, padding: "0 20px",
-          borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.07)" : "none",
+      {/* KPIs */}
+      <div style={{ display: "flex", gap: 12, marginBottom: insights.porMetodo.length > 0 ? 14 : 0 }}>
+        {/* Principal — Faturado */}
+        <div style={{
+          flex: 2,
+          background: "rgba(200,255,0,0.06)",
+          border: "1px solid rgba(200,255,0,0.12)",
+          borderRadius: 12,
+          padding: "14px 18px",
         }}>
-          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 3px" }}>
-            {k.label}
+          <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(200,255,0,0.50)", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 6px" }}>
+            Faturado no turno
           </p>
-          <p style={{ fontSize: 18, fontWeight: 700, color: k.color, margin: 0, fontFamily: "monospace" }}>
-            {k.value}
+          <p style={{ fontSize: 24, fontWeight: 800, color: "#c8ff00", margin: 0, letterSpacing: "-0.5px", fontVariantNumeric: "tabular-nums" }}>
+            {currency.format(insights.totalTurno)}
           </p>
         </div>
-      ))}
 
+        {/* Secundários */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{
+            flex: 1,
+            background: "rgba(74,222,128,0.06)",
+            border: "1px solid rgba(74,222,128,0.12)",
+            borderRadius: 10,
+            padding: "10px 14px",
+            display: "flex", flexDirection: "column", justifyContent: "center",
+          }}>
+            <p style={{ fontSize: 9, fontWeight: 600, color: "rgba(74,222,128,0.45)", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 3px" }}>
+              Pagas
+            </p>
+            <p style={{ fontSize: 18, fontWeight: 800, color: "rgba(74,222,128,0.9)", margin: 0 }}>
+              {insights.comandasPagas}
+            </p>
+          </div>
+          <div style={{
+            flex: 1,
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.07)",
+            borderRadius: 10,
+            padding: "10px 14px",
+            display: "flex", flexDirection: "column", justifyContent: "center",
+          }}>
+            <p style={{ fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.30)", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 3px" }}>
+              Ticket médio
+            </p>
+            <p style={{ fontSize: 16, fontWeight: 700, color: "rgba(255,255,255,0.75)", margin: 0, fontVariantNumeric: "tabular-nums" }}>
+              {currency.format(insights.ticketMedio)}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Por método — pills */}
       {insights.porMetodo.length > 0 && (
-        <div style={{ flex: 2, minWidth: 160, padding: "0 20px", borderLeft: "1px solid rgba(255,255,255,0.07)" }}>
-          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 5px" }}>
-            Por método
-          </p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "3px 12px" }}>
-            {insights.porMetodo.map(m => (
-              <span key={m.metodo} style={{ fontSize: 12, color: "rgba(255,255,255,0.55)" }}>
-                <span style={{ color: "rgba(255,255,255,0.32)" }}>{METODO_LABEL[m.metodo]}</span>{" "}
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {insights.porMetodo.map(m => (
+            <div key={m.metodo} style={{
+              display: "flex", alignItems: "center", gap: 5,
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 8,
+              padding: "5px 10px",
+            }}>
+              <span style={{ fontSize: 11 }}>{METODO_ICON[m.metodo]}</span>
+              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.40)", fontWeight: 500 }}>{METODO_LABEL[m.metodo]}</span>
+              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.75)", fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
                 {currency.format(m.total)}
               </span>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
   );
 }
 
-// ─── Mesa grid (navegação por mesas) ─────────────────────────────────────────
+// ─── Mesa chips (navegação por mesas) ────────────────────────────────────────
 
 function MesaChips({
   lista,
@@ -85,68 +128,87 @@ function MesaChips({
   filtro: string | null;
   onFiltro: (mesa: string | null) => void;
 }) {
-  const todas = [null, ...lista.map(c => c.mesa)];
-
   return (
     <div style={{
       borderBottom: "1px solid rgba(255,255,255,0.06)",
       background: "#0a0a10",
       position: "sticky", top: 56, zIndex: 9,
-      display: "grid",
-      gridTemplateColumns: `repeat(${Math.min(todas.length, 5)}, 1fr)`,
-    }}>
-      {/* Botão "Todas" */}
+      padding: "10px 20px",
+      display: "flex",
+      gap: 8,
+      overflowX: "auto",
+    }}
+    className="hide-scrollbar"
+    >
+      {/* Chip "Todas" */}
       <button
         onClick={() => onFiltro(null)}
         style={{
-          padding: "13px 8px",
-          border: "none",
-          borderRight: "1px solid rgba(255,255,255,0.06)",
-          background: filtro === null ? "#3b0764" : "transparent",
-          color: filtro === null ? "white" : "rgba(255,255,255,0.40)",
-          fontSize: 12, fontWeight: 700,
+          flexShrink: 0,
+          display: "flex", flexDirection: "column", alignItems: "center",
+          padding: "10px 16px",
+          borderRadius: 10,
+          border: filtro === null
+            ? "1px solid rgba(124,58,237,0.45)"
+            : "1px solid rgba(255,255,255,0.08)",
+          background: filtro === null ? "#3b0764" : "rgba(255,255,255,0.04)",
           cursor: "pointer",
-          transition: "background 150ms, color 150ms",
-          display: "flex", flexDirection: "column",
-          alignItems: "center", gap: 2,
+          transition: "background 150ms, border-color 150ms",
+          gap: 3,
+          minWidth: 64,
         }}
       >
-        <span>Todas</span>
         <span style={{
-          fontSize: 11, fontWeight: 500,
-          color: filtro === null ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.28)",
+          fontSize: 12, fontWeight: 700,
+          color: filtro === null ? "white" : "rgba(255,255,255,0.50)",
+        }}>
+          Todas
+        </span>
+        <span style={{
+          fontSize: 11, fontWeight: 600,
+          color: filtro === null ? "rgba(200,180,255,0.80)" : "rgba(255,255,255,0.28)",
+          background: filtro === null ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.07)",
+          borderRadius: 99, padding: "1px 7px",
+          lineHeight: 1.6,
         }}>
           {lista.length}
         </span>
       </button>
 
-      {/* Um botão por mesa */}
-      {lista.map((c, i) => {
+      {/* Um chip por mesa */}
+      {lista.map(c => {
         const ativo = filtro === c.mesa;
-        const isLast = i === lista.length - 1;
         return (
           <button
             key={c.id}
             onClick={() => onFiltro(ativo ? null : c.mesa)}
             style={{
-              padding: "13px 8px",
-              border: "none",
-              borderRight: isLast ? "none" : "1px solid rgba(255,255,255,0.06)",
-              background: ativo ? "#3b0764" : "transparent",
-              color: ativo ? "white" : "rgba(255,255,255,0.40)",
-              fontSize: 12, fontWeight: 700,
+              flexShrink: 0,
+              display: "flex", flexDirection: "column", alignItems: "flex-start",
+              padding: "10px 14px",
+              borderRadius: 10,
+              border: ativo
+                ? "1px solid rgba(124,58,237,0.45)"
+                : "1px solid rgba(255,255,255,0.08)",
+              background: ativo ? "#3b0764" : "rgba(255,255,255,0.04)",
               cursor: "pointer",
-              transition: "background 150ms, color 150ms",
-              display: "flex", flexDirection: "column",
-              alignItems: "center", gap: 2,
+              transition: "background 150ms, border-color 150ms",
+              gap: 2,
+              minWidth: 80,
+              textAlign: "left",
             }}
           >
-            <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%", padding: "0 4px" }}>
+            <span style={{
+              fontSize: 12, fontWeight: 700,
+              color: ativo ? "white" : "rgba(255,255,255,0.55)",
+              whiteSpace: "nowrap",
+            }}>
               {c.mesa}
             </span>
             <span style={{
-              fontSize: 11, fontWeight: 500, fontFamily: "monospace",
-              color: ativo ? "rgba(255,255,255,0.70)" : "rgba(255,255,255,0.28)",
+              fontSize: 11, fontWeight: 600,
+              color: ativo ? "rgba(200,180,255,0.85)" : "rgba(255,255,255,0.30)",
+              fontVariantNumeric: "tabular-nums",
             }}>
               {currency.format(c.total)}
             </span>
