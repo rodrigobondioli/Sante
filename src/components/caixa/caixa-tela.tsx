@@ -8,108 +8,68 @@ import type { PagamentoMetodo } from "@/types/database";
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
 const METODOS: { key: PagamentoMetodo; label: string; icon: string }[] = [
+  { key: "pix",      label: "Pix",      icon: "⚡" },
+  { key: "debito",   label: "Débito",   icon: "💳" },
+  { key: "credito",  label: "Crédito",  icon: "💳" },
   { key: "dinheiro", label: "Dinheiro", icon: "💵" },
-  { key: "debito", label: "Débito", icon: "💳" },
-  { key: "credito", label: "Crédito", icon: "💳" },
-  { key: "pix", label: "Pix", icon: "⚡" },
   { key: "cortesia", label: "Cortesia", icon: "🎁" },
 ];
 
 const METODO_LABEL: Record<PagamentoMetodo, string> = {
-  dinheiro: "Dinheiro",
-  debito: "Débito",
-  credito: "Crédito",
-  pix: "Pix",
-  cortesia: "Cortesia",
+  pix: "Pix", debito: "Débito", credito: "Crédito",
+  dinheiro: "Dinheiro", cortesia: "Cortesia",
 };
 
 // ─── Insights bar ────────────────────────────────────────────────────────────
 
-const METODO_ICON: Record<PagamentoMetodo, string> = {
-  pix: "⚡",
-  dinheiro: "💵",
-  debito: "💳",
-  credito: "💳",
-  cortesia: "🎁",
-};
-
 function InsightsBar({ insights }: { insights: CaixaInsights }) {
   return (
     <div style={{
-      background: "#0d0d1a",
+      padding: "20px 24px 18px",
       borderBottom: "1px solid rgba(255,255,255,0.06)",
-      padding: "20px 24px 16px",
     }}>
       {/* KPIs */}
-      <div style={{ display: "flex", gap: 12, marginBottom: insights.porMetodo.length > 0 ? 14 : 0 }}>
-        {/* Principal — Faturado */}
-        <div style={{
-          flex: 2,
-          background: "rgba(200,255,0,0.06)",
-          border: "1px solid rgba(200,255,0,0.12)",
-          borderRadius: 12,
-          padding: "14px 18px",
-        }}>
-          <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(200,255,0,0.50)", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 6px" }}>
-            Faturado no turno
+      <div style={{ display: "flex", gap: 32, alignItems: "flex-end", marginBottom: 14 }}>
+        {/* Principal */}
+        <div>
+          <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(200,255,0,0.45)", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 4px" }}>
+            Faturado
           </p>
-          <p style={{ fontSize: 24, fontWeight: 800, color: "#c8ff00", margin: 0, letterSpacing: "-0.5px", fontVariantNumeric: "tabular-nums" }}>
+          <p style={{ fontSize: 28, fontWeight: 900, color: "#c8ff00", margin: 0, letterSpacing: "-0.8px", fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
             {currency.format(insights.totalTurno)}
           </p>
         </div>
 
-        {/* Secundários */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
-          <div style={{
-            flex: 1,
-            background: "rgba(74,222,128,0.06)",
-            border: "1px solid rgba(74,222,128,0.12)",
-            borderRadius: 10,
-            padding: "10px 14px",
-            display: "flex", flexDirection: "column", justifyContent: "center",
-          }}>
-            <p style={{ fontSize: 9, fontWeight: 600, color: "rgba(74,222,128,0.45)", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 3px" }}>
+        <div style={{ display: "flex", gap: 28, paddingBottom: 2 }}>
+          <div>
+            <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.28)", textTransform: "uppercase", letterSpacing: "0.10em", margin: "0 0 3px" }}>
               Pagas
             </p>
-            <p style={{ fontSize: 18, fontWeight: 800, color: "rgba(74,222,128,0.9)", margin: 0 }}>
+            <p style={{ fontSize: 20, fontWeight: 800, color: "rgba(74,222,128,0.9)", margin: 0, lineHeight: 1 }}>
               {insights.comandasPagas}
             </p>
           </div>
-          <div style={{
-            flex: 1,
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.07)",
-            borderRadius: 10,
-            padding: "10px 14px",
-            display: "flex", flexDirection: "column", justifyContent: "center",
-          }}>
-            <p style={{ fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.30)", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 3px" }}>
+          <div>
+            <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.28)", textTransform: "uppercase", letterSpacing: "0.10em", margin: "0 0 3px" }}>
               Ticket médio
             </p>
-            <p style={{ fontSize: 16, fontWeight: 700, color: "rgba(255,255,255,0.75)", margin: 0, fontVariantNumeric: "tabular-nums" }}>
+            <p style={{ fontSize: 20, fontWeight: 800, color: "rgba(255,255,255,0.65)", margin: 0, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
               {currency.format(insights.ticketMedio)}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Por método — pills */}
+      {/* Por método — inline, sem caixas */}
       {insights.porMetodo.length > 0 && (
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
           {insights.porMetodo.map(m => (
-            <div key={m.metodo} style={{
-              display: "flex", alignItems: "center", gap: 5,
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: 8,
-              padding: "5px 10px",
-            }}>
-              <span style={{ fontSize: 11 }}>{METODO_ICON[m.metodo]}</span>
-              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.40)", fontWeight: 500 }}>{METODO_LABEL[m.metodo]}</span>
-              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.75)", fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
+            <span key={m.metodo} style={{ fontSize: 12, color: "rgba(255,255,255,0.35)" }}>
+              {METODO_LABEL[m.metodo]}
+              <span style={{ color: "rgba(255,255,255,0.65)", fontWeight: 600, marginLeft: 5, fontVariantNumeric: "tabular-nums" }}>
                 {currency.format(m.total)}
               </span>
-            </div>
+            </span>
           ))}
         </div>
       )}
@@ -117,65 +77,45 @@ function InsightsBar({ insights }: { insights: CaixaInsights }) {
   );
 }
 
-// ─── Mesa chips (navegação por mesas) ────────────────────────────────────────
+// ─── Mesa chips ───────────────────────────────────────────────────────────────
 
 function MesaChips({
-  lista,
-  filtro,
-  onFiltro,
+  lista, filtro, onFiltro,
 }: {
   lista: ComandaPendente[];
   filtro: string | null;
   onFiltro: (mesa: string | null) => void;
 }) {
   return (
-    <div style={{
-      borderBottom: "1px solid rgba(255,255,255,0.06)",
-      background: "#0a0a10",
-      position: "sticky", top: 56, zIndex: 9,
-      padding: "10px 20px",
-      display: "flex",
-      gap: 8,
-      overflowX: "auto",
-    }}
-    className="hide-scrollbar"
+    <div
+      className="hide-scrollbar"
+      style={{
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        position: "sticky", top: 56, zIndex: 9,
+        padding: "10px 20px",
+        display: "flex", gap: 6,
+        overflowX: "auto",
+        background: "#0a0a10",
+      }}
     >
-      {/* Chip "Todas" */}
       <button
         onClick={() => onFiltro(null)}
         style={{
           flexShrink: 0,
-          display: "flex", flexDirection: "column", alignItems: "center",
-          padding: "10px 16px",
-          borderRadius: 10,
-          border: filtro === null
-            ? "1px solid rgba(124,58,237,0.45)"
-            : "1px solid rgba(255,255,255,0.08)",
-          background: filtro === null ? "#3b0764" : "rgba(255,255,255,0.04)",
-          cursor: "pointer",
-          transition: "background 150ms, border-color 150ms",
-          gap: 3,
-          minWidth: 64,
+          display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+          padding: "9px 14px", borderRadius: 10, border: "none",
+          background: filtro === null ? "rgba(109,40,217,0.35)" : "rgba(255,255,255,0.05)",
+          cursor: "pointer", transition: "background 150ms", minWidth: 56,
         }}
       >
-        <span style={{
-          fontSize: 12, fontWeight: 700,
-          color: filtro === null ? "white" : "rgba(255,255,255,0.50)",
-        }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: filtro === null ? "white" : "rgba(255,255,255,0.45)" }}>
           Todas
         </span>
-        <span style={{
-          fontSize: 11, fontWeight: 600,
-          color: filtro === null ? "rgba(200,180,255,0.80)" : "rgba(255,255,255,0.28)",
-          background: filtro === null ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.07)",
-          borderRadius: 99, padding: "1px 7px",
-          lineHeight: 1.6,
-        }}>
+        <span style={{ fontSize: 11, fontWeight: 600, color: filtro === null ? "rgba(200,180,255,0.75)" : "rgba(255,255,255,0.25)" }}>
           {lista.length}
         </span>
       </button>
 
-      {/* Um chip por mesa */}
       {lista.map(c => {
         const ativo = filtro === c.mesa;
         return (
@@ -184,32 +124,16 @@ function MesaChips({
             onClick={() => onFiltro(ativo ? null : c.mesa)}
             style={{
               flexShrink: 0,
-              display: "flex", flexDirection: "column", alignItems: "flex-start",
-              padding: "10px 14px",
-              borderRadius: 10,
-              border: ativo
-                ? "1px solid rgba(124,58,237,0.45)"
-                : "1px solid rgba(255,255,255,0.08)",
-              background: ativo ? "#3b0764" : "rgba(255,255,255,0.04)",
-              cursor: "pointer",
-              transition: "background 150ms, border-color 150ms",
-              gap: 2,
-              minWidth: 80,
-              textAlign: "left",
+              display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 2,
+              padding: "9px 14px", borderRadius: 10, border: "none",
+              background: ativo ? "rgba(109,40,217,0.35)" : "rgba(255,255,255,0.05)",
+              cursor: "pointer", transition: "background 150ms", minWidth: 72, textAlign: "left",
             }}
           >
-            <span style={{
-              fontSize: 12, fontWeight: 700,
-              color: ativo ? "white" : "rgba(255,255,255,0.55)",
-              whiteSpace: "nowrap",
-            }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: ativo ? "white" : "rgba(255,255,255,0.50)", whiteSpace: "nowrap" }}>
               {c.mesa}
             </span>
-            <span style={{
-              fontSize: 11, fontWeight: 600,
-              color: ativo ? "rgba(200,180,255,0.85)" : "rgba(255,255,255,0.30)",
-              fontVariantNumeric: "tabular-nums",
-            }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: ativo ? "rgba(200,180,255,0.80)" : "rgba(255,255,255,0.28)", fontVariantNumeric: "tabular-nums" }}>
               {currency.format(c.total)}
             </span>
           </button>
@@ -224,9 +148,7 @@ function MesaChips({
 const MOTIVOS_RAPIDOS = ["VIP / cliente especial", "Erro do preparo", "Aniversariante", "Parceiro / influencer", "Brinde da casa"];
 
 function CortesiaModal({
-  comanda,
-  onConfirm,
-  onClose,
+  comanda, onConfirm, onClose,
 }: {
   comanda: ComandaPendente;
   onConfirm: (motivo: string) => void;
@@ -237,53 +159,28 @@ function CortesiaModal({
 
   return (
     <>
-      {/* Overlay */}
-      <div
-        onClick={onClose}
-        style={{
-          position: "fixed", inset: 0,
-          background: "rgba(0,0,0,0.72)",
-          backdropFilter: "blur(4px)",
-          zIndex: 50,
-        }}
-      />
-      {/* Painel */}
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.72)", backdropFilter: "blur(4px)", zIndex: 50 }} />
       <div style={{
         position: "fixed", bottom: 0, left: 0, right: 0,
-        background: "#14141f",
-        borderTop: "1px solid rgba(255,255,255,0.10)",
-        borderRadius: "20px 20px 0 0",
-        padding: "24px 24px 40px",
-        zIndex: 51,
+        background: "#111118", borderTop: "1px solid rgba(255,255,255,0.08)",
+        borderRadius: "20px 20px 0 0", padding: "24px 24px 40px", zIndex: 51,
       }}>
-        {/* Handle */}
-        <div style={{
-          width: 36, height: 4, borderRadius: 99,
-          background: "rgba(255,255,255,0.15)",
-          margin: "0 auto 20px",
-        }} />
-
-        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>
+        <div style={{ width: 36, height: 4, borderRadius: 99, background: "rgba(255,255,255,0.12)", margin: "0 auto 20px" }} />
+        <p style={{ fontSize: 10, color: "rgba(255,255,255,0.30)", textTransform: "uppercase", letterSpacing: "0.10em", margin: "0 0 5px" }}>
           Cortesia — {comanda.mesa}
         </p>
-        <h2 style={{ fontSize: 18, fontWeight: 700, color: "white", margin: "0 0 20px" }}>
-          Qual o motivo?
-        </h2>
+        <h2 style={{ fontSize: 18, fontWeight: 700, color: "white", margin: "0 0 20px" }}>Qual o motivo?</h2>
 
-        {/* Atalhos rápidos */}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
           {MOTIVOS_RAPIDOS.map(m => (
             <button
               key={m}
               onClick={() => setMotivo(m)}
               style={{
-                padding: "7px 14px", borderRadius: 8,
-                border: "1px solid",
-                borderColor: motivo === m ? "rgba(255,165,0,0.50)" : "rgba(255,255,255,0.10)",
-                background: motivo === m ? "rgba(255,165,0,0.12)" : "rgba(255,255,255,0.04)",
-                color: motivo === m ? "rgba(255,165,0,0.90)" : "rgba(255,255,255,0.50)",
-                fontSize: 13, fontWeight: 500,
-                cursor: "pointer", transition: "all 150ms",
+                padding: "7px 14px", borderRadius: 8, border: "none",
+                background: motivo === m ? "rgba(255,165,0,0.15)" : "rgba(255,255,255,0.06)",
+                color: motivo === m ? "rgba(255,165,0,0.90)" : "rgba(255,255,255,0.45)",
+                fontSize: 13, fontWeight: 500, cursor: "pointer", transition: "all 150ms",
               }}
             >
               {m}
@@ -291,47 +188,31 @@ function CortesiaModal({
           ))}
         </div>
 
-        {/* Campo livre */}
         <input
           value={motivo}
           onChange={e => setMotivo(e.target.value)}
           placeholder="Ou escreva o motivo..."
           style={{
             width: "100%", boxSizing: "border-box",
-            background: "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(255,255,255,0.10)",
+            background: "rgba(255,255,255,0.05)", border: "none",
             borderRadius: 10, padding: "13px 16px",
-            fontSize: 14, color: "white",
-            outline: "none", marginBottom: 16,
+            fontSize: 14, color: "white", outline: "none", marginBottom: 16,
             colorScheme: "dark",
           }}
         />
 
         <div style={{ display: "flex", gap: 10 }}>
-          <button
-            onClick={onClose}
-            style={{
-              flex: 1, padding: "14px",
-              background: "rgba(255,255,255,0.06)",
-              border: "none", borderRadius: 10,
-              color: "rgba(255,255,255,0.50)",
-              fontSize: 14, fontWeight: 600, cursor: "pointer",
-            }}
-          >
+          <button onClick={onClose} style={{ flex: 1, padding: "14px", background: "rgba(255,255,255,0.06)", border: "none", borderRadius: 10, color: "rgba(255,255,255,0.45)", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
             Cancelar
           </button>
           <button
             onClick={() => valid && onConfirm(motivo.trim())}
             disabled={!valid}
             style={{
-              flex: 2, padding: "14px",
-              background: valid ? "rgba(255,165,0,0.20)" : "rgba(255,255,255,0.05)",
-              border: `1px solid ${valid ? "rgba(255,165,0,0.35)" : "transparent"}`,
-              borderRadius: 10,
-              color: valid ? "rgba(255,165,0,0.95)" : "rgba(255,255,255,0.20)",
-              fontSize: 14, fontWeight: 700,
-              cursor: valid ? "pointer" : "default",
-              transition: "all 150ms",
+              flex: 2, padding: "14px", border: "none", borderRadius: 10,
+              background: valid ? "rgba(255,165,0,0.18)" : "rgba(255,255,255,0.04)",
+              color: valid ? "rgba(255,165,0,0.95)" : "rgba(255,255,255,0.18)",
+              fontSize: 14, fontWeight: 700, cursor: valid ? "pointer" : "default", transition: "all 150ms",
             }}
           >
             🎁 Confirmar cortesia
@@ -342,15 +223,9 @@ function CortesiaModal({
   );
 }
 
-// ─── Card de comanda ─────────────────────────────────────────────────────────
+// ─── Card de comanda ──────────────────────────────────────────────────────────
 
-function ComandaCard({
-  comanda,
-  onPago,
-}: {
-  comanda: ComandaPendente;
-  onPago: (metodo: PagamentoMetodo) => void;
-}) {
+function ComandaCard({ comanda, onPago }: { comanda: ComandaPendente; onPago: (metodo: PagamentoMetodo) => void }) {
   const [isPending, startTransition] = useTransition();
   const [pago, setPago] = useState(false);
   const [metodoPago, setMetodoPago] = useState<string | null>(null);
@@ -372,26 +247,21 @@ function ComandaCard({
   };
 
   const minutos = Math.floor((Date.now() - new Date(comanda.aberta_em).getTime()) / 60000);
-  const tempo = minutos < 60
-    ? `${minutos}min`
-    : `${Math.floor(minutos / 60)}h${minutos % 60 > 0 ? ` ${minutos % 60}min` : ""}`;
+  const tempo = minutos < 60 ? `${minutos}min` : `${Math.floor(minutos / 60)}h${minutos % 60 > 0 ? ` ${minutos % 60}min` : ""}`;
 
   if (pago) {
     return (
       <div style={{
-        background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.15)",
-        borderRadius: 12, padding: "16px 20px",
+        background: "rgba(74,222,128,0.05)",
+        border: "1px solid rgba(74,222,128,0.12)",
+        borderRadius: 14, padding: "18px 20px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
         <div>
-          <p style={{ fontSize: 15, fontWeight: 700, color: "rgba(74,222,128,0.9)", margin: 0 }}>
-            ✓ {comanda.mesa}
-          </p>
-          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.35)", margin: "3px 0 0" }}>
-            Pago via {metodoPago}
-          </p>
+          <p style={{ fontSize: 15, fontWeight: 700, color: "rgba(74,222,128,0.9)", margin: 0 }}>✓ {comanda.mesa}</p>
+          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.30)", margin: "3px 0 0" }}>Pago via {metodoPago}</p>
         </div>
-        <p style={{ fontSize: 20, fontWeight: 700, color: "rgba(255,255,255,0.40)", margin: 0, fontFamily: "monospace" }}>
+        <p style={{ fontSize: 18, fontWeight: 700, color: "rgba(255,255,255,0.35)", margin: 0, fontVariantNumeric: "tabular-nums" }}>
           {currency.format(comanda.total)}
         </p>
       </div>
@@ -399,34 +269,28 @@ function ComandaCard({
   }
 
   return (
-    <div style={{
-      background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
-      borderRadius: 12, overflow: "hidden",
-    }}>
-      {/* Header */}
-      <div style={{
-        padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-      }}>
+    <div style={{ border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, overflow: "hidden" }}>
+      {/* Header do card */}
+      <div style={{ padding: "16px 20px 14px", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
         <div>
-          <p style={{ fontSize: 16, fontWeight: 700, color: "white", margin: 0 }}>{comanda.mesa}</p>
-          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.35)", margin: "3px 0 0" }}>Aberta há {tempo}</p>
+          <p style={{ fontSize: 17, fontWeight: 800, color: "white", margin: 0, letterSpacing: "-0.3px" }}>{comanda.mesa}</p>
+          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.30)", margin: "3px 0 0" }}>aberta há {tempo}</p>
         </div>
-        <p style={{ fontSize: 22, fontWeight: 700, color: "white", margin: 0, fontFamily: "monospace" }}>
+        <p style={{ fontSize: 24, fontWeight: 900, color: "white", margin: 0, letterSpacing: "-0.5px", fontVariantNumeric: "tabular-nums" }}>
           {currency.format(comanda.total)}
         </p>
       </div>
 
       {/* Itens */}
       {comanda.itens.length > 0 && (
-        <div style={{ padding: "10px 20px", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+        <div style={{ padding: "0 20px 14px" }}>
           {comanda.itens.map((item, i) => (
-            <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0" }}>
-              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.65)", margin: 0 }}>
-                <span style={{ color: "rgba(255,255,255,0.35)", marginRight: 8 }}>{item.quantidade}×</span>
+            <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "3px 0" }}>
+              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", margin: 0 }}>
+                <span style={{ color: "rgba(255,255,255,0.22)", marginRight: 7 }}>{item.quantidade}×</span>
                 {item.nome}
               </p>
-              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", margin: 0, fontFamily: "monospace" }}>
+              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0, fontVariantNumeric: "tabular-nums" }}>
                 {currency.format(item.preco_total)}
               </p>
             </div>
@@ -435,43 +299,46 @@ function ComandaCard({
       )}
 
       {/* Pagamento */}
-      <div style={{ padding: "14px 20px" }}>
-        {error && (
-          <p style={{ fontSize: 12, color: "rgba(239,68,68,0.9)", margin: "0 0 10px" }}>{error}</p>
-        )}
-        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.28)", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>
-          Forma de pagamento
-        </p>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+      <div style={{ padding: "14px 20px 18px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+        {error && <p style={{ fontSize: 12, color: "rgba(239,68,68,0.85)", margin: "0 0 10px" }}>{error}</p>}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 8,
+        }}>
           {METODOS.map(m => (
             <button
               key={m.key}
               onClick={() => m.key === "cortesia" ? setShowCortesia(true) : pagar(m.key)}
               disabled={isPending}
               style={{
-                display: "flex", alignItems: "center", gap: 6,
-                padding: "9px 16px", borderRadius: 8,
-                background: m.key === "cortesia" ? "rgba(255,165,0,0.08)" : "rgba(76,29,149,0.22)",
-                border: m.key === "cortesia" ? "1px solid rgba(255,165,0,0.18)" : "1px solid rgba(109,40,217,0.28)",
-                color: m.key === "cortesia" ? "rgba(255,165,0,0.85)" : "rgba(196,167,255,0.85)",
-                fontSize: 13, fontWeight: 600,
+                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                gap: 5, padding: "14px 8px", borderRadius: 10, border: "none",
+                background: m.key === "cortesia"
+                  ? "rgba(255,165,0,0.10)"
+                  : "rgba(255,255,255,0.06)",
                 cursor: isPending ? "not-allowed" : "pointer",
-                opacity: isPending ? 0.55 : 1,
-                transition: "all 150ms",
+                opacity: isPending ? 0.5 : 1,
+                transition: "background 150ms",
               }}
             >
-              <span>{m.icon}</span>
-              {m.label}
+              <span style={{ fontSize: 20 }}>{m.icon}</span>
+              <span style={{
+                fontSize: 11, fontWeight: 700,
+                color: m.key === "cortesia" ? "rgba(255,165,0,0.80)" : "rgba(255,255,255,0.65)",
+                letterSpacing: "0.01em",
+              }}>
+                {m.label}
+              </span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Modal de cortesia */}
       {showCortesia && (
         <CortesiaModal
           comanda={comanda}
-          onConfirm={(motivo) => { setShowCortesia(false); pagar("cortesia", motivo); }}
+          onConfirm={motivo => { setShowCortesia(false); pagar("cortesia", motivo); }}
           onClose={() => setShowCortesia(false)}
         />
       )}
@@ -481,11 +348,7 @@ function ComandaCard({
 
 // ─── Shell principal ──────────────────────────────────────────────────────────
 
-export function CaixaTela({
-  comandas,
-  insights,
-  barNome,
-}: {
+export function CaixaTela({ comandas, insights, barNome }: {
   comandas: ComandaPendente[];
   insights: CaixaInsights;
   barNome: string;
@@ -494,34 +357,25 @@ export function CaixaTela({
   const [insightsAtual, setInsightsAtual] = useState(insights);
   const [filtro, setFiltro] = useState<string | null>(null);
 
-  const listaFiltrada = filtro
-    ? listaAtual.filter(c => c.mesa === filtro)
-    : listaAtual;
+  const listaFiltrada = filtro ? listaAtual.filter(c => c.mesa === filtro) : listaAtual;
 
   const onPago = (comanda: ComandaPendente, metodo: PagamentoMetodo) => {
-    // Atualiza insights otimisticamente
     setInsightsAtual(prev => {
       const novoTotal = prev.totalTurno + comanda.total;
       const novaQtd = prev.comandasPagas + 1;
       const metodosAtuais = [...prev.porMetodo];
       const idx = metodosAtuais.findIndex(m => m.metodo === metodo);
       if (idx >= 0) {
-        metodosAtuais[idx] = {
-          ...metodosAtuais[idx],
-          total: metodosAtuais[idx].total + comanda.total,
-          quantidade: metodosAtuais[idx].quantidade + 1,
-        };
+        metodosAtuais[idx] = { ...metodosAtuais[idx], total: metodosAtuais[idx].total + comanda.total, quantidade: metodosAtuais[idx].quantidade + 1 };
       } else {
         metodosAtuais.push({ metodo, total: comanda.total, quantidade: 1 });
       }
       return { totalTurno: novoTotal, comandasPagas: novaQtd, ticketMedio: novoTotal / novaQtd, porMetodo: metodosAtuais };
     });
 
-    // Remove da lista após 1.5s (dá tempo de ver o "✓ Pago")
     setTimeout(() => {
       setListaAtual(prev => {
         const nova = prev.filter(c => c.id !== comanda.id);
-        // Se era a única da mesa filtrada, limpa filtro
         if (filtro === comanda.mesa && nova.filter(c => c.mesa === comanda.mesa).length === 0) {
           setFiltro(null);
         }
@@ -537,67 +391,44 @@ export function CaixaTela({
         padding: "14px 24px",
         borderBottom: "1px solid rgba(255,255,255,0.06)",
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        background: "#0a0a10",
         position: "sticky", top: 0, zIndex: 10,
-        height: 56,
-        boxSizing: "border-box",
+        background: "#0a0a10",
+        height: 56, boxSizing: "border-box",
       }}>
         <div>
-          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.32)", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>
-            {barNome}
-          </p>
+          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.28)", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>{barNome}</p>
           <h1 style={{ fontSize: 17, fontWeight: 700, color: "white", margin: "2px 0 0" }}>Caixa</h1>
         </div>
         {listaAtual.length === 0 && (
-          <span style={{
-            fontSize: 13, fontWeight: 600,
-            color: "rgba(74,222,128,0.9)",
-          }}>
-            Caixa limpo ✓
-          </span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: "rgba(74,222,128,0.85)" }}>Caixa limpo ✓</span>
         )}
       </div>
 
-      {/* Insights */}
       <InsightsBar insights={insightsAtual} />
 
-      {/* Chips de mesa — só aparece se tiver mais de 1 comanda */}
       {listaAtual.length > 1 && (
         <MesaChips lista={listaAtual} filtro={filtro} onFiltro={setFiltro} />
       )}
 
-      {/* Comandas */}
-      <div style={{ flex: 1, padding: "16px 24px", display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ flex: 1, padding: "16px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
         {listaAtual.length === 0 ? (
-          <div style={{
-            display: "flex", flexDirection: "column",
-            alignItems: "center", justifyContent: "center",
-            padding: "80px 0", gap: 8,
-          }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "80px 0", gap: 8 }}>
             <p style={{ fontSize: 36, margin: 0 }}>✓</p>
             <p style={{ fontSize: 15, fontWeight: 600, color: "white", margin: 0 }}>Nada pendente</p>
-            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0 }}>
-              Todas as comandas foram pagas.
-            </p>
+            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.30)", margin: 0 }}>Todas as comandas foram pagas.</p>
           </div>
         ) : listaFiltrada.length === 0 ? (
           <div style={{ padding: "48px 0", textAlign: "center" }}>
-            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0 }}>
-              Nenhuma comanda para {filtro}.
-            </p>
+            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.30)", margin: 0 }}>Nenhuma comanda para {filtro}.</p>
           </div>
         ) : (
           listaFiltrada.map(c => (
-            <ComandaCard
-              key={c.id}
-              comanda={c}
-              onPago={(metodo) => onPago(c, metodo)}
-            />
+            <ComandaCard key={c.id} comanda={c} onPago={metodo => onPago(c, metodo)} />
           ))
         )}
       </div>
 
-      <style>{`.hide-scrollbar::-webkit-scrollbar { display: none; }`}</style>
+      <style>{`.hide-scrollbar::-webkit-scrollbar{display:none}`}</style>
     </div>
   );
 }
