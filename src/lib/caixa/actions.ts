@@ -41,7 +41,7 @@ export async function registrarPagamento(
     status: "confirmado",
     processado_por: current.userId,
     processado_em: new Date().toISOString(),
-    ...(motivo ? { observacoes: motivo } : {}),
+    referencia: motivo ?? null,
   });
 
   // Marca comanda como paga
@@ -57,6 +57,7 @@ export async function registrarPagamento(
     })
     .eq("id", turno.id);
 
+  revalidatePath("/caixa");
   revalidatePath("/dashboard/caixa");
   revalidatePath("/dashboard");
 }

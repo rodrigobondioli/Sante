@@ -42,13 +42,14 @@ export async function getComandasPendentes(barId: string, turnoId: string): Prom
   // Busca itens de todas as comandas de uma vez
   const ids = comandas.map(c => c.id);
   const { data: itensRaw } = await semTipo(supabase.from("comanda_items"))
-    .select("comanda_id, quantidade, preco_total, produtos(nome)")
+    .select("comanda_id, quantidade, preco_total, variante_nome, produtos(nome)")
     .in("comanda_id", ids)
     .eq("status", "ativo") as {
       data: {
         comanda_id: string;
         quantidade: number;
         preco_total: number;
+        variante_nome: string | null;
         produtos: { nome: string } | null;
       }[] | null;
     };
@@ -56,8 +57,10 @@ export async function getComandasPendentes(barId: string, turnoId: string): Prom
   const itensPorComanda = new Map<string, ComandaPendente["itens"]>();
   for (const item of itensRaw ?? []) {
     if (!item.produtos) continue;
+    const nomeBase = item.produtos.nome;
+    const nome = item.variante_nome ? `${nomeBase} — ${item.variante_nome}` : nomeBase;
     const lista = itensPorComanda.get(item.comanda_id) ?? [];
-    lista.push({ nome: item.produtos.nome, quantidade: item.quantidade, preco_total: item.preco_total });
+    lista.push({ nome, quantidade: item.quantidade, preco_total: item.preco_total });
     itensPorComanda.set(item.comanda_id, lista);
   }
 

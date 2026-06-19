@@ -157,7 +157,7 @@ export async function getItensComanda(comandaId: string): Promise<ItemComanda[]>
   const supabase = await createClient();
   const { data } = await supabase
     .from("comanda_items")
-    .select("id, produto_id, preco_unitario, preco_total, produtos(nome)")
+    .select("id, produto_id, preco_unitario, preco_total, variante_nome, produtos(nome)")
     .eq("comanda_id", comandaId)
     .eq("status", "ativo")
     .order("adicionado_em", { ascending: true })
@@ -166,17 +166,21 @@ export async function getItensComanda(comandaId: string): Promise<ItemComanda[]>
       produto_id: string;
       preco_unitario: number;
       preco_total: number;
+      variante_nome: string | null;
       produtos: { nome: string } | null;
     }[]>();
 
-  return (data ?? []).map((item) => ({
-    id: item.id,
-    produtoId: item.produto_id,
-    produtoNome: item.produtos?.nome ?? "Produto",
-    quantidade: 1,
-    precoUnitario: item.preco_unitario,
-    precoTotal: item.preco_total,
-  }));
+  return (data ?? []).map((item) => {
+    const nomeBase = item.produtos?.nome ?? "Produto";
+    return {
+      id: item.id,
+      produtoId: item.produto_id,
+      produtoNome: item.variante_nome ? `${nomeBase} — ${item.variante_nome}` : nomeBase,
+      quantidade: 1,
+      precoUnitario: item.preco_unitario,
+      precoTotal: item.preco_total,
+    };
+  });
 }
 
 export interface ItemAgrupado {
