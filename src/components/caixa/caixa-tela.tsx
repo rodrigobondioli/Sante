@@ -29,9 +29,9 @@ function InsightsBar({ insights }: { insights: CaixaInsights }) {
       {/* 3 stats — mesma escala, sem caixas */}
       <div style={{ display: "flex", gap: 0 }}>
         {[
-          { label: "Faturado", value: currency.format(insights.totalTurno),  color: "#c8ff00" },
-          { label: "Pagas",    value: String(insights.comandasPagas),         color: "rgba(74,222,128,0.90)" },
-          { label: "Ticket",   value: currency.format(insights.ticketMedio),  color: "rgba(255,255,255,0.55)" },
+          { label: "Faturado", value: currency.format(insights.totalTurno),  color: "#ffffff" },
+          { label: "Pagas",    value: String(insights.comandasPagas),         color: "rgba(255,255,255,0.85)" },
+          { label: "Ticket",   value: currency.format(insights.ticketMedio),  color: "rgba(255,255,255,0.50)" },
         ].map((s, i) => (
           <div key={s.label} style={{
             flex: i === 0 ? 2 : 1,
@@ -164,8 +164,8 @@ function CortesiaModal({
               onClick={() => setMotivo(m)}
               style={{
                 padding: "7px 14px", borderRadius: 8, border: "none",
-                background: motivo === m ? "rgba(255,165,0,0.15)" : "rgba(255,255,255,0.06)",
-                color: motivo === m ? "rgba(255,165,0,0.90)" : "rgba(255,255,255,0.45)",
+                background: motivo === m ? "rgba(109,40,217,0.20)" : "rgba(255,255,255,0.06)",
+                color: motivo === m ? "rgba(167,139,250,0.90)" : "rgba(255,255,255,0.45)",
                 fontSize: 13, fontWeight: 500, cursor: "pointer", transition: "all 150ms",
               }}
             >
@@ -196,8 +196,8 @@ function CortesiaModal({
             disabled={!valid}
             style={{
               flex: 2, padding: "14px", border: "none", borderRadius: 10,
-              background: valid ? "rgba(255,165,0,0.18)" : "rgba(255,255,255,0.04)",
-              color: valid ? "rgba(255,165,0,0.95)" : "rgba(255,255,255,0.18)",
+              background: valid ? "rgba(109,40,217,0.25)" : "rgba(255,255,255,0.04)",
+              color: valid ? "rgba(167,139,250,0.95)" : "rgba(255,255,255,0.18)",
               fontSize: 14, fontWeight: 700, cursor: valid ? "pointer" : "default", transition: "all 150ms",
             }}
           >
@@ -255,7 +255,7 @@ function ComandaCard({ comanda, onPago }: { comanda: ComandaPendente; onPago: (m
   }
 
   return (
-    <div style={{ border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, overflow: "hidden" }}>
+    <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 14, overflow: "hidden" }}>
       {/* Header do card */}
       <div style={{ padding: "16px 20px 14px", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
         <div>
@@ -326,7 +326,7 @@ function ComandaCard({ comanda, onPago }: { comanda: ComandaPendente; onPago: (m
                 style={{
                   flex: 1, height: 52,
                   display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3,
-                  background: isCortesia ? "rgba(255,165,0,0.09)" : "rgba(255,255,255,0.05)",
+                  background: isCortesia ? "rgba(109,40,217,0.15)" : "rgba(255,255,255,0.05)",
                   borderRadius: 10, border: "none",
                   cursor: isPending ? "not-allowed" : "pointer",
                   opacity: isPending ? 0.5 : 1,
@@ -334,7 +334,7 @@ function ComandaCard({ comanda, onPago }: { comanda: ComandaPendente; onPago: (m
                 }}
               >
                 <span style={{ fontSize: 15 }}>{m.icon}</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: isCortesia ? "rgba(255,165,0,0.75)" : "rgba(255,255,255,0.50)" }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: isCortesia ? "rgba(167,139,250,0.85)" : "rgba(255,255,255,0.50)" }}>
                   {m.label}
                 </span>
               </button>
