@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, BarChart3, History, UtensilsCrossed,
-  TableProperties, Users, MonitorSmartphone, Wallet,
+  TableProperties, Users, MonitorSmartphone, Wallet, Package,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { BarRole } from "@/types/database";
@@ -17,6 +17,7 @@ const links = [
   { href: "/dashboard/turnos", label: "Turnos", icon: History },
   { href: "/dashboard/cardapio", label: "Cardápio", icon: UtensilsCrossed },
   { href: "/dashboard/mesas", label: "Mesas", icon: TableProperties },
+  { href: "/dashboard/estoque", label: "Estoque", icon: Package },
   { href: "/dashboard/equipe", label: "Equipe", icon: Users },
   { href: "/caixa", label: "Caixa", icon: Wallet },
 ];
