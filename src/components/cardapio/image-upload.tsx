@@ -7,10 +7,11 @@ import { createClient } from "@/lib/supabase/client";
 interface ImageUploadProps {
   currentUrl?: string | null;
   autoUrl?: string | null;    // from drink library
+  bucket?: string;            // default: "product-images"
   onUpload: (url: string | null) => void;
 }
 
-export function ImageUpload({ currentUrl, autoUrl, onUpload }: ImageUploadProps) {
+export function ImageUpload({ currentUrl, autoUrl, bucket = "product-images", onUpload }: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(currentUrl ?? null);
   const [autoFailed, setAutoFailed] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -38,7 +39,7 @@ export function ImageUpload({ currentUrl, autoUrl, onUpload }: ImageUploadProps)
     const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
     const { error: upErr } = await supabase.storage
-      .from("product-images")
+      .from(bucket)
       .upload(path, file, { upsert: false });
 
     if (upErr) {
@@ -48,7 +49,7 @@ export function ImageUpload({ currentUrl, autoUrl, onUpload }: ImageUploadProps)
       return;
     }
 
-    const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
     setPreview(data.publicUrl);
     onUpload(data.publicUrl);
     setUploading(false);

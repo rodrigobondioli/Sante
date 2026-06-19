@@ -1,4 +1,4 @@
-import { Settings } from "lucide-react";
+import { SettingsButton } from "@/components/dashboard/settings-button";
 import { TrendText } from "@/components/ui/trend-text";
 import { BarChart } from "@/components/ui/bar-chart";
 import { CategoriaBadge } from "@/components/dashboard/categoria-badge";
@@ -130,23 +130,14 @@ export default async function DashboardPage() {
         {/* Controls — top-right */}
         <div style={{ position: "absolute", top: "16px", right: "24px", display: "flex", alignItems: "center", gap: "10px" }}>
           <AlertasBell alertas={alertas} />
-          <button
-            type="button"
-            title="Configurações"
-            style={{
-              display: "flex", alignItems: "center", justifyContent: "center",
-              width: "32px", height: "32px",
-              borderRadius: "4px",
-              border: "1px solid var(--border)",
-              color: "var(--fg-muted)",
-              background: "transparent",
-              cursor: "pointer",
-              transition: "border-color 150ms, color 150ms",
-            }}
-            className="hover:border-[var(--border-strong)] hover:!text-[var(--fg)]"
-          >
-            <Settings className="h-4 w-4" strokeWidth={1.75} />
-          </button>
+          <SettingsButton
+            bar={current.bar}
+            barId={current.bar.id}
+            userId={current.userId}
+            userNome={current.userNome}
+            userEmail={current.userEmail}
+            userAvatarUrl={current.userAvatarUrl}
+          />
           <div style={{
             width: "32px", height: "32px", borderRadius: "50%",
             background: "var(--accent)",
