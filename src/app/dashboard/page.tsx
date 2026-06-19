@@ -165,8 +165,9 @@ export default async function DashboardPage() {
       </div>
 
       {/* KPI strip */}
+      <div className="px-5 py-4 lg:p-0">
       <div
-        className="grid grid-cols-1 lg:grid-cols-4 mx-5 my-4 lg:mx-0 lg:my-0 overflow-hidden rounded lg:rounded-none"
+        className="grid grid-cols-1 lg:grid-cols-4 overflow-hidden rounded-[4px] lg:rounded-none"
         style={{ gap: "1px", background: "var(--border)", border: "1px solid var(--border)" }}
       >
         {kpiCards.map((kpi, i) => (
@@ -207,6 +208,7 @@ export default async function DashboardPage() {
             </div>
           </div>
         ))}
+      </div>
       </div>
 
       {/* Content */}
