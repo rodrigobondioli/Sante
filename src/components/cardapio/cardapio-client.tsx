@@ -571,7 +571,27 @@ export function CardapioClient({ cardapio }: { cardapio: CategoriaComProdutosAdm
   const selectedGrupo = cardapio.find(g => g.categoria.id === selectedId);
 
   return (
-    <div style={{ display: "flex", gap: 0, height: "100%", overflow: "hidden" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
+
+      {/* Page header */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 24, flexShrink: 0 }}>
+        <div>
+          <p style={{ fontSize: 11, fontWeight: 500, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 6px" }}>Admin</p>
+          <h1 style={{ fontSize: 22, fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", letterSpacing: "-0.01em", margin: 0 }}>Cardápio</h1>
+          <p style={{ fontSize: 13, color: "var(--fg-muted)", margin: "4px 0 0" }}>Gerencie categorias e produtos do seu bar.</p>
+        </div>
+        {selectedGrupo && (
+          <button
+            onClick={() => setAddingProduto(p => !p)}
+            style={{ ...btnPrimary, display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", flexShrink: 0 }}
+          >
+            <Plus style={{ width: 14, height: 14 }} />
+            Novo produto
+          </button>
+        )}
+      </div>
+
+    <div style={{ display: "flex", gap: 0, flex: 1, minHeight: 0, overflow: "hidden" }}>
 
       {/* ── Left: category list ── */}
       <div style={{
@@ -638,17 +658,10 @@ export function CardapioClient({ cardapio }: { cardapio: CategoriaComProdutosAdm
         ) : (
           <>
             {/* Header */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-              <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--fg)", margin: 0, fontFamily: "var(--font-mono)" }}>
+            <div style={{ marginBottom: 20 }}>
+              <h2 style={{ fontSize: 14, fontWeight: 500, color: "var(--fg-muted)", margin: 0, fontFamily: "var(--font-mono)" }}>
                 {selectedGrupo.categoria.nome}
               </h2>
-              <button
-                onClick={() => setAddingProduto(p => !p)}
-                style={{ ...btnPrimary, display: "flex", alignItems: "center", gap: 6, padding: "7px 14px" }}
-              >
-                <Plus style={{ width: 14, height: 14 }} />
-                Novo produto
-              </button>
             </div>
 
             {/* New product form */}
@@ -672,6 +685,7 @@ export function CardapioClient({ cardapio }: { cardapio: CategoriaComProdutosAdm
           </>
         )}
       </div>
+    </div>
     </div>
   );
 }
