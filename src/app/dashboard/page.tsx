@@ -244,17 +244,15 @@ export default async function DashboardPage() {
             style={{ ...card, animationDelay: "300ms" }}
           >
             <p style={{ ...overline, marginBottom: "16px" }}>Receita — últimos 7 dias</p>
-            <div className="flex items-baseline gap-3">
-              <p style={{
-                fontSize: "28px", fontWeight: 600,
-                color: "var(--fg)",
-                fontFamily: "var(--font-mono)",
-                fontVariantNumeric: "tabular-nums",
-              }}>
-                {currency.format(receitaSemana.atual)}
-              </p>
-              <TrendText percent={receitaSemana.percentual} comparativoLabel="vs semana passada" />
-            </div>
+            <p className="text-[22px] lg:text-[28px]" style={{
+              fontWeight: 600,
+              color: "var(--fg)",
+              fontFamily: "var(--font-mono)",
+              fontVariantNumeric: "tabular-nums",
+            }}>
+              {currency.format(receitaSemana.atual)}
+            </p>
+            <TrendText percent={receitaSemana.percentual} comparativoLabel="vs semana passada" />
             <div className="mt-3" style={{ maxHeight: "160px", overflow: "hidden" }}>
               <BarChart data={pontosReceita} height={160} />
             </div>
