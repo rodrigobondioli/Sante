@@ -1,5 +1,42 @@
 @import "tailwindcss";
 
+/* ─── Design tokens — novo sistema (DESIGN.md §3) ─── */
+:root, [data-theme="dark"] {
+  --bg:            #0B0B0C;
+  --bg-elevated:   #141416;
+  --bg-inset:      #08080A;
+  --fg:            #FAFAFA;
+  --fg-muted:      #9A9AA0;
+  --fg-subtle:     #65656B;
+  --border:        rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.16);
+  --accent:        #260078;
+  --accent-fg:     #FFFFFF;
+  --accent-bright: #6B4FE8;
+  --ring:          #6B4FE8;
+  /* semânticas — APENAS Bartender e Caixa */
+  --ok:        #22C55E;  --ok-bg:     rgba(34,197,94,0.12);
+  --warn:      #F59E0B;  --warn-bg:   rgba(245,158,11,0.12);
+  --danger:    #EF4444;  --danger-bg: rgba(239,68,68,0.12);
+}
+[data-theme="light"] {
+  --bg:            #FFFFFF;
+  --bg-elevated:   #FAFAFA;
+  --bg-inset:      #F4F4F5;
+  --fg:            #0B0B0C;
+  --fg-muted:      #6B6B70;
+  --fg-subtle:     #9A9AA0;
+  --border:        rgba(0,0,0,0.10);
+  --border-strong: rgba(0,0,0,0.18);
+  --accent:        #260078;
+  --accent-fg:     #FFFFFF;
+  --accent-bright: #260078;
+  --ring:          #260078;
+  --ok:        #16A34A;  --ok-bg:     rgba(22,163,74,0.10);
+  --warn:      #D97706;  --warn-bg:   rgba(217,119,6,0.10);
+  --danger:    #DC2626;  --danger-bg: rgba(220,38,38,0.10);
+}
+
 @theme {
   /* Base surfaces */
   --color-black: #000000;

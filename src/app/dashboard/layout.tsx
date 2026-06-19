@@ -17,10 +17,26 @@ export default async function DashboardLayout({
 
   if (!current) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-black px-4 text-center">
-        <p className="text-body text-white-80">Nenhum bar vinculado a esse usuário ainda.</p>
+      <div
+        className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center"
+        style={{ background: "var(--bg)" }}
+      >
+        <p style={{ fontSize: "14px", color: "var(--fg-muted)" }}>
+          Nenhum bar vinculado a esse usuário ainda.
+        </p>
         <form action={signOut}>
-          <button className="text-body-sm text-white-50 underline transition-colors duration-150 active:scale-[0.97] hover:text-white">
+          <button
+            style={{
+              fontSize: "13px",
+              color: "var(--fg-subtle)",
+              textDecoration: "underline",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              transition: "color 150ms",
+            }}
+            className="hover:!text-[var(--fg)]"
+          >
             Sair
           </button>
         </form>
@@ -29,11 +45,13 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div style={{ display: "flex", height: "100dvh", overflow: "hidden", background: "#0a0a10" }}>
-      <aside style={{ width: "220px", flexShrink: 0, height: "100dvh", overflow: "hidden", background: "#0a0a10", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
+    <div style={{ display: "flex", height: "100dvh", overflow: "hidden", background: "var(--bg)" }}>
+      <aside style={{ width: "220px", flexShrink: 0, height: "100dvh", overflow: "hidden", background: "var(--bg)", borderRight: "1px solid var(--border)" }}>
         <DashboardSidebar barNome={current.bar.nome} userNome={current.userNome} role={current.role} />
       </aside>
-      <main style={{ flex: 1, height: "100dvh", overflowY: "auto", background: "#0a0a10" }}>{children}</main>
+      <main style={{ flex: 1, height: "100dvh", overflowY: "auto", background: "var(--bg)" }}>
+        {children}
+      </main>
     </div>
   );
 }

@@ -1,556 +1,372 @@
 # DESIGN.md — Superbar
 
-> Este arquivo é o contrato visual do produto. Toda UI gerada deve seguir estas regras.
-> Fonte de verdade para Claude Code e qualquer agente de codificação.
+> Contrato visual do produto. Toda UI gerada (site, dashboard, telas operacionais) segue estas regras.
+> Fonte de verdade visual para o Claude Code e qualquer agente de codificação.
 
 ---
 
-## 1. Identidade
+## 0. O que mudou (zeramos o sistema antigo)
 
-**Produto**: Superbar — OS unificado para bares premium  
-**Posicionamento visual**: Dark. Minimal. Operacional. Sem ruído.  
-**Referência estética**: Human Academy (humanacademy.com.br) — pill nav, gradient hero, cards arredondados, tipografia bold  
-**Princípio**: Cada elemento que não serve à operação é removido.
+O sistema visual anterior (dark com degradês, glow índigo, pills, raios grandes, índigo como tema) foi **descartado**. Nova direção, válida para tudo:
 
----
-
-## 2. Paleta de Cores
-
-### 2.1 Cores Base (todas as surfaces)
-
-```css
---color-black:       #000000   /* fundo principal */
---color-black-soft:  #0A000F   /* fundo com toque de índigo */
---color-black-card:  #0D0015   /* fundo de cards */
---color-black-hover: #160025   /* hover state de cards */
---color-border:      #26007840 /* #260078 a 25% — bordas */
---color-border-strong: #260078 /* borda de foco/ativo */
-
---color-white:       #FFFFFF
---color-white-80:    #FFFFFFCC /* texto secundário */
---color-white-50:    #FFFFFF80 /* texto terciário / placeholder */
---color-white-20:    #FFFFFF33 /* separadores, disabled */
---color-white-10:    #FFFFFF1A /* surface sutil */
-
---color-indigo:      #260078   /* accent principal */
---color-indigo-light:#3A00B8   /* hover de botão primário */
---color-indigo-glow: #26007866 /* glow / shadow */
-```
-
-### 2.2 Gradientes
-
-```css
-/* Hero sections — estilo aurora */
---gradient-hero:    linear-gradient(135deg, #000000 0%, #260078 60%, #000000 100%)
---gradient-card:    linear-gradient(135deg, #0D0015 0%, #1A0050 100%)
---gradient-subtle:  linear-gradient(180deg, #000000 0%, #0A000F 100%)
-
-/* Text gradient — para headlines com destaque */
---gradient-text:    linear-gradient(90deg, #FFFFFF 0%, #A78BFA 100%)
-```
-
-### 2.3 Cores Semânticas — APENAS surfaces operacionais
-
-> Usar **somente** em: PDV — Caixa, Interface Bartender, CS Admin  
-> **Proibido** em: Site de Vendas, Onboarding, Dashboard (exceto status badges pequenos)
-
-```css
---color-success:     #22C55E   /* comanda aberta, pagamento ok */
---color-success-bg:  #052E16   /* fundo de badge success */
---color-error:       #EF4444   /* cancelado, erro, alerta crítico */
---color-error-bg:    #330A0A   /* fundo de badge error */
---color-warning:     #F59E0B   /* aguardando, pendente */
---color-warning-bg:  #291500   /* fundo de badge warning */
---color-info:        #3B82F6   /* informativo neutro */
---color-info-bg:     #0A1525   /* fundo de badge info */
-```
+**Limpo. Plano. Mono. Muito espaço. Um respiro de cor só.** Estética de instrumento de precisão — silencioso, estruturado, sem decoração. Sem degradê, sem glow, sem sombra colorida.
 
 ---
 
-## 3. Tipografia
+## 1. Princípios visuais
 
-### 3.1 Fontes
+- **Plano e silencioso.** Nada de degradê, glow ou sombra decorativa. Hierarquia se faz com espaço, peso tipográfico e cor com parcimônia.
+- **Cada cor tem função.** A base é preto/branco/cinza. O #260078 é o respiro — aparece só onde há ação. Cores semânticas só onde há estado operacional.
+- **Mono na frente.** Títulos e dados em monoespaçada dão o tom "instrumento". Corpo em sans pra leitura.
+- **Espaço é design.** Generoso. O vazio organiza.
+- **Premium na execução (este doc). Descolado na personalidade.** A personalidade jovem (mascote, voz, copy) vive na camada de marca do site — dentro desta mesma paleta, sem quebrar o sistema.
+
+---
+
+## 2. Temas (dark + light)
+
+Dois temas, **dark é o padrão**, com botão de troca pro usuário (ícone de sol/lua no topo).
+
+Arquitetura: **tokens semânticos via CSS variables.** A UI nunca usa hex cru — usa o token (`--bg`, `--fg`, `--accent`...). Trocar de tema é trocar os valores dos tokens. Por isso os dois temas custam quase nada: o sistema nasce assim na fundação.
+
+**Regra:** nenhum componente referencia cor fixa. Sempre o token.
+
+---
+
+## 3. Paleta
+
+### 3.1 Regra de cor (a régua)
+
+- **Base:** branco, preto e tons de cinza.
+- **Ação:** `#260078` — **só em CTAs e detalhes de ação** (botão primário, foco, link, item de nav ativo). É o respiro; aparece pouco e por isso tem força.
+- **Semânticas (verde/âmbar/vermelho):** **só nas telas operacionais** (Bartender e Caixa), pra sinalizar estado. Proibidas no site, onboarding e dashboard — exceto um badge de status mínimo.
+
+### 3.2 Tokens — tema DARK (padrão)
+
+```css
+:root, [data-theme="dark"] {
+  --bg:            #0B0B0C;   /* fundo principal */
+  --bg-elevated:   #141416;   /* cards, superfícies elevadas */
+  --bg-inset:      #08080A;   /* campos, áreas recuadas */
+  --fg:            #FAFAFA;   /* texto principal */
+  --fg-muted:      #9A9AA0;   /* texto secundário */
+  --fg-subtle:     #65656B;   /* texto terciário, labels, placeholder */
+  --border:        rgba(255,255,255,0.08);  /* hairline padrão */
+  --border-strong: rgba(255,255,255,0.16);  /* divisória/ativo */
+
+  --accent:        #260078;   /* ação — fill de CTA */
+  --accent-fg:     #FFFFFF;   /* texto sobre o accent */
+  --accent-bright: #6B4FE8;   /* tint do accent p/ texto/ring sobre fundo escuro (legibilidade) */
+  --ring:          #6B4FE8;   /* foco no dark */
+}
+```
+
+### 3.3 Tokens — tema LIGHT
+
+```css
+[data-theme="light"] {
+  --bg:            #FFFFFF;
+  --bg-elevated:   #FAFAFA;
+  --bg-inset:      #F4F4F5;
+  --fg:            #0B0B0C;
+  --fg-muted:      #6B6B70;
+  --fg-subtle:     #9A9AA0;
+  --border:        rgba(0,0,0,0.10);
+  --border-strong: rgba(0,0,0,0.18);
+
+  --accent:        #260078;
+  --accent-fg:     #FFFFFF;
+  --accent-bright: #260078;   /* no claro o #260078 já é legível como texto/ring */
+  --ring:          #260078;
+}
+```
+
+> **Nota de contraste do #260078:** como fill de CTA com texto branco, funciona nos dois temas. Como *texto* ou *anel de foco* sobre fundo escuro ele fica baixo — por isso no dark usamos `--accent-bright` (#6B4FE8) nesses casos. CTA sólido = sempre `--accent`.
+
+### 3.4 Cores semânticas — APENAS Bartender e Caixa
+
+```css
+/* valem só nas surfaces operacionais; discretas, nunca berrantes */
+:root, [data-theme="dark"] {
+  --ok:        #22C55E;  --ok-bg:     rgba(34,197,94,0.12);   /* comanda ok / pago */
+  --warn:      #F59E0B;  --warn-bg:   rgba(245,158,11,0.12);  /* quer pagar / pendente */
+  --danger:    #EF4444;  --danger-bg: rgba(239,68,68,0.12);   /* cancelado / erro */
+}
+[data-theme="light"] {
+  --ok:        #16A34A;  --ok-bg:     rgba(22,163,74,0.10);
+  --warn:      #D97706;  --warn-bg:   rgba(217,119,6,0.10);
+  --danger:    #DC2626;  --danger-bg: rgba(220,38,38,0.10);
+}
+```
+
+---
+
+## 4. Tipografia
+
+### 4.1 Fontes
+
+- **Display / títulos / dados:** monoespaçada (Geist Mono). É a assinatura do sistema.
+- **Corpo / parágrafos / UI:** sans (Geist).
 
 ```javascript
-// next/font — configuração no layout.tsx
 import { Geist, Geist_Mono } from 'next/font/google'
+const geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
+const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-mono' })
+```
 
-const geist = Geist({
-  subsets: ['latin'],
-  variable: '--font-geist',
-})
+### 4.2 Escala
 
-const geistMono = Geist_Mono({
-  subsets: ['latin'],
-  variable: '--font-geist-mono',
-})
+```css
+/* Display — mono, títulos de hero/seção */
+--text-display: 3rem / 1.1;     /* 48px */
+--text-h1:      2rem / 1.15;    /* 32px — mono */
+--text-h2:      1.5rem / 1.2;   /* 24px — mono */
+--text-h3:      1.125rem / 1.3; /* 18px — mono */
+
+/* Corpo — sans */
+--text-body-lg: 1.125rem / 1.6; /* 18px */
+--text-body:    1rem / 1.6;     /* 16px */
+--text-body-sm: 0.875rem / 1.5; /* 14px */
+
+/* Overline — label de seção (sans, caixa alta) */
+--text-overline: 0.75rem / 1.4; /* 12px, uppercase, letter-spacing 0.12em, --fg-subtle */
+
+/* Dados — mono, tabular */
+--text-data-xl: 2.5rem / 1;     /* 40px — KPI principal */
+--text-data-lg: 1.75rem / 1;    /* 28px */
+--text-data:    1rem / 1;       /* 16px — tabela */
 ```
 
 ```css
---font-sans: var(--font-geist), system-ui, sans-serif
---font-mono: var(--font-geist-mono), 'Courier New', monospace
-```
-
-### 3.2 Escala Tipográfica
-
-```css
-/* Display — hero headlines, landing page */
---text-display-2xl: 4.5rem / 1.1   /* 72px — hero principal */
---text-display-xl:  3.5rem / 1.15  /* 56px — section hero */
---text-display-lg:  2.75rem / 1.2  /* 44px — page title */
-
-/* Heading — estrutura de página */
---text-h1:  2rem / 1.25    /* 32px */
---text-h2:  1.5rem / 1.3   /* 24px */
---text-h3:  1.25rem / 1.4  /* 20px */
---text-h4:  1.125rem / 1.4 /* 18px */
-
-/* Body */
---text-body-lg: 1.125rem / 1.6  /* 18px — lead text */
---text-body:    1rem / 1.6      /* 16px — padrão */
---text-body-sm: 0.875rem / 1.5  /* 14px — secundário */
---text-caption: 0.75rem / 1.4   /* 12px — labels, overlines */
-
-/* Mono — números, preços, dados */
---text-data-xl: 3rem / 1      /* 48px — KPI principal */
---text-data-lg: 2rem / 1      /* 32px — KPI secundário */
---text-data:    1.5rem / 1    /* 24px — métricas */
---text-data-sm: 1rem / 1      /* 16px — tabela */
-```
-
-### 3.3 Padrões de Texto
-
-```css
-/* Overline — label de seção, acima do headline */
-.overline {
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--color-white-50);
-}
-
-/* Headline com destaque em índigo */
-.headline-accent span {
-  background: var(--gradient-text);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Números/preços — sempre Geist Mono */
-.data-value {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-}
+.overline { font: var(--text-overline); text-transform: uppercase; letter-spacing: 0.12em; color: var(--fg-subtle); }
+.data-value { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+h1,h2,h3,.display { font-family: var(--font-mono); letter-spacing: -0.01em; }
 ```
 
 ---
 
-## 4. Espaçamento
+## 5. Espaçamento (base 4px)
 
 ```css
-/* Base: 4px */
---space-1:  0.25rem  /* 4px */
---space-2:  0.5rem   /* 8px */
---space-3:  0.75rem  /* 12px */
---space-4:  1rem     /* 16px */
---space-5:  1.25rem  /* 20px */
---space-6:  1.5rem   /* 24px */
---space-8:  2rem     /* 32px */
---space-10: 2.5rem   /* 40px */
---space-12: 3rem     /* 48px */
---space-16: 4rem     /* 64px */
---space-20: 5rem     /* 80px */
---space-24: 6rem     /* 96px */
---space-32: 8rem     /* 128px */
+--space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-6:24px;
+--space-8:32px; --space-10:40px; --space-12:48px; --space-16:64px; --space-24:96px; --space-32:128px;
+```
+Use espaço com generosidade. Seções respiram com `--space-16` a `--space-32`.
+
+---
+
+## 6. Raio (pequeno, plano)
+
+```css
+--radius-sm: 2px;   /* badges, chips */
+--radius-md: 4px;   /* botões, inputs, cards */
+--radius-lg: 8px;   /* containers maiores */
+```
+**Sem pills.** O raio é discreto — a sensação é técnica, não "appzinho".
+
+---
+
+## 7. Superfícies e bordas
+
+- Cards e painéis = `--bg-elevated` + borda `1px solid var(--border)`. **Sem sombra, sem glow.**
+- Divisórias e grids = `1px solid var(--border)`.
+- Estado ativo/foco = borda `--border-strong` ou anel `--ring`.
+- Profundidade se faz por **cor de superfície e borda**, nunca por sombra.
+
+```css
+.surface { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-md); }
 ```
 
 ---
 
-## 5. Border Radius
+## 8. Componentes
+
+### 8.1 Navegação
+Topo fixo simples (não pill flutuante): logo à esquerda, busca/ações ao centro/direita, toggle de tema (sol/lua), menu de usuário. Sidebar (dashboard/admin) com seções em overline (ex: GERAL, OPERAÇÃO, CONFIG) e itens em texto + ícone stroke. Item ativo: texto `--fg` + barra/realce sutil, ícone em `--accent-bright`.
+
+### 8.2 Botões
 
 ```css
---radius-sm:   0.375rem  /* 6px  — badges, chips */
---radius-md:   0.75rem   /* 12px — inputs, botões pequenos */
---radius-lg:   1rem      /* 16px — cards */
---radius-xl:   1.5rem    /* 24px — cards hero, modais */
---radius-2xl:  2rem      /* 32px — seções grandes */
---radius-full: 9999px    /* pill — nav, botões pill, tags */
+/* Primário — ação. Único lugar do #260078 sólido. */
+.btn-primary { background: var(--accent); color: var(--accent-fg); border-radius: var(--radius-md);
+  padding: 10px 18px; font-weight: 500; border: none; }
+.btn-primary:hover { filter: brightness(1.12); }
+
+/* Secundário — outline neutro */
+.btn-secondary { background: transparent; color: var(--fg); border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md); padding: 10px 18px; }
+.btn-secondary:hover { border-color: var(--fg-muted); }
+
+/* Ghost — texto */
+.btn-ghost { background: transparent; color: var(--fg-muted); padding: 10px 14px; }
+.btn-ghost:hover { color: var(--fg); }
+
+/* Operacional — bartender/caixa: alvo de toque generoso */
+.btn-op { min-height: 48px; border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; }
+/* no Caixa: min-height 56px (ambiente com movimento) */
 ```
+
+### 8.3 Cards e grid numerado (padrão da referência)
+
+```css
+.card { background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: var(--space-6); }
+
+/* Grid de primitivos: células com número (01, 02...) em mono, overline-like, divididas por hairline */
+.grid-cell .num { font-family: var(--font-mono); color: var(--fg-subtle); font-size: 0.75rem; }
+.grid-cell .title { font-family: var(--font-mono); font-size: 1.125rem; color: var(--fg); }
+.grid-cell .desc { color: var(--fg-muted); font-size: 0.875rem; }
+```
+
+### 8.4 Inputs
+
+```css
+.input { background: var(--bg-inset); border: 1px solid var(--border); border-radius: var(--radius-md);
+  color: var(--fg); padding: 10px 12px; font-family: var(--font-sans); }
+.input::placeholder { color: var(--fg-subtle); }
+.input:focus { outline: none; border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 25%, transparent); }
+```
+
+### 8.5 Badges / status
+
+```css
+.badge { display:inline-flex; align-items:center; gap:6px; padding:3px 10px;
+  border-radius: var(--radius-sm); font-size:0.75rem; font-weight:500; }
+.badge-neutral { background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--fg-muted); }
+.badge-accent  { background: color-mix(in srgb, var(--accent-bright) 16%, transparent); color: var(--accent-bright); }
+
+/* SÓ em Bartender/Caixa */
+.badge-ok     { background: var(--ok-bg);     color: var(--ok); }
+.badge-warn   { background: var(--warn-bg);   color: var(--warn); }
+.badge-danger { background: var(--danger-bg); color: var(--danger); }
+```
+
+### 8.6 Stat / KPI
+
+```css
+.stat-value { font-family: var(--font-mono); font-size: var(--text-data-xl); font-weight:700;
+  color: var(--fg); font-variant-numeric: tabular-nums; }
+.stat-label { font: var(--text-overline); text-transform:uppercase; letter-spacing:0.1em; color: var(--fg-subtle); }
+```
+
+### 8.7 Tabelas
+Densas e limpas. Cabeçalho em overline (`--fg-subtle`). Linhas divididas por hairline `--border`. Hover de linha: `color-mix(in srgb, var(--fg) 3%, transparent)`. Valores monetários sempre em mono.
 
 ---
 
-## 6. Sombras e Efeitos
+## 9. Regras por surface
 
-```css
-/* Glow índigo — para elementos ativos/hover */
---shadow-indigo-sm: 0 0 12px #26007840
---shadow-indigo-md: 0 0 24px #26007860
---shadow-indigo-lg: 0 0 48px #26007880
+### Site de vendas
+- Paleta: P&B + cinza + `#260078` só nos CTAs. Sem cores semânticas.
+- Títulos em mono, overlines nas seções, muito espaço, hairlines.
+- **Camada de marca:** aqui entra a personalidade (mascote, copy descolada, composição com atitude) — mas **dentro desta paleta**, sem quebrar o sistema. O "cool" vem do mascote e da voz, não de cor extra.
 
-/* Sombra de card */
---shadow-card: 0 1px 3px rgba(0,0,0,0.5), 0 0 0 1px #26007840
+### Onboarding
+- P&B + cinza + `#260078` nos botões. Sem semânticas. Progress em barra `--border` com trecho ativo `--accent`.
 
-/* Glassmorphism — cards sobre gradient */
---glass-bg:     rgba(13, 0, 21, 0.7)
---glass-border: rgba(255, 255, 255, 0.08)
---glass-blur:   backdrop-filter: blur(12px)
-```
+### Dashboard Dono
+- P&B + cinza + `#260078` na ação. KPIs em mono. Gráficos: linha `--accent-bright`, área `color-mix(in srgb, var(--accent-bright) 12%, transparent)`. Comparações ↑↓ podem usar `--ok`/`--danger` em texto pequeno (exceção de status).
 
----
+### Bartender (mobile/iPad)
+- P&B + cinza + `#260078` + **semânticas (estado)**. Toque mínimo 48px. Estado de comanda em badges semânticos: aberta/ok = `ok`, quer pagar = `warn`, cancelado = `danger`. Sem decoração — velocidade de leitura.
 
-## 7. Componentes
+### Caixa
+- Igual ao Bartender, toque 56px+. Valores em mono. Estado de mesa/comanda em semânticas. Teclado numérico em `btn-op`.
 
-### 7.1 Navegação — Pill Flutuante
-
-```css
-.nav-pill {
-  position: fixed;
-  top: 1.25rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(13, 0, 21, 0.85);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  padding: 0.5rem 1.5rem;
-  z-index: 50;
-}
-```
-
-### 7.2 Botões
-
-```css
-/* Primário — índigo sólido */
-.btn-primary {
-  background: #260078;
-  color: #FFFFFF;
-  border-radius: var(--radius-full);
-  padding: 0.75rem 1.75rem;
-  font-weight: 500;
-  transition: background 150ms;
-}
-.btn-primary:hover { background: #3A00B8; }
-
-/* Secundário — outline */
-.btn-secondary {
-  background: transparent;
-  color: #FFFFFF;
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: var(--radius-full);
-  padding: 0.75rem 1.75rem;
-}
-.btn-secondary:hover { border-color: #260078; }
-
-/* Ghost — texto apenas */
-.btn-ghost {
-  background: transparent;
-  color: rgba(255,255,255,0.7);
-  padding: 0.75rem 1.25rem;
-}
-
-/* Operacional — grande, touch target mínimo 48px, APENAS surfaces operacionais */
-.btn-op {
-  min-height: 3rem;        /* 48px */
-  border-radius: var(--radius-lg);
-  font-size: 1rem;
-  font-weight: 600;
-}
-```
-
-### 7.3 Cards
-
-```css
-/* Card padrão */
-.card {
-  background: var(--color-black-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  padding: var(--space-6);
-  transition: border-color 150ms, box-shadow 150ms;
-}
-.card:hover {
-  border-color: #26007880;
-  box-shadow: var(--shadow-indigo-sm);
-}
-
-/* Card hero — gradient */
-.card-hero {
-  background: var(--gradient-card);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: var(--radius-2xl);
-  padding: var(--space-10) var(--space-12);
-}
-
-/* Card glass — sobre seção com gradient */
-.card-glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-xl);
-}
-```
-
-### 7.4 Inputs
-
-```css
-.input {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  color: #FFFFFF;
-  padding: 0.75rem 1rem;
-  font-family: var(--font-sans);
-  transition: border-color 150ms, box-shadow 150ms;
-}
-.input:focus {
-  outline: none;
-  border-color: #260078;
-  box-shadow: 0 0 0 3px #26007830;
-}
-.input::placeholder { color: var(--color-white-30); }
-```
-
-### 7.5 Badges / Status
-
-```css
-/* Base */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-/* Variantes — APENAS surfaces operacionais */
-.badge-success { background: var(--color-success-bg); color: var(--color-success); }
-.badge-error   { background: var(--color-error-bg);   color: var(--color-error); }
-.badge-warning { background: var(--color-warning-bg); color: var(--color-warning); }
-.badge-info    { background: var(--color-info-bg);    color: var(--color-info); }
-
-/* Variante neutra — todas as surfaces */
-.badge-neutral { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
-.badge-indigo  { background: #26007840; color: #A78BFA; }
-```
-
-### 7.6 Overline + Headline (padrão de seção)
-
-```html
-<!-- Padrão Human Academy — overline acima do headline -->
-<section>
-  <p class="overline">PLATAFORMA COMPLETA</p>
-  <h2>Os melhores dados <span class="accent">para o seu bar.</span></h2>
-</section>
-```
-
-### 7.7 Stats / KPI Block
-
-```css
-.stat-block {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-.stat-value {
-  font-family: var(--font-mono);
-  font-size: var(--text-data-xl);
-  font-weight: 700;
-  color: #FFFFFF;
-  font-variant-numeric: tabular-nums;
-}
-.stat-label {
-  font-size: var(--text-caption);
-  color: var(--color-white-50);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-```
+### Admin
+- P&B + cinza + `#260078`. Tabelas densas. Sidebar com seções em overline.
 
 ---
 
-## 8. Seções Hero — Padrão Gradient
-
-```css
-/* Seção com aurora gradient */
-.section-hero {
-  background: var(--gradient-hero);
-  border-radius: var(--radius-2xl);
-  padding: var(--space-24) var(--space-16);
-  margin: var(--space-4) var(--space-4);
-  position: relative;
-  overflow: hidden;
-}
-
-/* Glow radial de fundo */
-.section-hero::before {
-  content: '';
-  position: absolute;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, #26007860 0%, transparent 70%);
-  top: -200px;
-  left: -100px;
-  pointer-events: none;
-}
-```
-
----
-
-## 9. Regras por Surface
-
-### Site de Vendas (SV01–SV05)
-- Paleta: preto + branco + #260078 APENAS
-- Cores semânticas: proibidas
-- Nav: pill flutuante centralizado
-- Botão CTA: `btn-primary` pill
-- Seções alternadas: seção gradient hero intercalada com seção preta pura
-- Overlines em todas as seções
-- Stats grandes (Geist Mono) para social proof
-
-### Onboarding (OB01–OB07 Mobile + Desktop)
-- Paleta: preto + branco + #260078 APENAS
-- Progress indicator: linha branca com step ativo em #260078
-- Botão avançar: `btn-primary` full-width
-- Cards de seleção: `card` com borda ativa em #260078
-
-### Dashboard Dono (S05, S06, S20)
-- Paleta: preto + branco + #260078 + cores semânticas em badges APENAS
-- KPI cards: `card-hero` com `stat-value` em Geist Mono
-- Gráficos: linhas em #260078, área em #26007820
-- Tabelas: fundo alternado rgba(255,255,255,0.02)
-- Comparações (↑↓): success/error colors permitidas
-
-### Interface Bartender — Mobile (S32–S36)
-- Paleta: preto + branco + #260078 + cores semânticas (operacional)
-- Touch targets mínimos: 48px
-- Botões: `btn-op` — grandes, área de toque generosa
-- Status de comanda: badges com cores semânticas obrigatórias
-- Sem gradientes decorativos — foco em velocidade de leitura
-
-### PDV — Caixa (PDV01–PDV04)
-- Paleta: preto + branco + #260078 + cores semânticas (operacional)
-- Touch targets: 56px+ (ambiente com movimento)
-- Valores monetários: Geist Mono obrigatório
-- Status de mesa/comanda: cores semânticas obrigatórias
-- Teclado numérico: botões grandes, `btn-op`
-- Zero gradientes decorativos
-
-### CS Admin (SA01–SA04)
-- Paleta: preto + branco + #260078 + cores semânticas em status
-- Tabelas densas permitidas
-- Sidebar: fundo `--color-black-card`, itens pill com hover em #26007820
-- Formulários: `input` padrão
-
----
-
-## 10. Tailwind Config
+## 10. Tailwind config (token-based, dual theme)
 
 ```javascript
 // tailwind.config.ts
 import type { Config } from 'tailwindcss'
-
 export default {
+  darkMode: ['selector', '[data-theme="dark"]'],
   content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
   theme: {
     extend: {
       colors: {
-        indigo: {
-          DEFAULT: '#260078',
-          light:   '#3A00B8',
-          glow:    '#26007866',
-          subtle:  '#26007820',
-        },
-        surface: {
-          DEFAULT: '#000000',
-          soft:    '#0A000F',
-          card:    '#0D0015',
-          hover:   '#160025',
-        },
+        bg: 'var(--bg)', 'bg-elevated': 'var(--bg-elevated)', 'bg-inset': 'var(--bg-inset)',
+        fg: 'var(--fg)', 'fg-muted': 'var(--fg-muted)', 'fg-subtle': 'var(--fg-subtle)',
+        border: 'var(--border)', 'border-strong': 'var(--border-strong)',
+        accent: 'var(--accent)', 'accent-fg': 'var(--accent-fg)', 'accent-bright': 'var(--accent-bright)',
+        ok: 'var(--ok)', warn: 'var(--warn)', danger: 'var(--danger)',
       },
       fontFamily: {
-        sans: ['var(--font-geist)', 'system-ui', 'sans-serif'],
-        mono: ['var(--font-geist-mono)', 'monospace'],
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-mono)', 'monospace'],
       },
-      borderRadius: {
-        'pill': '9999px',
-        '2xl':  '1rem',
-        '3xl':  '1.5rem',
-        '4xl':  '2rem',
-      },
-      boxShadow: {
-        'indigo-sm': '0 0 12px #26007840',
-        'indigo-md': '0 0 24px #26007860',
-        'indigo-lg': '0 0 48px #26007880',
-      },
+      borderRadius: { sm: '2px', md: '4px', lg: '8px' },
     },
   },
   plugins: [],
 } satisfies Config
 ```
 
+> Toggle de tema: usar `next-themes` com `attribute="data-theme"`, `defaultTheme="dark"`. O ícone sol/lua no topo alterna `data-theme` entre `dark` e `light`.
+
 ---
 
-## 11. globals.css — Setup inicial
+## 11. globals.css
 
 ```css
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* (tokens das seções 3.2 / 3.3 / 3.4 entram aqui em :root e [data-theme="light"]) */
+
 @layer base {
-  :root {
-    --font-geist: 'Geist';
-    --font-geist-mono: 'Geist Mono';
-  }
-
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
+  * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background-color: #000000;
-    color: #FFFFFF;
-    font-family: var(--font-geist), system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans), system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 150ms, color 150ms;
   }
+  h1, h2, h3 { font-family: var(--font-mono); letter-spacing: -0.01em; }
 
-  /* Scrollbar — dark, minimal */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: #000000; }
-  ::-webkit-scrollbar-thumb { background: #260078; border-radius: 9999px; }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: var(--radius-sm); }
 
-  /* Focus ring acessível */
-  :focus-visible {
-    outline: 2px solid #260078;
-    outline-offset: 2px;
-  }
+  :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
 }
 ```
 
 ---
 
-## 12. Padrões Proibidos
+## 12. Padrões proibidos
 
-- **Nunca** usar cor de fundo branca pura em páginas internas do app
-- **Nunca** usar sombras coloridas fora do índigo (#260078)
-- **Nunca** usar cores semânticas (verde/vermelho/âmbar) em Site de Vendas ou Onboarding
-- **Nunca** usar fonte sem ser Geist / Geist Mono
-- **Nunca** usar border-radius < 6px (flat looks quebram o sistema)
-- **Nunca** usar gradientes multicoloridos — apenas preto ↔ #260078
-- **Nunca** usar texto com cor diferente de branco em variantes de opacidade (ex: texto azul no dashboard)
-- **Nunca** usar ícones coloridos decorativos — apenas stroke branco ou índigo
+- **Nunca** degradê (de qualquer tipo).
+- **Nunca** glow, sombra colorida ou sombra decorativa.
+- **Nunca** usar `#260078` como cor de fundo/tema — só ação.
+- **Nunca** cores semânticas fora de Bartender/Caixa (exceto badge de status mínimo).
+- **Nunca** pills como padrão; raio máximo 8px.
+- **Nunca** hex cru no componente — sempre o token (senão o tema quebra).
+- **Nunca** fonte fora de Geist / Geist Mono.
+- **Nunca** ícone colorido decorativo — stroke `--fg`, `--fg-muted` ou `--accent-bright`.
 
 ---
 
-## 13. Referências
+## 13. A camada de marca no site
 
-- **Estética**: Human Academy (humanacademy.com.br)
-- **Wireframes**: Figma `gcE5bakUMH5f5Mb02gvNTc` — 9 páginas, 39 telas
-- **Spec completo**: `Bar_Intelligence_Platform_Specs.docx`
-- **Stack**: Next.js 14 (App Router) + Tailwind CSS + Supabase + Vercel
+O site pode (e deve) ser mais descolado que o app — mas **a paleta é a mesma**. A personalidade vem de:
+- **Mascote** (o copo herói "SB"): renderizar em traço plano, mono/duotone — preto sobre claro, com no máximo um toque de `#260078`. Encaixa no sistema, não destoa.
+- **Voz e copy** jovem (ver seção "Marca" do `docs/negocio.md`).
+- **Composição e movimento** com atitude.
+
+Cool na personalidade, impecável no craft. O mascote brinca; o sistema não.
+
+---
+
+## 14. Referências
+
+- **Estética:** instrumento de precisão — mono, plano, hairlines, muito espaço (refs de admin/IAM tipo dashboard técnico).
+- **Stack:** Next.js (App Router) + Tailwind + Supabase + Vercel.
+- **Estratégia/marca:** `docs/negocio.md`.
+- **Regras de build:** `CLAUDE.md`.

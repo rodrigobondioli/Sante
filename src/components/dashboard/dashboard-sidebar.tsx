@@ -3,7 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, BarChart3, History, UtensilsCrossed, TableProperties, Users, MonitorSmartphone, Wallet } from "lucide-react";
+import {
+  LayoutDashboard, BarChart3, History, UtensilsCrossed,
+  TableProperties, Users, MonitorSmartphone, Wallet,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { BarRole } from "@/types/database";
 import { Drawer } from "@/components/ui/drawer";
@@ -33,10 +36,15 @@ const ROLE_LABEL: Record<string, string> = {
   garcom: "Garçom",
 };
 
+const footerItems = [
+  { label: "Suporte", type: "suporte" as const },
+  { label: "Sugestão", type: "sugestao" as const },
+];
+
 export function DashboardSidebar({ barNome, role }: DashboardSidebarProps) {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [drawerType, setDrawerType] = useState<'suporte' | 'sugestao'>('suporte');
+  const [drawerType, setDrawerType] = useState<"suporte" | "sugestao">("suporte");
 
   return (
     <aside
@@ -45,29 +53,36 @@ export function DashboardSidebar({ barNome, role }: DashboardSidebarProps) {
         width: "220px",
         height: "100dvh",
         overflow: "hidden",
-        background: "#0a0a10",
-        borderRight: "1px solid rgba(255,255,255,0.06)",
+        background: "var(--bg)",
+        borderRight: "1px solid var(--border)",
       }}
     >
-      <div style={{ padding: "20px 24px", display: "flex", alignItems: "center", gap: "10px" }}>
-        <span style={{ fontSize: "14px", fontWeight: 600, color: "white" }}>{barNome}</span>
+      {/* Logo / bar name */}
+      <div style={{ padding: "20px 24px", display: "flex", alignItems: "center", gap: "10px", borderBottom: "1px solid var(--border)" }}>
+        <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)" }}>
+          {barNome}
+        </span>
         <span style={{
-          fontSize: "11px",
+          fontSize: "10px",
           fontWeight: 500,
-          padding: "3px 10px",
-          borderRadius: "99px",
-          background: "rgba(38,0,120,0.30)",
-          color: "rgba(160,130,255,0.9)",
+          padding: "2px 6px",
+          borderRadius: "2px",
+          background: "color-mix(in srgb, var(--accent-bright) 14%, transparent)",
+          color: "var(--accent-bright)",
           whiteSpace: "nowrap",
+          letterSpacing: "0.04em",
         }}>
           {ROLE_LABEL[role] ?? role}
         </span>
       </div>
 
-      <nav className="flex flex-col gap-1 px-3">
+      {/* Nav */}
+      <nav className="flex flex-col gap-0.5 p-3" style={{ paddingTop: "12px" }}>
         {links.map((link) => {
           const active =
-            link.href === "/dashboard" ? pathname === link.href : pathname.startsWith(link.href);
+            link.href === "/dashboard"
+              ? pathname === link.href
+              : pathname.startsWith(link.href);
 
           return (
             <Link
@@ -76,64 +91,70 @@ export function DashboardSidebar({ barNome, role }: DashboardSidebarProps) {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "12px",
-                padding: "8px 12px",
-                borderRadius: "8px",
-                fontSize: "14px",
+                gap: "10px",
+                padding: "7px 10px",
+                borderRadius: "4px",
+                fontSize: "13px",
                 fontWeight: active ? 500 : 400,
-                color: active ? "#ffffff" : "rgba(255,255,255,0.45)",
-                background: active ? "rgba(255,255,255,0.07)" : "transparent",
+                color: active ? "var(--fg)" : "var(--fg-muted)",
+                background: active ? "color-mix(in srgb, var(--fg) 6%, transparent)" : "transparent",
                 textDecoration: "none",
-                transition: "all 150ms",
+                transition: "background 150ms, color 150ms",
               }}
-              className={cn(!active && "hover:bg-white/[0.04] hover:!text-white/70")}
+              className={cn(!active && "hover:bg-white/[0.04] hover:!text-[var(--fg)]")}
             >
-              <link.icon className="h-4 w-4" strokeWidth={1.75} style={{ color: active ? "#ffffff" : "rgba(255,255,255,0.45)" }} />
+              <link.icon
+                className="h-4 w-4 shrink-0"
+                strokeWidth={1.75}
+                style={{ color: active ? "var(--accent-bright)" : "var(--fg-subtle)" }}
+              />
               {link.label}
             </Link>
           );
         })}
       </nav>
 
-      {/* Rodapé — empurrado pro fundo */}
-      <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 0 }}>
-
-        {/* Suporte + Sugestão */}
-        <div style={{ padding: '8px 16px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {[
-            { icon: '🎧', label: 'Suporte', type: 'suporte' as const },
-            { icon: '💡', label: 'Sugestão', type: 'sugestao' as const },
-          ].map(item => (
+      {/* Footer */}
+      <div style={{ marginTop: "auto", display: "flex", flexDirection: "column" }}>
+        <div style={{ padding: "6px 12px", borderTop: "1px solid var(--border)" }}>
+          {footerItems.map((item) => (
             <button
               key={item.label}
               onClick={() => { setDrawerType(item.type); setDrawerOpen(true); }}
-              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 6, background: 'none', border: 'none', color: 'rgba(255,255,255,0.30)', fontSize: 13, cursor: 'pointer', width: '100%', textAlign: 'left', transition: 'color 150ms' }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.60)'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.30)'; }}
+              style={{
+                display: "flex", alignItems: "center", gap: "10px",
+                padding: "8px 10px", borderRadius: "4px",
+                background: "none", border: "none",
+                color: "var(--fg-subtle)",
+                fontSize: "13px", cursor: "pointer",
+                width: "100%", textAlign: "left",
+                transition: "color 150ms",
+              }}
+              className="hover:!text-[var(--fg-muted)]"
             >
-              <span>{item.icon}</span>
               {item.label}
             </button>
           ))}
         </div>
 
-        {/* Modo Bartender — bloco fixo no fundo, full width */}
+        {/* Modo Bartender — CTA */}
         <Link
           href="/bartender"
           style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9,
-            padding: '16px 0',
-            background: '#4c1d95',
-            color: '#ede9fe',
-            fontSize: 13, fontWeight: 700,
-            textDecoration: 'none',
-            letterSpacing: '0.01em',
+            display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+            padding: "14px 0",
+            background: "var(--accent)",
+            color: "var(--accent-fg)",
+            fontSize: "13px", fontWeight: 600,
+            textDecoration: "none",
+            letterSpacing: "0.02em",
+            transition: "filter 150ms",
           }}
+          className="hover:brightness-110"
         >
-          <MonitorSmartphone style={{ width: 15, height: 15 }} />
+          <MonitorSmartphone style={{ width: "14px", height: "14px" }} />
           Modo Bartender
         </Link>
-
       </div>
 
       <Drawer open={drawerOpen} type={drawerType} onClose={() => setDrawerOpen(false)} />
