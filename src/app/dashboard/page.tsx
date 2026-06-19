@@ -119,10 +119,10 @@ export default async function DashboardPage() {
   const cmvParcial = cmvAtual !== null && produtosComCusto < produtosVendidos.length;
 
   const kpiCards = [
-    { value: currency.format(kpis.faturamento), label: "Faturamento do turno", percent: comparacao.faturamento, invert: false, estimado: false },
-    { value: cmvAtual !== null ? `${percent.format(cmvAtual)}%` : "—", label: "CMV", percent: comparacao.cmv, invert: true, estimado: cmvParcial },
-    { value: String(kpis.comandasAbertas), label: "Tickets abertos", percent: comparacao.comandas, invert: false, estimado: false },
-    { value: currency.format(kpis.ticketMedio), label: "Ticket médio", percent: comparacao.ticketMedio, invert: false, estimado: false },
+    { value: currency.format(kpis.faturamento), label: "Faturamento do turno", subtitle: null as string | null, percent: comparacao.faturamento, invert: false, estimado: false },
+    { value: cmvAtual !== null ? `${percent.format(cmvAtual)}%` : "—", label: "CMV", subtitle: "custo sobre receita", percent: comparacao.cmv, invert: true, estimado: cmvParcial },
+    { value: String(kpis.comandasAbertas), label: "Tickets abertos", subtitle: null as string | null, percent: comparacao.comandas, invert: false, estimado: false },
+    { value: currency.format(kpis.ticketMedio), label: "Ticket médio", subtitle: null as string | null, percent: comparacao.ticketMedio, invert: false, estimado: false },
   ];
 
   return (
@@ -214,6 +214,11 @@ export default async function DashboardPage() {
                   marginTop: "4px",
                 }}
               >{kpi.value}</p>
+              {kpi.subtitle && (
+                <p style={{ fontSize: "11px", color: "var(--fg-subtle)", marginTop: "2px" }}>
+                  {kpi.subtitle}
+                </p>
+              )}
             </div>
             {/* Trend à direita no mobile, abaixo no desktop */}
             <div className="lg:mt-1 flex-shrink-0 ml-4 lg:ml-0">
