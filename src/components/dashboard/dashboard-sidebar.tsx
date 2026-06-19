@@ -33,8 +33,8 @@ export function DashboardSidebar({ barNome }: DashboardSidebarProps) {
       className="flex flex-col"
       style={{
         width: "220px",
-        height: "100vh",
-        overflowY: "auto",
+        height: "100dvh",
+        overflow: "hidden",
         background: "#0a0a10",
         borderRight: "1px solid rgba(255,255,255,0.06)",
       }}

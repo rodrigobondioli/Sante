@@ -120,7 +120,7 @@ export function OperadorShell({
   if (!carregado) return null;
 
   return (
-    <div style={{ height: "100vh", display: "flex", flexDirection: "column", background: "#0a0a10" }}>
+    <div style={{ height: "100dvh", display: "flex", flexDirection: "column", background: "#0a0a10" }}>
       {/* Header */}
       <header style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
