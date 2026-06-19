@@ -110,11 +110,16 @@ export default async function DashboardPage() {
   const primeiroNome = current.userNome.split(" ")[0];
   const dataFormatada = capitalizarPrimeiraLetra(dataExtenso.format(agora));
 
+  // Cobertura de custo: se algum produto vendido tem custo mas nem todos têm,
+  // o CMV é parcial — indicador sutil "estimado" avisa o dono.
+  const produtosComCusto = produtosVendidos.filter(p => p.custo != null).length;
+  const cmvParcial = cmvAtual !== null && produtosComCusto < produtosVendidos.length;
+
   const kpiCards = [
-    { value: currency.format(kpis.faturamento), label: "Faturamento do turno", percent: comparacao.faturamento, invert: false },
-    { value: cmvAtual !== null ? `${percent.format(cmvAtual)}%` : "—", label: "CMV", percent: comparacao.cmv, invert: true },
-    { value: String(kpis.comandasAbertas), label: "Tickets abertos", percent: comparacao.comandas, invert: false },
-    { value: currency.format(kpis.ticketMedio), label: "Ticket médio", percent: comparacao.ticketMedio, invert: false },
+    { value: currency.format(kpis.faturamento), label: "Faturamento do turno", percent: comparacao.faturamento, invert: false, estimado: false },
+    { value: cmvAtual !== null ? `${percent.format(cmvAtual)}%` : "—", label: "CMV", percent: comparacao.cmv, invert: true, estimado: cmvParcial },
+    { value: String(kpis.comandasAbertas), label: "Tickets abertos", percent: comparacao.comandas, invert: false, estimado: false },
+    { value: currency.format(kpis.ticketMedio), label: "Ticket médio", percent: comparacao.ticketMedio, invert: false, estimado: false },
   ];
 
   return (
@@ -190,7 +195,19 @@ export default async function DashboardPage() {
             className="animate-fade-in-up"
             style={{ background: "var(--bg-elevated)", padding: "20px 28px", animationDelay: `${i * 60}ms` }}
           >
-            <p style={overline}>{kpi.label}</p>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <p style={overline}>{kpi.label}</p>
+              {kpi.estimado && (
+                <span style={{
+                  fontSize: "9px", fontWeight: 500,
+                  padding: "2px 5px", borderRadius: "2px",
+                  background: "color-mix(in srgb, var(--warn) 12%, transparent)",
+                  color: "var(--warn)",
+                  textTransform: "uppercase", letterSpacing: "0.05em",
+                  whiteSpace: "nowrap",
+                }}>estimado</span>
+              )}
+            </div>
             <p style={{
               fontSize: "28px", fontWeight: 600,
               color: "var(--fg)",

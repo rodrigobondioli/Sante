@@ -137,6 +137,7 @@ export interface ProdutoVariante {
   produto_id: string;
   nome: string;
   preco: number;
+  custo: number | null;
   imagem_url: string | null;
   ativo: boolean;
   ordem: number;

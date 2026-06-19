@@ -61,6 +61,7 @@ export async function criarProduto(formData: FormData) {
 
   const nome        = String(formData.get("nome") ?? "").trim();
   const precoStr    = String(formData.get("preco") ?? "").replace(",", ".");
+  const custoStr    = String(formData.get("custo") ?? "").replace(",", ".");
   const categoriaId = String(formData.get("categoria_id") ?? "").trim() || null;
   const descricao   = String(formData.get("descricao") ?? "").trim() || null;
   let   imagemUrl   = String(formData.get("imagem_url") ?? "").trim() || null;
@@ -70,12 +71,15 @@ export async function criarProduto(formData: FormData) {
   // auto-imagem se não fornecida
   if (!imagemUrl) imagemUrl = getImagemAutomatica(nome);
 
+  const custo = custoStr && !isNaN(parseFloat(custoStr)) ? parseFloat(custoStr) : null;
+
   const supabase = await createClient();
   await semTipo(supabase.from("produtos")).insert({
     bar_id:       current.bar.id,
     categoria_id: categoriaId,
     nome,
     preco:        parseFloat(precoStr),
+    custo,
     descricao,
     imagem_url:   imagemUrl,
     ativo:        true,
@@ -88,6 +92,7 @@ export async function criarProduto(formData: FormData) {
 export async function editarProduto(id: string, formData: FormData) {
   const nome        = String(formData.get("nome") ?? "").trim();
   const precoStr    = String(formData.get("preco") ?? "").replace(",", ".");
+  const custoStr    = String(formData.get("custo") ?? "").replace(",", ".");
   const categoriaId = String(formData.get("categoria_id") ?? "").trim() || null;
   const descricao   = String(formData.get("descricao") ?? "").trim() || null;
   let   imagemUrl   = String(formData.get("imagem_url") ?? "").trim() || null;
@@ -96,10 +101,13 @@ export async function editarProduto(id: string, formData: FormData) {
 
   if (!imagemUrl) imagemUrl = getImagemAutomatica(nome);
 
+  const custo = custoStr && !isNaN(parseFloat(custoStr)) ? parseFloat(custoStr) : null;
+
   const supabase = await createClient();
   await semTipo(supabase.from("produtos")).update({
     nome,
     preco:        parseFloat(precoStr),
+    custo,
     categoria_id: categoriaId,
     descricao,
     imagem_url:   imagemUrl,
@@ -111,11 +119,14 @@ export async function editarProduto(id: string, formData: FormData) {
 // ─── Variantes ────────────────────────────────────────────────────────────────
 
 export async function criarVariante(produtoId: string, formData: FormData) {
-  const nome     = String(formData.get("nome") ?? "").trim();
-  const precoStr = String(formData.get("preco") ?? "").replace(",", ".");
+  const nome      = String(formData.get("nome") ?? "").trim();
+  const precoStr  = String(formData.get("preco") ?? "").replace(",", ".");
+  const custoStr  = String(formData.get("custo") ?? "").replace(",", ".");
   const imagemUrl = String(formData.get("imagem_url") ?? "").trim() || null;
 
   if (!nome || isNaN(parseFloat(precoStr))) return;
+
+  const custo = custoStr && !isNaN(parseFloat(custoStr)) ? parseFloat(custoStr) : null;
 
   const supabase = await createClient();
 
@@ -129,28 +140,33 @@ export async function criarVariante(produtoId: string, formData: FormData) {
     .maybeSingle<{ ordem: number }>();
 
   await semTipo(supabase.from("produto_variantes")).insert({
-    produto_id: produtoId,
+    produto_id:  produtoId,
     nome,
-    preco:     parseFloat(precoStr),
-    imagem_url: imagemUrl,
-    ativo:     true,
-    ordem:     (ultima?.ordem ?? 0) + 1,
+    preco:       parseFloat(precoStr),
+    custo,
+    imagem_url:  imagemUrl,
+    ativo:       true,
+    ordem:       (ultima?.ordem ?? 0) + 1,
   });
 
   revalidatePath("/dashboard/cardapio");
 }
 
 export async function editarVariante(varianteId: string, formData: FormData) {
-  const nome     = String(formData.get("nome") ?? "").trim();
-  const precoStr = String(formData.get("preco") ?? "").replace(",", ".");
+  const nome      = String(formData.get("nome") ?? "").trim();
+  const precoStr  = String(formData.get("preco") ?? "").replace(",", ".");
+  const custoStr  = String(formData.get("custo") ?? "").replace(",", ".");
   const imagemUrl = String(formData.get("imagem_url") ?? "").trim() || null;
 
   if (!nome || isNaN(parseFloat(precoStr))) return;
+
+  const custo = custoStr && !isNaN(parseFloat(custoStr)) ? parseFloat(custoStr) : null;
 
   const supabase = await createClient();
   await semTipo(supabase.from("produto_variantes")).update({
     nome,
     preco:      parseFloat(precoStr),
+    custo,
     imagem_url: imagemUrl,
   }).eq("id", varianteId);
 

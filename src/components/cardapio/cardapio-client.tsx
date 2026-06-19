@@ -133,6 +133,16 @@ function VarianteForm({
           required
         />
       </div>
+      {/* Custo */}
+      <div style={{ width: 90 }}>
+        <label style={lbl}>Custo</label>
+        <input
+          name="custo"
+          defaultValue={variante?.custo != null ? String(variante.custo) : ""}
+          placeholder="0,00"
+          style={input}
+        />
+      </div>
       <button type="submit" style={{ ...btnPrimary, padding: "9px 14px" }}>
         {isEdit ? <Check style={{ width: 14, height: 14 }} /> : <Plus style={{ width: 14, height: 14 }} />}
       </button>
@@ -271,6 +281,15 @@ function ProdutoForm({
                 placeholder="0,00"
                 style={input}
                 required
+              />
+            </div>
+            <div>
+              <label style={lbl}>Custo de produção (R$)</label>
+              <input
+                name="custo"
+                defaultValue={produto?.custo != null ? String(produto.custo) : ""}
+                placeholder="0,00"
+                style={input}
               />
             </div>
           </div>
