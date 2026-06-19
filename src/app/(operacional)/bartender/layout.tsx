@@ -35,7 +35,7 @@ export default async function BartenderLayout({
 
   const membros: MembroSimples[] = (rows ?? []).map(r => ({
     id: r.id,
-    nome: r.nome ?? r.profiles?.nome ?? "Sem nome",
+    nome: r.nome ?? "Sem nome",
     role: r.role,
   }));
 
