@@ -166,42 +166,45 @@ export default async function DashboardPage() {
 
       {/* KPI strip */}
       <div
-        className="grid grid-cols-2 lg:grid-cols-4"
+        className="grid grid-cols-1 lg:grid-cols-4"
         style={{ gap: "1px", background: "var(--border)", borderBottom: "1px solid var(--border)" }}
       >
         {kpiCards.map((kpi, i) => (
           <div
             key={kpi.label}
-            className="animate-fade-in-up"
-            style={{ background: "var(--bg-elevated)", padding: "14px 16px", animationDelay: `${i * 60}ms`, minWidth: 0 }}
+            className="animate-fade-in-up flex items-center justify-between lg:block"
+            style={{ background: "var(--bg-elevated)", padding: "16px 20px", animationDelay: `${i * 60}ms`, minWidth: 0 }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-              <p style={{ ...overline, fontSize: "10px" }}>{kpi.label}</p>
-              {kpi.estimado && (
-                <span style={{
-                  fontSize: "9px", fontWeight: 500,
-                  padding: "2px 5px", borderRadius: "2px",
-                  background: "color-mix(in srgb, var(--warn) 12%, transparent)",
-                  color: "var(--warn)",
-                  textTransform: "uppercase", letterSpacing: "0.05em",
-                  whiteSpace: "nowrap",
-                }}>estimado</span>
-              )}
+            {/* Label + valor em linha no mobile, empilhados no desktop */}
+            <div className="flex flex-col lg:block">
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                <p style={{ ...overline, fontSize: "10px" }}>{kpi.label}</p>
+                {kpi.estimado && (
+                  <span style={{
+                    fontSize: "9px", fontWeight: 500,
+                    padding: "2px 5px", borderRadius: "2px",
+                    background: "color-mix(in srgb, var(--warn) 12%, transparent)",
+                    color: "var(--warn)",
+                    textTransform: "uppercase", letterSpacing: "0.05em",
+                    whiteSpace: "nowrap",
+                  }}>estimado</span>
+                )}
+              </div>
+              <p
+                className="text-[22px] lg:text-[26px]"
+                style={{
+                  fontWeight: 600,
+                  color: "var(--fg)",
+                  fontFamily: "var(--font-mono)",
+                  fontVariantNumeric: "tabular-nums",
+                  marginTop: "4px",
+                }}
+              >{kpi.value}</p>
             </div>
-            <p
-              className="text-[20px] lg:text-[26px]"
-              style={{
-                fontWeight: 600,
-                color: "var(--fg)",
-                fontFamily: "var(--font-mono)",
-                fontVariantNumeric: "tabular-nums",
-                marginTop: "6px",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >{kpi.value}</p>
-            <TrendText percent={kpi.percent} invert={kpi.invert} />
+            {/* Trend à direita no mobile, abaixo no desktop */}
+            <div className="lg:mt-1 flex-shrink-0 ml-4 lg:ml-0">
+              <TrendText percent={kpi.percent} invert={kpi.invert} />
+            </div>
           </div>
         ))}
       </div>
