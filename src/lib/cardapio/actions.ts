@@ -108,6 +108,64 @@ export async function editarProduto(id: string, formData: FormData) {
   revalidatePath("/dashboard/cardapio");
 }
 
+// ─── Variantes ────────────────────────────────────────────────────────────────
+
+export async function criarVariante(produtoId: string, formData: FormData) {
+  const nome     = String(formData.get("nome") ?? "").trim();
+  const precoStr = String(formData.get("preco") ?? "").replace(",", ".");
+  const imagemUrl = String(formData.get("imagem_url") ?? "").trim() || null;
+
+  if (!nome || isNaN(parseFloat(precoStr))) return;
+
+  const supabase = await createClient();
+
+  // próxima ordem
+  const { data: ultima } = await supabase
+    .from("produto_variantes")
+    .select("ordem")
+    .eq("produto_id", produtoId)
+    .order("ordem", { ascending: false })
+    .limit(1)
+    .maybeSingle<{ ordem: number }>();
+
+  await semTipo(supabase.from("produto_variantes")).insert({
+    produto_id: produtoId,
+    nome,
+    preco:     parseFloat(precoStr),
+    imagem_url: imagemUrl,
+    ativo:     true,
+    ordem:     (ultima?.ordem ?? 0) + 1,
+  });
+
+  revalidatePath("/dashboard/cardapio");
+}
+
+export async function editarVariante(varianteId: string, formData: FormData) {
+  const nome     = String(formData.get("nome") ?? "").trim();
+  const precoStr = String(formData.get("preco") ?? "").replace(",", ".");
+  const imagemUrl = String(formData.get("imagem_url") ?? "").trim() || null;
+
+  if (!nome || isNaN(parseFloat(precoStr))) return;
+
+  const supabase = await createClient();
+  await semTipo(supabase.from("produto_variantes")).update({
+    nome,
+    preco:      parseFloat(precoStr),
+    imagem_url: imagemUrl,
+  }).eq("id", varianteId);
+
+  revalidatePath("/dashboard/cardapio");
+}
+
+export async function deletarVariante(varianteId: string) {
+  const supabase = await createClient();
+  await semTipo(supabase.from("produto_variantes"))
+    .update({ ativo: false })
+    .eq("id", varianteId);
+
+  revalidatePath("/dashboard/cardapio");
+}
+
 export async function toggleProduto(id: string, ativo: boolean) {
   const supabase = await createClient();
   await semTipo(supabase.from("produtos")).update({ ativo: !ativo }).eq("id", id);

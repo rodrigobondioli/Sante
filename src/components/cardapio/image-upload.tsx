@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Upload, X, Sparkles } from "lucide-react";
+import { ImageIcon, X, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 interface ImageUploadProps {
@@ -41,7 +41,8 @@ export function ImageUpload({ currentUrl, autoUrl, onUpload }: ImageUploadProps)
       .upload(path, file, { upsert: false });
 
     if (upErr) {
-      setError("Erro ao enviar imagem. Tente novamente.");
+      console.error("[image-upload] storage error:", upErr);
+      setError(`Erro: ${upErr.message}`);
       setUploading(false);
       return;
     }
@@ -72,6 +73,7 @@ export function ImageUpload({ currentUrl, autoUrl, onUpload }: ImageUploadProps)
           <img
             src={displayUrl}
             alt="Preview"
+            onError={() => { setPreview(null); onUpload(null); }}
             style={{ width: 80, height: 80, borderRadius: 8, objectFit: "cover", display: "block" }}
           />
           {isAuto && (
@@ -121,23 +123,19 @@ export function ImageUpload({ currentUrl, autoUrl, onUpload }: ImageUploadProps)
           onDragOver={e => e.preventDefault()}
           onClick={() => inputRef.current?.click()}
           style={{
-            width: 80, height: 80, borderRadius: 8,
-            border: "1.5px dashed rgba(255,255,255,0.15)",
+            width: 80, height: 80, borderRadius: 10,
+            border: "1.5px dashed rgba(255,255,255,0.12)",
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-            gap: 4, cursor: "pointer",
-            background: uploading ? "rgba(38,0,120,0.15)" : "rgba(255,255,255,0.03)",
+            gap: 6, cursor: "pointer",
+            background: uploading ? "rgba(109,40,217,0.12)" : "rgba(255,255,255,0.04)",
             transition: "background 0.15s",
+            position: "relative",
           }}
         >
           {uploading ? (
-            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.40)" }}>Enviando…</span>
+            <span style={{ fontSize: 10, color: "rgba(255,255,255,0.40)" }}>Enviando…</span>
           ) : (
-            <>
-              <Upload style={{ width: 16, height: 16, color: "rgba(255,255,255,0.25)" }} />
-              <span style={{ fontSize: 10, color: "rgba(255,255,255,0.30)", textAlign: "center", lineHeight: 1.3 }}>
-                Upload
-              </span>
-            </>
+            <ImageIcon style={{ width: 24, height: 24, color: "rgba(255,255,255,0.18)" }} />
           )}
         </div>
       )}

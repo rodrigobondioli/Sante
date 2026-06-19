@@ -132,6 +132,22 @@ export interface Produto {
   updated_at: string;
 }
 
+export interface ProdutoVariante {
+  id: string;
+  produto_id: string;
+  nome: string;
+  preco: number;
+  imagem_url: string | null;
+  ativo: boolean;
+  ordem: number;
+  created_at: string;
+}
+
+/** Produto com variantes já carregadas (usado no admin e no bartender) */
+export interface ProdutoComVariantes extends Produto {
+  produto_variantes: ProdutoVariante[];
+}
+
 export interface Fornecedor {
   id: string;
   bar_id: string;
@@ -211,6 +227,8 @@ export interface ComandaItem {
   comanda_id: string;
   bar_id: string;
   produto_id: string;
+  variante_id: string | null;
+  variante_nome: string | null;
   quantidade: number;
   preco_unitario: number;
   preco_total: number;
@@ -290,6 +308,7 @@ export interface Database {
       mesas: TableDef<Mesa>;
       categorias: TableDef<Categoria>;
       produtos: TableDef<Produto>;
+      produto_variantes: TableDef<ProdutoVariante>;
       fornecedores: TableDef<Fornecedor>;
       estoque: TableDef<Estoque>;
       compras: TableDef<Compra>;

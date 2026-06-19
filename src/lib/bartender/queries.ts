@@ -1,9 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Categoria, Comanda, Mesa, Produto } from "@/types/database";
+import type { Categoria, Comanda, Mesa, ProdutoComVariantes } from "@/types/database";
 
 export interface CategoriaComProdutos {
   categoria: Categoria;
-  produtos: Produto[];
+  produtos: ProdutoComVariantes[];
 }
 
 const SEM_CATEGORIA: Categoria = {
@@ -28,11 +28,11 @@ export async function getCardapio(barId: string): Promise<CategoriaComProdutos[]
       .returns<Categoria[]>(),
     supabase
       .from("produtos")
-      .select("*")
+      .select("*, produto_variantes(*)")
       .eq("bar_id", barId)
       .eq("ativo", true)
       .order("nome", { ascending: true })
-      .returns<Produto[]>(),
+      .returns<ProdutoComVariantes[]>(),
   ]);
 
   const categoriasPorId = new Map<string, CategoriaComProdutos>();
@@ -42,6 +42,11 @@ export async function getCardapio(barId: string): Promise<CategoriaComProdutos[]
 
   let temSemCategoria = false;
   for (const produto of produtos ?? []) {
+    // ordena variantes ativas por ordem
+    produto.produto_variantes = (produto.produto_variantes ?? [])
+      .filter(v => v.ativo)
+      .sort((a, b) => a.ordem - b.ordem);
+
     const chave = produto.categoria_id ?? "sem-categoria";
     if (!categoriasPorId.has(chave)) {
       if (produto.categoria_id) continue;
@@ -78,7 +83,7 @@ export async function getMesasComStatus(barId: string, turnoId: string): Promise
       .select("*")
       .eq("bar_id", barId)
       .eq("turno_id", turnoId)
-      .eq("status", "aberta")
+      .in("status", ["aberta", "aguardando_pagamento"])
       .returns<Comanda[]>(),
   ]);
 
@@ -101,7 +106,7 @@ export async function getComandaBalcao(barId: string, turnoId: string): Promise<
     .select("*")
     .eq("bar_id", barId)
     .eq("turno_id", turnoId)
-    .eq("status", "aberta")
+    .in("status", ["aberta", "aguardando_pagamento"])
     .is("mesa_id", null)
     .order("aberta_em", { ascending: false })
     .limit(1)

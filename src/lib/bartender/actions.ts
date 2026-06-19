@@ -32,26 +32,46 @@ export async function abrirComanda(mesaId: string | null) {
   redirect(`/bartender/${novaComanda.id}`);
 }
 
-export async function adicionarItem(produtoId: string, comandaId: string) {
+export async function adicionarItem(
+  produtoId: string,
+  comandaId: string,
+  varianteId?: string | null,
+  varianteName?: string | null,
+) {
   const current = await getCurrentBar();
   if (!current) return;
 
   const supabase = await createClient();
 
-  const { data: produto } = await supabase
-    .from("produtos")
-    .select("preco")
-    .eq("id", produtoId)
-    .single<{ preco: number }>();
-  if (!produto) return;
+  // Se tem variante, usa o preço da variante; senão usa o preço do produto
+  let preco: number;
+  if (varianteId) {
+    const { data: variante } = await supabase
+      .from("produto_variantes")
+      .select("preco")
+      .eq("id", varianteId)
+      .single<{ preco: number }>();
+    if (!variante) return;
+    preco = variante.preco;
+  } else {
+    const { data: produto } = await supabase
+      .from("produtos")
+      .select("preco")
+      .eq("id", produtoId)
+      .single<{ preco: number }>();
+    if (!produto) return;
+    preco = produto.preco;
+  }
 
   await semTipo(supabase.from("comanda_items")).insert({
-    comanda_id: comandaId,
-    bar_id: current.bar.id,
-    produto_id: produtoId,
-    quantidade: 1,
-    preco_unitario: produto.preco,
-    preco_total: produto.preco,
+    comanda_id:    comandaId,
+    bar_id:        current.bar.id,
+    produto_id:    produtoId,
+    variante_id:   varianteId ?? null,
+    variante_nome: varianteName ?? null,
+    quantidade:    1,
+    preco_unitario: preco,
+    preco_total:    preco,
     adicionado_por: current.userId,
   });
 

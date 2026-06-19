@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Martini, Search, X } from "lucide-react";
+import { useMemo, useState, useTransition } from "react";
+import { Martini, Search, X, ImageIcon } from "lucide-react";
 import { adicionarItem } from "@/lib/bartender/actions";
 import type { CategoriaComProdutos } from "@/lib/bartender/queries";
-import type { Categoria, Produto } from "@/types/database";
+import type { Categoria, ProdutoComVariantes, ProdutoVariante } from "@/types/database";
 
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -12,8 +12,8 @@ const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "
 const C = (id: string, nome: string, ordem: number): Categoria =>
   ({ id, bar_id: "demo", nome, ordem, ativo: true, created_at: "" });
 
-const P = (id: string, cat: string, nome: string, preco: number): Produto =>
-  ({ id, bar_id: "demo", categoria_id: cat, nome, preco, descricao: null, custo: null, imagem_url: null, ativo: true, controla_estoque: false, created_at: "", updated_at: "" });
+const P = (id: string, cat: string, nome: string, preco: number): ProdutoComVariantes =>
+  ({ id, bar_id: "demo", categoria_id: cat, nome, preco, descricao: null, custo: null, imagem_url: null, ativo: true, controla_estoque: false, created_at: "", updated_at: "", produto_variantes: [] });
 
 const DEMO_CARDAPIO: CategoriaComProdutos[] = [
   { categoria: C("c1", "Drinques", 1), produtos: [
@@ -43,59 +43,202 @@ const DEMO_CARDAPIO: CategoriaComProdutos[] = [
   ]},
 ];
 
-// ─── Product card ──────────────────────────────────────────────────────────────
-function ProdutoCard({ produto, comandaId }: { produto: Produto; comandaId: string }) {
-  const [hovered, setHovered] = useState(false);
+// ─── Variant picker overlay ────────────────────────────────────────────────────
+function VariantePicker({
+  produto,
+  comandaId,
+  onClose,
+}: {
+  produto: ProdutoComVariantes;
+  comandaId: string;
+  onClose: () => void;
+}) {
+  const [pending, startTransition] = useTransition();
+
+  function escolher(v: ProdutoVariante) {
+    startTransition(async () => {
+      await adicionarItem(produto.id, comandaId, v.id, v.nome);
+      onClose();
+    });
+  }
 
   return (
-    <form action={adicionarItem.bind(null, produto.id, comandaId)}>
-      <button
-        type="submit"
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+    <>
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
         style={{
-          width: "100%",
-          display: "flex",
-          flexDirection: "column",
-          gap: 8,
-          background: hovered ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.04)",
-          border: "none",
-          borderRadius: 12,
-          padding: 12,
-          textAlign: "left",
-          cursor: "pointer",
-          transition: "background 0.15s",
+          position: "fixed", inset: 0, zIndex: 40,
+          background: "rgba(0,0,0,0.55)", backdropFilter: "blur(2px)",
         }}
-      >
-        <div style={{
-          aspectRatio: "1",
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: 8,
-          background: "rgba(255,255,255,0.04)",
-          overflow: "hidden",
-          marginBottom: 4,
-        }}>
-          {produto.imagem_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={produto.imagem_url} alt={produto.nome} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          ) : (
-            <Martini style={{ width: 26, height: 26, color: "rgba(255,255,255,0.15)" }} strokeWidth={1.5} />
-          )}
+      />
+      {/* Modal */}
+      <div style={{
+        position: "fixed", left: "50%", top: "50%",
+        transform: "translate(-50%, -50%)",
+        zIndex: 50,
+        background: "#12121e",
+        border: "1px solid rgba(255,255,255,0.10)",
+        borderRadius: 16,
+        padding: 20,
+        width: "min(360px, 90vw)",
+        boxShadow: "0 24px 64px rgba(0,0,0,0.60)",
+      }}>
+        {/* Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <div>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>
+              Escolha a variante
+            </p>
+            <p style={{ fontSize: 15, fontWeight: 700, color: "white", margin: "3px 0 0" }}>
+              {produto.nome}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              background: "rgba(255,255,255,0.06)", border: "none", borderRadius: 8,
+              color: "rgba(255,255,255,0.50)", cursor: "pointer", padding: 6,
+              display: "flex", alignItems: "center",
+            }}
+          >
+            <X style={{ width: 14, height: 14 }} />
+          </button>
         </div>
-        <div>
-          <p style={{ fontSize: 13, fontWeight: 500, color: "rgba(255,255,255,0.85)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {produto.nome}
-          </p>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", margin: "3px 0 0" }}>
-            {currency.format(produto.preco)}
-          </p>
+
+        {/* Variante cards */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {produto.produto_variantes.map(v => (
+            <button
+              key={v.id}
+              type="button"
+              disabled={pending}
+              onClick={() => escolher(v)}
+              style={{
+                display: "flex", alignItems: "center", gap: 12,
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: 12, padding: "10px 14px",
+                cursor: pending ? "wait" : "pointer",
+                textAlign: "left",
+                transition: "background 0.12s",
+                opacity: pending ? 0.6 : 1,
+              }}
+            >
+              {/* Foto */}
+              <div style={{
+                width: 48, height: 48, borderRadius: 8, flexShrink: 0,
+                background: v.imagem_url
+                  ? `url(${v.imagem_url}) center/cover`
+                  : "rgba(255,255,255,0.06)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                {!v.imagem_url && <ImageIcon style={{ width: 18, height: 18, color: "rgba(255,255,255,0.18)" }} />}
+              </div>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: 14, fontWeight: 600, color: "white", margin: 0 }}>{v.nome}</p>
+              </div>
+              <p style={{ fontSize: 14, fontWeight: 700, color: "rgba(255,255,255,0.70)", margin: 0, fontVariantNumeric: "tabular-nums" }}>
+                {currency.format(v.preco)}
+              </p>
+            </button>
+          ))}
         </div>
-      </button>
-    </form>
+      </div>
+    </>
   );
+}
+
+// ─── Product card ──────────────────────────────────────────────────────────────
+function ProdutoCard({
+  produto,
+  comandaId,
+  onPickVariante,
+}: {
+  produto: ProdutoComVariantes;
+  comandaId: string;
+  onPickVariante: (p: ProdutoComVariantes) => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const [pending, startTransition] = useTransition();
+  const temVariantes = produto.produto_variantes.length > 0;
+
+  function handleClick() {
+    if (temVariantes) {
+      onPickVariante(produto);
+    } else {
+      startTransition(async () => {
+        await adicionarItem(produto.id, comandaId);
+      });
+    }
+  }
+
+  const inner = (
+    <button
+      type="button"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onClick={handleClick}
+      disabled={pending}
+      style={{
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        gap: 8,
+        background: hovered ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.04)",
+        border: "none",
+        borderRadius: 12,
+        padding: 12,
+        textAlign: "left",
+        cursor: "pointer",
+        transition: "background 0.15s",
+        position: "relative",
+      }}
+    >
+      <div style={{
+        aspectRatio: "1",
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 8,
+        background: "rgba(255,255,255,0.04)",
+        overflow: "hidden",
+        marginBottom: 4,
+      }}>
+        {produto.imagem_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={produto.imagem_url} alt={produto.nome} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        ) : (
+          <Martini style={{ width: 26, height: 26, color: "rgba(255,255,255,0.15)" }} strokeWidth={1.5} />
+        )}
+      </div>
+
+      {/* Badge de variantes */}
+      {temVariantes && (
+        <div style={{
+          position: "absolute", top: 8, right: 8,
+          background: "rgba(109,40,217,0.75)",
+          borderRadius: 99, padding: "2px 6px",
+          fontSize: 9, fontWeight: 700, color: "rgba(220,200,255,0.9)",
+        }}>
+          {produto.produto_variantes.length} vars
+        </div>
+      )}
+
+      <div>
+        <p style={{ fontSize: 13, fontWeight: 500, color: "rgba(255,255,255,0.85)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {produto.nome}
+        </p>
+        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", margin: "3px 0 0" }}>
+          {temVariantes ? "→ escolher" : currency.format(produto.preco)}
+        </p>
+      </div>
+    </button>
+  );
+
+  return inner;
 }
 
 // ─── Main grid ────────────────────────────────────────────────────────────────
@@ -105,6 +248,7 @@ export function ProdutoGrid({ cardapio, comandaId }: { cardapio: CategoriaComPro
   const [categoriaAtiva, setCategoriaAtiva] = useState(data[0]?.categoria.id ?? "");
   const [busca, setBusca] = useState("");
   const [buscaAtiva, setBuscaAtiva] = useState(false);
+  const [pickerProduto, setPickerProduto] = useState<ProdutoComVariantes | null>(null);
 
   // Search across all categories when search is active
   const resultadoBusca = useMemo(() => {
@@ -118,6 +262,7 @@ export function ProdutoGrid({ cardapio, comandaId }: { cardapio: CategoriaComPro
     : (data.find(g => g.categoria.id === categoriaAtiva)?.produtos ?? []);
 
   return (
+    <>
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
 
       {/* ── Category tabs + search toggle ── */}
@@ -220,12 +365,27 @@ export function ProdutoGrid({ cardapio, comandaId }: { cardapio: CategoriaComPro
             gap: 10,
           }}>
             {produtosAtivos.map(produto => (
-              <ProdutoCard key={produto.id} produto={produto} comandaId={comandaId} />
+              <ProdutoCard
+                key={produto.id}
+                produto={produto}
+                comandaId={comandaId}
+                onPickVariante={setPickerProduto}
+              />
             ))}
           </div>
         )}
       </div>
 
     </div>
+
+    {/* Variant picker */}
+    {pickerProduto && (
+      <VariantePicker
+        produto={pickerProduto}
+        comandaId={comandaId}
+        onClose={() => setPickerProduto(null)}
+      />
+    )}
+    </>
   );
 }
