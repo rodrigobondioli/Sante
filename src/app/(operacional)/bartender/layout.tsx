@@ -29,6 +29,8 @@ export default async function BartenderLayout({
     .select("id, nome, role")
     .eq("bar_id", current.bar.id)
     .eq("ativo", true)
+    .in("role", ["bartender", "garcom", "caixa"])
+    .not("nome", "is", null)
     .order("created_at", { ascending: true }) as {
       data: { id: string; nome: string | null; role: string }[] | null;
     };
