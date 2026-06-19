@@ -85,42 +85,47 @@ export function DashboardSidebar({ barNome }: DashboardSidebarProps) {
         })}
       </nav>
 
-      {/* Suporte + Sugestão */}
-      <div style={{ padding:'12px 16px', borderTop:'1px solid rgba(255,255,255,0.06)', display:'flex', flexDirection:'column', gap:'2px' }}>
-        {[
-          { icon:'🎧', label:'Suporte', type:'suporte' as const },
-          { icon:'💡', label:'Sugestão', type:'sugestao' as const },
-        ].map(item => (
-          <button
-            key={item.label}
-            onClick={() => { setDrawerType(item.type); setDrawerOpen(true); }}
-            style={{ display:'flex', alignItems:'center', gap:'10px', padding:'8px 12px', borderRadius:'4px', background:'none', border:'none', color:'rgba(255,255,255,0.35)', fontSize:'13px', cursor:'pointer', width:'100%', textAlign:'left', transition:'all 150ms' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.70)'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.35)'; }}
-          >
-            <span>{item.icon}</span>
-            {item.label}
-          </button>
-        ))}
-      </div>
+      {/* Rodapé — empurrado pro fundo */}
+      <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 0 }}>
 
-      {/* Modo Bartender — rodapé */}
-      <div style={{ padding: '12px 16px', borderTop:'1px solid rgba(255,255,255,0.06)' }}>
-        <Link
-          href="/bartender"
-          style={{
-            display: "flex", alignItems: "center", gap: 10,
-            padding: "10px 12px", borderRadius: 10,
-            background: "rgba(38,0,120,0.25)",
-            border: "1px solid rgba(124,58,237,0.25)",
-            color: "rgba(160,130,255,0.9)",
-            fontSize: 13, fontWeight: 600,
-            textDecoration: "none",
-          }}
-        >
-          <MonitorSmartphone style={{ width: 15, height: 15 }} />
-          Modo Bartender
-        </Link>
+        {/* Suporte + Sugestão */}
+        <div style={{ padding: '8px 16px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {[
+            { icon: '🎧', label: 'Suporte', type: 'suporte' as const },
+            { icon: '💡', label: 'Sugestão', type: 'sugestao' as const },
+          ].map(item => (
+            <button
+              key={item.label}
+              onClick={() => { setDrawerType(item.type); setDrawerOpen(true); }}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 6, background: 'none', border: 'none', color: 'rgba(255,255,255,0.30)', fontSize: 13, cursor: 'pointer', width: '100%', textAlign: 'left', transition: 'color 150ms' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.60)'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.30)'; }}
+            >
+              <span>{item.icon}</span>
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Modo Bartender */}
+        <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <Link
+            href="/bartender"
+            style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '10px 12px', borderRadius: 10,
+              background: 'rgba(38,0,120,0.25)',
+              border: '1px solid rgba(124,58,237,0.25)',
+              color: 'rgba(160,130,255,0.9)',
+              fontSize: 13, fontWeight: 600,
+              textDecoration: 'none',
+            }}
+          >
+            <MonitorSmartphone style={{ width: 15, height: 15 }} />
+            Modo Bartender
+          </Link>
+        </div>
+
       </div>
 
       <Drawer open={drawerOpen} type={drawerType} onClose={() => setDrawerOpen(false)} />
