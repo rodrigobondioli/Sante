@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { submeterPedido } from "@/lib/menu/actions";
+import { useState, useEffect, useTransition } from "react";
+import { submeterPedido, pedirConta } from "@/lib/menu/actions";
 import type { Bar, Mesa, Categoria, Produto } from "@/types/database";
 
 type CategoriaComProdutos = Categoria & { produtos: Produto[] };
@@ -13,7 +13,9 @@ type Screen =
   | "categories"
   | "products"
   | "product-detail"
-  | "cart";
+  | "cart"
+  | "pedir-conta"
+  | "conta-solicitada";
 
 interface CartItem {
   produto: Produto;
@@ -367,11 +369,13 @@ function CategoriesScreen({
   onSelect,
   cartCount,
   onCart,
+  onPedirConta,
 }: {
   cardapio: CategoriaComProdutos[];
   onSelect: (cat: CategoriaComProdutos) => void;
   cartCount: number;
   onCart: () => void;
+  onPedirConta: () => void;
 }) {
   return (
     <div style={{ height: "100%", background: BG, display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: FONT }}>
@@ -396,7 +400,7 @@ function CategoriesScreen({
       </div>
 
       {/* Cards */}
-      <div style={{ flex: 1, overflow: "hidden", padding: "0 16px 32px", display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ flex: 1, overflow: "hidden", padding: "0 16px 0", display: "flex", flexDirection: "column", gap: 10 }}>
         {cardapio.map((cat) => {
           const coverImg = cat.produtos.find((p) => p.imagem_url)?.imagem_url ?? null;
           return (
@@ -446,6 +450,26 @@ function CategoriesScreen({
             </button>
           );
         })}
+      </div>
+
+      {/* Fechar conta — rodapé discreto */}
+      <div style={{ padding: "14px 20px 40px", textAlign: "center", flexShrink: 0 }}>
+        <button
+          onClick={onPedirConta}
+          style={{
+            background: "none", border: "none",
+            color: "rgba(255,255,255,0.28)",
+            fontSize: 13, cursor: "pointer",
+            textDecoration: "underline",
+            textUnderlineOffset: 3,
+            fontFamily: FONT,
+            transition: "color 200ms",
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.55)"; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.28)"; }}
+        >
+          Pronto? Fechar a conta
+        </button>
       </div>
     </div>
   );
@@ -921,6 +945,117 @@ function CartScreen({
   );
 }
 
+// ─── PEDIR CONTA ─────────────────────────────────────────────────────────────
+
+function PedirContaScreen({
+  bar,
+  mesa,
+  onConfirm,
+  onBack,
+}: {
+  bar: Bar;
+  mesa: Mesa;
+  onConfirm: () => void;
+  onBack: () => void;
+}) {
+  const [isPending, startTransition] = useTransition();
+  const mesaLabel = mesa.nome ?? `Mesa ${mesa.numero}`;
+
+  const handleConfirm = () => {
+    startTransition(async () => {
+      await pedirConta(bar.id, mesa.id);
+      onConfirm();
+    });
+  };
+
+  return (
+    <div style={{
+      height: "100%", background: BG, fontFamily: FONT,
+      display: "flex", flexDirection: "column",
+      justifyContent: "space-between",
+      padding: "72px 28px 52px",
+    }}>
+      <div>
+        <p style={{ fontSize: 11, color: ACCENT, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", margin: "0 0 22px" }}>
+          {mesaLabel}
+        </p>
+        <h1 style={{ fontSize: 34, fontWeight: 900, color: "white", margin: "0 0 16px", lineHeight: 1.05, letterSpacing: "-0.8px" }}>
+          Fechar a conta?
+        </h1>
+        <p style={{ fontSize: 15, color: "rgba(255,255,255,0.45)", margin: 0, lineHeight: 1.7 }}>
+          Ao confirmar, o garçom vai até você para finalizar o pagamento.
+          Você não poderá mais fazer pedidos nesta mesa.
+        </p>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <button
+          onClick={handleConfirm}
+          disabled={isPending}
+          style={{
+            padding: "20px", borderRadius: 16,
+            background: isPending ? "rgba(38,0,120,0.50)" : ACCENT,
+            border: "none", color: "white",
+            fontSize: 16, fontWeight: 900,
+            cursor: isPending ? "default" : "pointer",
+            letterSpacing: "-0.3px", fontFamily: FONT,
+            transition: "background 200ms",
+          }}
+        >
+          {isPending ? "Enviando..." : "Confirmar — fechar conta →"}
+        </button>
+        <button
+          onClick={onBack}
+          disabled={isPending}
+          style={{
+            padding: "18px", borderRadius: 16,
+            background: CARD, border: "none",
+            color: "rgba(255,255,255,0.45)",
+            fontSize: 15, fontWeight: 600,
+            cursor: "pointer", fontFamily: FONT,
+          }}
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── CONTA SOLICITADA ─────────────────────────────────────────────────────────
+
+function ContaSolicitadaScreen({ mesa }: { mesa: Mesa }) {
+  const mesaLabel = mesa.nome ?? `Mesa ${mesa.numero}`;
+
+  return (
+    <div style={{
+      height: "100%", background: BG, fontFamily: FONT,
+      display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      padding: "0 40px", textAlign: "center",
+    }}>
+      <div style={{
+        width: 96, height: 96, borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(200,255,0,0.12) 0%, transparent 70%)",
+        border: "2px solid rgba(200,255,0,0.2)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: 42, marginBottom: 32,
+      }}>
+        🧾
+      </div>
+      <h2 style={{ fontSize: 30, fontWeight: 900, color: "white", margin: "0 0 14px", letterSpacing: "-0.6px", lineHeight: 1.1 }}>
+        Conta solicitada!
+      </h2>
+      <p style={{ fontSize: 15, color: "rgba(255,255,255,0.45)", margin: 0, lineHeight: 1.7 }}>
+        Seu garçom vai até você<br />em instantes para finalizar.
+      </p>
+      <p style={{ fontSize: 12, color: "rgba(255,255,255,0.20)", marginTop: 40 }}>
+        {mesaLabel}
+      </p>
+    </div>
+  );
+}
+
 // ─── TOAST ────────────────────────────────────────────────────────────────────
 function Toast({ visible }: { visible: boolean }) {
   return (
@@ -1038,6 +1173,7 @@ export function MenuApp({
           onSelect={(cat) => { setSelectedCategoria(cat); setScreen("products"); }}
           cartCount={cartCount}
           onCart={() => setScreen("cart")}
+          onPedirConta={() => setScreen("pedir-conta")}
         />
       )}
       {screen === "products" && selectedCategoria && (
@@ -1072,6 +1208,17 @@ export function MenuApp({
             setScreen("categories");
           }}
         />
+      )}
+      {screen === "pedir-conta" && (
+        <PedirContaScreen
+          bar={bar}
+          mesa={mesa}
+          onConfirm={() => setScreen("conta-solicitada")}
+          onBack={() => setScreen("categories")}
+        />
+      )}
+      {screen === "conta-solicitada" && (
+        <ContaSolicitadaScreen mesa={mesa} />
       )}
     </div>
   );

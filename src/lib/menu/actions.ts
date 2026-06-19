@@ -39,6 +39,32 @@ export async function submeterPedido({
   return data.id;
 }
 
+export async function pedirConta(
+  barId: string,
+  mesaId: string,
+): Promise<{ ok: boolean; total?: number }> {
+  const supabase = await createClient();
+
+  // Busca comanda aberta desta mesa
+  const { data: comanda } = await semTipo(supabase.from("comandas"))
+    .select("id, total")
+    .eq("bar_id", barId)
+    .eq("mesa_id", mesaId)
+    .eq("status", "aberta")
+    .maybeSingle() as { data: { id: string; total: number } | null };
+
+  if (comanda) {
+    await semTipo(supabase.from("comandas"))
+      .update({ status: "aguardando_pagamento" })
+      .eq("id", comanda.id);
+    return { ok: true, total: comanda.total };
+  }
+
+  // Se não há comanda aberta (pedidos ainda em fila), ok na mesma
+  // — o garçom vai atender
+  return { ok: true };
+}
+
 export async function atualizarStatusPedido(
   pedidoId: string,
   status: "em_preparo" | "pronto" | "entregue" | "cancelado"
