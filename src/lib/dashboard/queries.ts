@@ -293,22 +293,22 @@ export async function getMetaMes(barId: string) {
   const [mesAtualResult, mesAnteriorResult] = await Promise.all([
     supabase
       .from('turnos')
-      .select('faturamento_calculado')
+      .select('total_vendas')
       .eq('bar_id', barId)
       .gte('aberto_em', inicioMesAtual)
       .lte('aberto_em', fimMesAtual)
-      .returns<{ faturamento_calculado: number | null }[]>(),
+      .returns<{ total_vendas: number }[]>(),
     supabase
       .from('turnos')
-      .select('faturamento_calculado')
+      .select('total_vendas')
       .eq('bar_id', barId)
       .gte('aberto_em', inicioMesAnterior)
       .lte('aberto_em', fimMesAnterior)
-      .returns<{ faturamento_calculado: number | null }[]>(),
+      .returns<{ total_vendas: number }[]>(),
   ])
 
-  const faturamentoAtual = (mesAtualResult.data ?? []).reduce((sum, t) => sum + (t.faturamento_calculado ?? 0), 0)
-  const faturamentoAnterior = (mesAnteriorResult.data ?? []).reduce((sum, t) => sum + (t.faturamento_calculado ?? 0), 0)
+  const faturamentoAtual = (mesAtualResult.data ?? []).reduce((sum, t) => sum + (t.total_vendas ?? 0), 0)
+  const faturamentoAnterior = (mesAnteriorResult.data ?? []).reduce((sum, t) => sum + (t.total_vendas ?? 0), 0)
 
   // Goal = last month + 10% (or last month if no previous data)
   const meta = faturamentoAnterior > 0 ? faturamentoAnterior * 1.1 : 5000

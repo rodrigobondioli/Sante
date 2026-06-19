@@ -252,10 +252,17 @@ export default async function DashboardPage() {
             }}>
               {currency.format(receitaSemana.atual)}
             </p>
-            <TrendText percent={receitaSemana.percentual} comparativoLabel="vs semana passada" />
+            {/* Desktop: trend acima do gráfico */}
+            <span className="hidden lg:inline-block">
+              <TrendText percent={receitaSemana.percentual} comparativoLabel="vs semana passada" />
+            </span>
             <div className="mt-3" style={{ maxHeight: "160px", overflow: "hidden" }}>
               <BarChart data={pontosReceita} height={160} />
             </div>
+            {/* Mobile: trend abaixo do gráfico */}
+            <span className="lg:hidden block mt-2">
+              <TrendText percent={receitaSemana.percentual} comparativoLabel="vs semana passada" />
+            </span>
           </div>
 
           <div
@@ -393,6 +400,21 @@ export default async function DashboardPage() {
           </div>
 
         </div>
+
+        {/* Aviso mobile — versão desktop tem mais detalhes */}
+        <p
+          className="lg:hidden"
+          style={{
+            fontSize: "12px",
+            color: "var(--fg-subtle)",
+            textAlign: "center",
+            paddingTop: "8px",
+            paddingBottom: "4px",
+          }}
+        >
+          Acesse o desktop para gráficos e análises completas.
+        </p>
+
       </div>
     </div>
   );
