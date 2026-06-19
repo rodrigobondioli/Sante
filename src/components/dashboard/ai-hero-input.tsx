@@ -34,7 +34,7 @@ export function AiHeroInput({ barId }: { barId: string }) {
   }
 
   return (
-    <div style={{ width: '100%', maxWidth: '640px', margin: '0 auto' }}>
+    <div style={{ width: '100%', maxWidth: '720px', margin: '0 auto' }}>
       {/* Single card — input + chips */}
       <div style={{
         background: 'var(--bg-elevated)',
@@ -43,7 +43,7 @@ export function AiHeroInput({ barId }: { barId: string }) {
         overflow: 'hidden',
       }}>
         {/* Input row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '22px 24px' }}>
           <input
             value={question}
             onChange={e => setQuestion(e.target.value)}
@@ -55,7 +55,7 @@ export function AiHeroInput({ barId }: { barId: string }) {
               border: 'none',
               outline: 'none',
               color: 'var(--fg)',
-              fontSize: '15px',
+              fontSize: '17px',
             }}
           />
           <button
@@ -65,8 +65,8 @@ export function AiHeroInput({ barId }: { barId: string }) {
               background: 'var(--accent)',
               border: 'none',
               borderRadius: '4px',
-              width: '36px',
-              height: '36px',
+              width: '44px',
+              height: '44px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -76,9 +76,9 @@ export function AiHeroInput({ barId }: { barId: string }) {
             }}
           >
             {loading ? (
-              <span style={{ color: 'var(--accent-fg)', fontSize: '16px' }}>·</span>
+              <span style={{ color: 'var(--accent-fg)', fontSize: '20px' }}>·</span>
             ) : (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-fg)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-fg)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8"/>
                 <path d="m21 21-4.35-4.35"/>
               </svg>
@@ -87,14 +87,14 @@ export function AiHeroInput({ barId }: { barId: string }) {
         </div>
 
         {/* Divider */}
-        <div style={{ height: '1px', background: 'var(--border)', margin: '0 20px' }} />
+        <div style={{ height: '1px', background: 'var(--border)', margin: '0 24px' }} />
 
         {/* Chips row */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '6px',
-          padding: '12px 20px',
+          gap: '8px',
+          padding: '14px 24px',
           flexWrap: 'wrap',
         }}>
           <span style={{ fontSize: '12px', color: 'var(--fg-subtle)', flexShrink: 0, marginRight: '4px' }}>
