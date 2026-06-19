@@ -126,14 +126,12 @@ export default async function DashboardPage() {
     <div className="flex flex-col">
 
       {/* Hero — flat, plano, sem orbs */}
-      <div style={{
-        position: "relative",
-        background: "var(--bg)",
-        borderBottom: "1px solid var(--border)",
-        padding: "56px 48px 40px",
-      }}>
-        {/* Controls — top-right */}
-        <div style={{ position: "absolute", top: "16px", right: "24px", display: "flex", alignItems: "center", gap: "10px" }}>
+      <div
+        className="relative px-5 pt-8 pb-6 lg:px-12 lg:pt-14 lg:pb-10"
+        style={{ background: "var(--bg)", borderBottom: "1px solid var(--border)" }}
+      >
+        {/* Controls — top-right, visível só no desktop (mobile usa o header do layout) */}
+        <div className="hidden lg:flex" style={{ position: "absolute", top: "16px", right: "24px", alignItems: "center", gap: "10px" }}>
           <AlertasBell alertas={alertas} />
           <SettingsButton
             bar={current.bar}
@@ -164,17 +162,20 @@ export default async function DashboardPage() {
         </div>
 
         {/* Greeting */}
-        <h1 style={{
-          fontSize: "32px", fontWeight: 700,
-          color: "var(--fg)",
-          fontFamily: "var(--font-mono)",
-          letterSpacing: "-0.01em",
-          lineHeight: 1.15,
-          marginBottom: "6px",
-        }}>
+        <h1
+          className="lg:text-[32px] text-[24px]"
+          style={{
+            fontWeight: 700,
+            color: "var(--fg)",
+            fontFamily: "var(--font-mono)",
+            letterSpacing: "-0.01em",
+            lineHeight: 1.15,
+            marginBottom: "6px",
+          }}
+        >
           {saudacao(agora.getHours())}, {primeiroNome}
         </h1>
-        <p style={{ fontSize: "13px", color: "var(--fg-subtle)", marginBottom: "32px" }}>
+        <p style={{ fontSize: "13px", color: "var(--fg-subtle)", marginBottom: "24px" }}>
           {dataFormatada}{turno ? " · turno aberto" : " · nenhum turno aberto"}
         </p>
 
@@ -182,18 +183,15 @@ export default async function DashboardPage() {
       </div>
 
       {/* KPI strip */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(4, 1fr)",
-        gap: "1px",
-        background: "var(--border)",
-        borderBottom: "1px solid var(--border)",
-      }}>
+      <div
+        className="grid grid-cols-2 lg:grid-cols-4"
+        style={{ gap: "1px", background: "var(--border)", borderBottom: "1px solid var(--border)" }}
+      >
         {kpiCards.map((kpi, i) => (
           <div
             key={kpi.label}
             className="animate-fade-in-up"
-            style={{ background: "var(--bg-elevated)", padding: "20px 28px", animationDelay: `${i * 60}ms` }}
+            style={{ background: "var(--bg-elevated)", padding: "16px 20px", animationDelay: `${i * 60}ms` }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <p style={overline}>{kpi.label}</p>
@@ -221,7 +219,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Content */}
-      <div style={{ padding: "32px", display: "flex", flexDirection: "column", gap: "24px" }}>
+      <div className="px-5 lg:px-8" style={{ paddingTop: 24, paddingBottom: 32, display: "flex", flexDirection: "column", gap: "24px" }}>
 
         {/* Section header */}
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
@@ -268,7 +266,8 @@ export default async function DashboardPage() {
               </p>
               <p style={{ ...overline, marginBottom: "16px" }}>por margem · turno atual</p>
             </div>
-            <table className="w-full text-left">
+            <div style={{ overflowX: "auto" }}>
+            <table className="w-full text-left" style={{ minWidth: 360 }}>
               <thead>
                 <tr style={overline}>
                   <th className="font-medium" style={{ padding: "4px 24px" }}>#</th>
@@ -318,12 +317,13 @@ export default async function DashboardPage() {
                 )}
               </tbody>
             </table>
+            </div>
             <div className="h-3" />
           </div>
         </div>
 
         {/* Bottom widgets */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3" style={{ gap: "16px" }}>
 
           {/* CMV */}
           <div style={card}>

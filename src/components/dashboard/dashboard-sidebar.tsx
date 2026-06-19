@@ -26,6 +26,8 @@ interface DashboardSidebarProps {
   barNome: string;
   userNome: string;
   role: BarRole;
+  onNavigate?: () => void;
+  hideHeader?: boolean;
 }
 
 const ROLE_LABEL: Record<string, string> = {
@@ -42,7 +44,7 @@ const footerItems = [
   { label: "Sugestão", type: "sugestao" as const },
 ];
 
-export function DashboardSidebar({ barNome, role }: DashboardSidebarProps) {
+export function DashboardSidebar({ barNome, role, onNavigate, hideHeader }: DashboardSidebarProps) {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerType, setDrawerType] = useState<"suporte" | "sugestao">("suporte");
@@ -58,8 +60,8 @@ export function DashboardSidebar({ barNome, role }: DashboardSidebarProps) {
         borderRight: "1px solid var(--border)",
       }}
     >
-      {/* Logo / bar name */}
-      <div style={{ padding: "20px 24px", display: "flex", alignItems: "center", gap: "10px", borderBottom: "1px solid var(--border)" }}>
+      {/* Logo / bar name — oculto dentro do drawer mobile (já tem header próprio) */}
+      <div style={{ padding: "20px 24px", display: hideHeader ? "none" : "flex", alignItems: "center", gap: "10px", borderBottom: "1px solid var(--border)" }}>
         <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)" }}>
           {barNome}
         </span>
@@ -89,6 +91,7 @@ export function DashboardSidebar({ barNome, role }: DashboardSidebarProps) {
             <Link
               key={link.href}
               href={link.href}
+              onClick={onNavigate}
               style={{
                 display: "flex",
                 alignItems: "center",
