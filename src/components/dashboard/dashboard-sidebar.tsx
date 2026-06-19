@@ -15,7 +15,7 @@ const links = [
   { href: "/dashboard/cardapio", label: "Cardápio", icon: UtensilsCrossed },
   { href: "/dashboard/mesas", label: "Mesas", icon: TableProperties },
   { href: "/dashboard/equipe", label: "Equipe", icon: Users },
-  { href: "/dashboard/caixa", label: "Caixa", icon: Wallet },
+  { href: "/caixa", label: "Caixa", icon: Wallet },
 ];
 
 interface DashboardSidebarProps {
@@ -24,7 +24,16 @@ interface DashboardSidebarProps {
   role: BarRole;
 }
 
-export function DashboardSidebar({ barNome }: DashboardSidebarProps) {
+const ROLE_LABEL: Record<string, string> = {
+  dono: "Dono",
+  gerente: "Gerente",
+  bar_manager: "Gerente",
+  caixa: "Caixa",
+  bartender: "Bartender",
+  garcom: "Garçom",
+};
+
+export function DashboardSidebar({ barNome, role }: DashboardSidebarProps) {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerType, setDrawerType] = useState<'suporte' | 'sugestao'>('suporte');
@@ -51,7 +60,7 @@ export function DashboardSidebar({ barNome }: DashboardSidebarProps) {
           color: "rgba(160,130,255,0.9)",
           whiteSpace: "nowrap",
         }}>
-          Dono
+          {ROLE_LABEL[role] ?? role}
         </span>
       </div>
 

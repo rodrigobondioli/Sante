@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import type { PagamentoMetodo } from "@/types/database";
 
 export interface ComandaPendente {
   id: string;
@@ -6,6 +7,13 @@ export interface ComandaPendente {
   aberta_em: string;
   mesa: string; // "Mesa 3" | "Balcão"
   itens: { nome: string; quantidade: number; preco_total: number }[];
+}
+
+export interface CaixaInsights {
+  totalTurno: number;
+  comandasPagas: number;
+  ticketMedio: number;
+  porMetodo: { metodo: PagamentoMetodo; total: number; quantidade: number }[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,4 +68,31 @@ export async function getComandasPendentes(barId: string, turnoId: string): Prom
     mesa: c.mesas ? (c.mesas.nome ?? `Mesa ${c.mesas.numero}`) : "Balcão",
     itens: itensPorComanda.get(c.id) ?? [],
   }));
+}
+
+export async function getCaixaInsights(barId: string, turnoId: string): Promise<CaixaInsights> {
+  const supabase = await createClient();
+
+  const { data: pagamentos } = await semTipo(supabase.from("pagamentos"))
+    .select("valor, metodo")
+    .eq("bar_id", barId)
+    .eq("turno_id", turnoId)
+    .eq("status", "confirmado") as {
+      data: { valor: number; metodo: PagamentoMetodo }[] | null;
+    };
+
+  const lista = pagamentos ?? [];
+  const totalTurno = lista.reduce((s, p) => s + p.valor, 0);
+  const comandasPagas = lista.length;
+  const ticketMedio = comandasPagas > 0 ? totalTurno / comandasPagas : 0;
+
+  const mapaMetodo = new Map<PagamentoMetodo, { total: number; quantidade: number }>();
+  for (const p of lista) {
+    const atual = mapaMetodo.get(p.metodo) ?? { total: 0, quantidade: 0 };
+    mapaMetodo.set(p.metodo, { total: atual.total + p.valor, quantidade: atual.quantidade + 1 });
+  }
+
+  const porMetodo = Array.from(mapaMetodo.entries()).map(([metodo, v]) => ({ metodo, ...v }));
+
+  return { totalTurno, comandasPagas, ticketMedio, porMetodo };
 }
