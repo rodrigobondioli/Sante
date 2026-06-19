@@ -15,9 +15,8 @@ export function TrendText({ percent, comparativoLabel = "vs turno anterior", inv
   }
 
   const isPositive = percent >= 0;
-  const isGood = invert ? !isPositive : isPositive;
   const arrow = isPositive ? "↑" : "↓";
-  const arrowColor = isGood ? "var(--ok)" : "var(--danger)";
+  const arrowColor = isPositive ? "var(--ok)" : "var(--danger)";
 
   return (
     <span style={{
