@@ -167,13 +167,17 @@ function VarianteRow({ variante, produtoId }: { variante: ProdutoVariante; produ
 
   return (
     <div className="group flex items-center gap-2.5 rounded" style={{ padding: "6px 10px" }}>
-      <div style={{
-        width: 48, height: 48, borderRadius: 4, flexShrink: 0,
-        background: variante.imagem_url
-          ? `url(${variante.imagem_url}) center/cover`
-          : "var(--bg-inset)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-      }}>
+      <div
+        onClick={!variante.imagem_url ? () => setEditing(true) : undefined}
+        title={!variante.imagem_url ? "Adicionar imagem" : undefined}
+        style={{
+          width: 48, height: 48, borderRadius: 4, flexShrink: 0,
+          background: variante.imagem_url
+            ? `url(${variante.imagem_url}) center/cover`
+            : "var(--bg-inset)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          cursor: variante.imagem_url ? "default" : "pointer",
+        }}>
         {!variante.imagem_url && <ImageIcon style={{ width: 16, height: 16, color: "var(--fg-subtle)" }} />}
       </div>
       <span style={{ flex: 1, fontSize: 13, color: "var(--fg)" }}>{variante.nome}</span>
@@ -343,13 +347,17 @@ function ProdutoRow({
         }}
       >
         {/* Thumb */}
-        <div style={{
-          width: 56, height: 56, borderRadius: 4, flexShrink: 0,
-          background: produto.imagem_url
-            ? `url(${produto.imagem_url}) center/cover`
-            : "var(--bg-inset)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
+        <div
+          onClick={!produto.imagem_url ? () => setEditing(true) : undefined}
+          title={!produto.imagem_url ? "Adicionar imagem" : undefined}
+          style={{
+            width: 56, height: 56, borderRadius: 4, flexShrink: 0,
+            background: produto.imagem_url
+              ? `url(${produto.imagem_url}) center/cover`
+              : "var(--bg-inset)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: produto.imagem_url ? "default" : "pointer",
+          }}>
           {!produto.imagem_url && <ImageIcon style={{ width: 22, height: 22, color: "var(--fg-subtle)" }} />}
         </div>
 
