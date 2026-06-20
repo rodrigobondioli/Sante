@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { X, Building2, User, Target } from "lucide-react";
 import { ImageUpload } from "@/components/cardapio/image-upload";
 import { atualizarPerfil, atualizarConta, atualizarLogo, atualizarAvatar, type ActionResult } from "@/lib/settings/actions";
+import { signOut } from "@/lib/auth/actions";
 import type { Bar } from "@/types/database";
 
 // ─── Shared inline styles ────────────────────────────────────────────────────
@@ -419,6 +420,32 @@ export function SettingsPanel({
             userEmail={userEmail}
             userAvatarUrl={userAvatarUrl}
           />
+
+          {/* Divider */}
+          <div style={{ height: 1, background: "var(--border)" }} />
+
+          {/* Logout */}
+          <section>
+            <form action={signOut}>
+              <button
+                type="submit"
+                style={{
+                  background: "transparent",
+                  border: "1px solid color-mix(in srgb, var(--danger) 40%, transparent)",
+                  borderRadius: 4,
+                  padding: "9px 18px",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color: "var(--danger)",
+                  cursor: "pointer",
+                  transition: "background 150ms, border-color 150ms",
+                }}
+                className="hover:bg-[color-mix(in_srgb,var(--danger)_8%,transparent)] hover:border-[var(--danger)]"
+              >
+                Sair da conta
+              </button>
+            </form>
+          </section>
         </div>
       </div>
     </>
