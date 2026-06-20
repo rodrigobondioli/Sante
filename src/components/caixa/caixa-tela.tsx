@@ -232,6 +232,7 @@ function ComandaCard({ comanda, onPago }: { comanda: ComandaPendente; onPago: (m
   const [metodoPago, setMetodoPago] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showCortesia, setShowCortesia] = useState(false);
+  const [cartaoAberto, setCartaoAberto] = useState(false);
 
   const pagar = (metodo: PagamentoMetodo, motivo?: string) => {
     setError(null);
@@ -247,8 +248,9 @@ function ComandaCard({ comanda, onPago }: { comanda: ComandaPendente; onPago: (m
     });
   };
 
-  const minutos = Math.floor((Date.now() - new Date(comanda.aberta_em).getTime()) / 60000);
-  const tempo = minutos < 60 ? `${minutos}min` : `${Math.floor(minutos / 60)}h${minutos % 60 > 0 ? ` ${minutos % 60}min` : ""}`;
+  const base = comanda.fechada_em ?? comanda.aberta_em;
+  const minutos = Math.floor((Date.now() - new Date(base).getTime()) / 60000);
+  const tempo = minutos < 1 ? "agora" : minutos < 60 ? `${minutos}min` : `${Math.floor(minutos / 60)}h${minutos % 60 > 0 ? ` ${minutos % 60}min` : ""}`;
 
   if (pago) {
     return (
@@ -276,7 +278,7 @@ function ComandaCard({ comanda, onPago }: { comanda: ComandaPendente; onPago: (m
       <div style={{ padding: "16px 20px 14px", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
         <div>
           <p style={{ fontSize: 17, fontWeight: 800, color: "var(--fg)", margin: 0, letterSpacing: "-0.3px" }}>{comanda.mesa}</p>
-          <p style={{ fontSize: 12, color: "var(--fg-subtle)", margin: "3px 0 0" }}>aberta há {tempo}</p>
+          <p style={{ fontSize: 12, color: "var(--fg-subtle)", margin: "3px 0 0" }}>esperando há {tempo}</p>
         </div>
         <p style={{ fontSize: 24, fontWeight: 900, color: "var(--fg)", margin: 0, letterSpacing: "-0.5px", fontVariantNumeric: "tabular-nums", fontFamily: "var(--font-mono)" }}>
           {currency.format(comanda.total)}
@@ -330,36 +332,79 @@ function ComandaCard({ comanda, onPago }: { comanda: ComandaPendente; onPago: (m
           })}
         </div>
 
-        {/* Secundários: Débito, Crédito, Cortesia */}
+        {/* Secundários: Cartão (toggle Débito/Crédito) + Cortesia */}
         <div style={{ display: "flex", gap: 8 }}>
-          {(["debito", "credito", "cortesia"] as PagamentoMetodo[]).map(key => {
-            const m = METODOS.find(x => x.key === key)!;
-            const isCortesia = key === "cortesia";
-            return (
+          {cartaoAberto ? (
+            <>
               <button
-                key={key}
-                onClick={() => isCortesia ? setShowCortesia(true) : pagar(key)}
+                onClick={() => { pagar("debito"); setCartaoAberto(false); }}
                 disabled={isPending}
                 style={{
                   flex: 1, height: 52,
                   display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3,
-                  /* warn token for cortesia — semantic allowed in Caixa */
-                  background: isCortesia
-                    ? "color-mix(in srgb, var(--warn) 12%, transparent)"
-                    : "color-mix(in srgb, var(--fg) 5%, transparent)",
-                  borderRadius: 8, border: "none",
-                  cursor: isPending ? "not-allowed" : "pointer",
-                  opacity: isPending ? 0.5 : 1,
-                  transition: "background 150ms",
+                  background: "color-mix(in srgb, var(--fg) 8%, transparent)",
+                  borderRadius: 8, border: "1px solid var(--border)",
+                  cursor: isPending ? "not-allowed" : "pointer", opacity: isPending ? 0.5 : 1,
                 }}
               >
-                <span style={{ fontSize: 15 }}>{m.icon}</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: isCortesia ? "var(--warn)" : "var(--fg-muted)" }}>
-                  {m.label}
-                </span>
+                <span style={{ fontSize: 15 }}>💳</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-muted)" }}>Débito</span>
               </button>
-            );
-          })}
+              <button
+                onClick={() => { pagar("credito"); setCartaoAberto(false); }}
+                disabled={isPending}
+                style={{
+                  flex: 1, height: 52,
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3,
+                  background: "color-mix(in srgb, var(--fg) 8%, transparent)",
+                  borderRadius: 8, border: "1px solid var(--border)",
+                  cursor: isPending ? "not-allowed" : "pointer", opacity: isPending ? 0.5 : 1,
+                }}
+              >
+                <span style={{ fontSize: 15 }}>💳</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-muted)" }}>Crédito</span>
+              </button>
+              <button
+                onClick={() => setCartaoAberto(false)}
+                style={{
+                  width: 44, height: 52, borderRadius: 8, border: "none",
+                  background: "color-mix(in srgb, var(--fg) 5%, transparent)",
+                  color: "var(--fg-subtle)", fontSize: 16, cursor: "pointer",
+                }}
+              >✕</button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => setCartaoAberto(true)}
+                disabled={isPending}
+                style={{
+                  flex: 2, height: 52,
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3,
+                  background: "color-mix(in srgb, var(--fg) 5%, transparent)",
+                  borderRadius: 8, border: "none",
+                  cursor: isPending ? "not-allowed" : "pointer", opacity: isPending ? 0.5 : 1,
+                }}
+              >
+                <span style={{ fontSize: 15 }}>💳</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-muted)" }}>Cartão</span>
+              </button>
+              <button
+                onClick={() => setShowCortesia(true)}
+                disabled={isPending}
+                style={{
+                  flex: 1, height: 52,
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3,
+                  background: "color-mix(in srgb, var(--warn) 12%, transparent)",
+                  borderRadius: 8, border: "none",
+                  cursor: isPending ? "not-allowed" : "pointer", opacity: isPending ? 0.5 : 1,
+                }}
+              >
+                <span style={{ fontSize: 15 }}>🎁</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--warn)" }}>Cortesia</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -372,6 +417,26 @@ function ComandaCard({ comanda, onPago }: { comanda: ComandaPendente; onPago: (m
       )}
     </div>
   );
+}
+
+// ─── Notificação sonora + tátil ──────────────────────────────────────────────
+
+function notificarNovaMesa() {
+  try {
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.25, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.5);
+  } catch { /* contexto de áudio não disponível */ }
+  try { navigator.vibrate?.([150, 60, 150]); } catch { /* ignore */ }
 }
 
 // ─── Shell principal ──────────────────────────────────────────────────────────
@@ -395,15 +460,16 @@ export function CaixaTela({ comandas, insights, barNome, barId, turnoId }: {
 
     const { data: raw } = await supabase
       .from("comandas")
-      .select("id, total, aberta_em, mesa_id, mesas(numero, nome)")
+      .select("id, total, aberta_em, fechada_em, mesa_id, mesas(numero, nome)")
       .eq("bar_id", barId)
       .eq("turno_id", turnoId)
       .eq("status", "aguardando_pagamento")
-      .order("aberta_em", { ascending: true })
+      .order("fechada_em", { ascending: true })
       .returns<{
         id: string;
         total: number;
         aberta_em: string;
+        fechada_em: string | null;
         mesa_id: string | null;
         mesas: { numero: number; nome: string | null } | null;
       }[]>();
@@ -437,13 +503,21 @@ export function CaixaTela({ comandas, insights, barNome, barId, turnoId }: {
       itensPorComanda.set(item.comanda_id, lista);
     }
 
-    setListaAtual(raw.map(c => ({
+    const novaLista = raw.map(c => ({
       id: c.id,
       total: c.total,
       aberta_em: c.aberta_em,
+      fechada_em: c.fechada_em ?? null,
       mesa: c.mesas ? (c.mesas.nome ?? `Mesa ${c.mesas.numero}`) : "Balcão",
       itens: itensPorComanda.get(c.id) ?? [],
-    })));
+    }));
+
+    setListaAtual(prev => {
+      const idsAntigos = new Set(prev.map(c => c.id));
+      const temNova = novaLista.some(c => !idsAntigos.has(c.id));
+      if (temNova) notificarNovaMesa();
+      return novaLista;
+    });
   }, [barId, turnoId]);
 
   // Realtime: qualquer INSERT/UPDATE/DELETE em comandas deste bar atualiza a lista
@@ -529,8 +603,10 @@ export function CaixaTela({ comandas, insights, barNome, barId, turnoId }: {
             <p style={{ fontSize: 13, color: "var(--fg-subtle)", margin: 0 }}>Nenhuma comanda para {filtro}.</p>
           </div>
         ) : (
-          listaFiltrada.map(c => (
-            <ComandaCard key={c.id} comanda={c} onPago={metodo => onPago(c, metodo)} />
+          listaFiltrada.map((c, i) => (
+            <div key={c.id} className={i === listaFiltrada.length - 1 && listaFiltrada.length % 2 !== 0 ? "md:col-span-2" : ""}>
+              <ComandaCard comanda={c} onPago={metodo => onPago(c, metodo)} />
+            </div>
           ))
         )}
       </div>

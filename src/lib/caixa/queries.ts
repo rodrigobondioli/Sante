@@ -5,6 +5,7 @@ export interface ComandaPendente {
   id: string;
   total: number;
   aberta_em: string;
+  fechada_em: string | null;
   mesa: string; // "Mesa 3" | "Balcão"
   itens: { nome: string; quantidade: number; preco_total: number }[];
 }
@@ -20,15 +21,16 @@ export async function getComandasPendentes(barId: string, turnoId: string): Prom
   const supabase = await createClient();
 
   const { data: comandas } = await supabase.from("comandas")
-    .select("id, total, aberta_em, mesa_id, mesas(numero, nome)")
+    .select("id, total, aberta_em, fechada_em, mesa_id, mesas(numero, nome)")
     .eq("bar_id", barId)
     .eq("turno_id", turnoId)
     .eq("status", "aguardando_pagamento")
-    .order("aberta_em", { ascending: true }) as {
+    .order("fechada_em", { ascending: true }) as {
       data: {
         id: string;
         total: number;
         aberta_em: string;
+        fechada_em: string | null;
         mesa_id: string | null;
         mesas: { numero: number; nome: string | null } | null;
       }[] | null;
@@ -65,6 +67,7 @@ export async function getComandasPendentes(barId: string, turnoId: string): Prom
     id: c.id,
     total: c.total,
     aberta_em: c.aberta_em,
+    fechada_em: c.fechada_em,
     mesa: c.mesas ? (c.mesas.nome ?? `Mesa ${c.mesas.numero}`) : "Balcão",
     itens: itensPorComanda.get(c.id) ?? [],
   }));
