@@ -47,7 +47,7 @@ export default async function RelatoriosPage({
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       {/* Page header */}
-      <div style={{ padding: "32px 40px", paddingBottom: 0 }}>
+      <div className="px-4 pt-6 pb-0 lg:px-10 lg:pt-8">
         <h1 style={{ fontSize: "22px", fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", letterSpacing: "-0.01em", margin: 0 }}>
           Relatórios
         </h1>
@@ -57,19 +57,19 @@ export default async function RelatoriosPage({
       </div>
 
       {/* Period selector */}
-      <div style={{ padding: "16px 40px", display: "flex", justifyContent: "flex-end" }}>
+      <div className="px-4 py-4 lg:px-10 flex justify-end">
         <PeriodoSeletor current={params} />
       </div>
 
       {/* Content area */}
-      <div style={{ padding: "0 40px 40px", display: "flex", flexDirection: "column", gap: "16px" }}>
+      <div className="px-4 pb-6 lg:px-10 lg:pb-10 flex flex-col gap-4">
 
         {/* Summary card */}
         <div style={card}>
           <p style={sectionLabel}>
             Faturamento no período · {dataCurta.format(periodo.inicio)} – {dataCurta.format(periodo.fim)}
           </p>
-          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: "16px", marginTop: "12px" }}>
+          <div style={{ display: "flex", alignItems: "baseline", flexWrap: "wrap", gap: "10px", marginTop: "12px" }}>
             <p style={{ fontSize: "30px", fontWeight: 600, color: "var(--fg)", margin: 0, fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums" }}>
               {currency.format(comparacao.atual)}
             </p>
@@ -106,18 +106,18 @@ export default async function RelatoriosPage({
                       }}
                     >
                       <span style={{ fontSize: "14px", color: "var(--fg)" }}>{produto.produtoNome}</span>
-                      <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-                        <span style={{ fontSize: "13px", color: "var(--fg-subtle)" }}>
+                      <div className="flex items-center gap-3 sm:gap-5">
+                        <span className="hidden sm:inline" style={{ fontSize: "13px", color: "var(--fg-subtle)" }}>
                           {produto.quantidadeVendida} un.
                         </span>
-                        <span style={{ fontSize: "13px", color: "var(--fg)", minWidth: "90px", textAlign: "right", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums" }}>
+                        <span style={{ fontSize: "13px", color: "var(--fg)", minWidth: "80px", textAlign: "right", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums" }}>
                           {currency.format(produto.faturamento)}
                         </span>
                         <span style={{
                           fontSize: "11px",
                           fontWeight: 500,
                           color: "var(--fg-subtle)",
-                          minWidth: "38px",
+                          minWidth: "32px",
                           textAlign: "right",
                         }}>
                           {pct.toFixed(0)}%

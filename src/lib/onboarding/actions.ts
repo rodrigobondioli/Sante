@@ -78,3 +78,66 @@ export async function criarBar(formData: FormData): Promise<OnboardingResult> {
   revalidatePath("/dashboard");
   redirect("/dashboard");
 }
+
+// ─── Onboarding multi-step (não redireciona — retorna barId) ─────────────────
+
+export type CriarBarOnboardingResult = { barId: string } | { error: string };
+
+export async function criarBarOnboarding(
+  formData: FormData
+): Promise<CriarBarOnboardingResult> {
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return { error: "Usuário não autenticado." };
+
+  const nome = String(formData.get("nome") ?? "").trim();
+  if (!nome) return { error: "Nome do bar é obrigatório." };
+
+  const nomeUsuario = String(formData.get("nome_usuario") ?? "").trim();
+  const admin = createAdminClient();
+
+  if (nomeUsuario) {
+    await admin
+      .from("profiles")
+      .upsert({ id: auth.user.id, nome: nomeUsuario, email: auth.user.email ?? "" })
+      .eq("id", auth.user.id);
+  }
+
+  const slugBase = toSlug(nome);
+  const slug = slugBase || `bar-${Date.now()}`;
+
+  const { data: bar, error: barError } = await admin
+    .from("bars")
+    .insert({ nome, slug, configuracoes: {}, ativo: true })
+    .select("id")
+    .single<{ id: string }>();
+
+  let barId: string;
+
+  if (barError || !bar) {
+    const { data: bar2, error: err2 } = await admin
+      .from("bars")
+      .insert({ nome, slug: `${slug}-${Date.now()}`, configuracoes: {}, ativo: true })
+      .select("id")
+      .single<{ id: string }>();
+    if (err2 || !bar2) return { error: "Erro ao criar o bar. Tente novamente." };
+    barId = bar2.id;
+  } else {
+    barId = bar.id;
+  }
+
+  const { error: memberError } = await admin
+    .from("bar_members")
+    .insert({
+      bar_id: barId,
+      user_id: auth.user.id,
+      role: "dono",
+      ativo: true,
+      nome: nomeUsuario || null,
+    });
+
+  if (memberError) return { error: "Erro ao vincular usuário ao bar." };
+
+  revalidatePath("/dashboard");
+  return { barId };
+}

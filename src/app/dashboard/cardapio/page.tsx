@@ -11,8 +11,8 @@ export default async function CardapioPage() {
   const cardapio = await getCardapioAdmin(current.bar.id);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden", padding: "32px 40px" }}>
-      <CardapioClient cardapio={cardapio} />
+    <div className="px-5 py-6 lg:px-10 lg:py-8 flex flex-col lg:h-full lg:overflow-hidden">
+      <CardapioClient cardapio={cardapio} barId={current.bar.id} />
     </div>
   );
 }

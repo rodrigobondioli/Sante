@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2, EyeOff, Eye, X, Check, ChevronDown, ChevronUp, ImageIcon } from "lucide-react";
+import { Plus, Pencil, Trash2, EyeOff, Eye, X, Check, ChevronDown, ChevronUp, ImageIcon, FileSpreadsheet } from "lucide-react";
+import { ImportarCardapioPanel } from "./importar-cardapio-panel";
 import {
   criarCategoria,
   editarCategoria,
@@ -21,7 +22,6 @@ import type { ProdutoComVariantes, ProdutoVariante } from "@/types/database";
 
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
 const input: React.CSSProperties = {
   background: "var(--bg-inset)",
   border: "1px solid var(--border)",
@@ -105,13 +105,11 @@ function VarianteForm({
   }
 
   return (
-    <form action={handleSubmit} style={{ display: "flex", gap: 10, alignItems: "flex-end", marginTop: 8 }}>
-      {/* Foto */}
-      <div style={{ flexShrink: 0 }}>
+    <form action={handleSubmit} className="flex flex-wrap gap-2 mt-2 items-end">
+      <div className="shrink-0">
         <ImageUpload currentUrl={variante?.imagem_url} onUpload={setImagemUrl} />
       </div>
-      {/* Nome */}
-      <div style={{ flex: 1 }}>
+      <div className="flex-1 min-w-[130px]">
         <label style={lbl}>Sabor / Variante</label>
         <input
           autoFocus
@@ -122,7 +120,6 @@ function VarianteForm({
           required
         />
       </div>
-      {/* Preço */}
       <div style={{ width: 90 }}>
         <label style={lbl}>Preço</label>
         <input
@@ -133,7 +130,6 @@ function VarianteForm({
           required
         />
       </div>
-      {/* Custo */}
       <div style={{ width: 90 }}>
         <label style={lbl}>Custo</label>
         <input
@@ -143,12 +139,14 @@ function VarianteForm({
           style={input}
         />
       </div>
-      <button type="submit" style={{ ...btnPrimary, padding: "9px 14px" }}>
-        {isEdit ? <Check style={{ width: 14, height: 14 }} /> : <Plus style={{ width: 14, height: 14 }} />}
-      </button>
-      <button type="button" onClick={onDone} style={{ ...btnSecondary, padding: "9px 14px" }}>
-        <X style={{ width: 14, height: 14 }} />
-      </button>
+      <div className="flex gap-2 shrink-0">
+        <button type="submit" style={{ ...btnPrimary, padding: "9px 14px" }}>
+          {isEdit ? <Check style={{ width: 14, height: 14 }} /> : <Plus style={{ width: 14, height: 14 }} />}
+        </button>
+        <button type="button" onClick={onDone} style={{ ...btnSecondary, padding: "9px 14px" }}>
+          <X style={{ width: 14, height: 14 }} />
+        </button>
+      </div>
     </form>
   );
 }
@@ -156,7 +154,6 @@ function VarianteForm({
 // ─── Variante Row ─────────────────────────────────────────────────────────────
 function VarianteRow({ variante, produtoId }: { variante: ProdutoVariante; produtoId: string }) {
   const [editing, setEditing] = useState(false);
-  const [hovered, setHovered] = useState(false);
 
   if (editing) {
     return (
@@ -169,31 +166,21 @@ function VarianteRow({ variante, produtoId }: { variante: ProdutoVariante; produ
   }
 
   return (
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        display: "flex", alignItems: "center", gap: 10,
-        padding: "6px 10px", borderRadius: 4,
-        background: hovered ? "color-mix(in srgb, var(--fg) 4%, transparent)" : "transparent",
-        transition: "background 0.1s",
-      }}
-    >
-      {/* Foto */}
+    <div className="group flex items-center gap-2.5 rounded" style={{ padding: "6px 10px" }}>
       <div style={{
-        width: 64, height: 64, borderRadius: 4, flexShrink: 0,
+        width: 48, height: 48, borderRadius: 4, flexShrink: 0,
         background: variante.imagem_url
           ? `url(${variante.imagem_url}) center/cover`
           : "var(--bg-inset)",
         display: "flex", alignItems: "center", justifyContent: "center",
       }}>
-        {!variante.imagem_url && <ImageIcon style={{ width: 22, height: 22, color: "var(--fg-subtle)" }} />}
+        {!variante.imagem_url && <ImageIcon style={{ width: 16, height: 16, color: "var(--fg-subtle)" }} />}
       </div>
       <span style={{ flex: 1, fontSize: 13, color: "var(--fg)" }}>{variante.nome}</span>
       <span style={{ fontSize: 12, color: "var(--fg-muted)", fontVariantNumeric: "tabular-nums" }}>
         {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(variante.preco)}
       </span>
-      <div style={{ display: "flex", gap: 2, opacity: hovered ? 1 : 0, transition: "opacity 0.1s" }}>
+      <div className="flex gap-0.5 shrink-0 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-100">
         <button type="button" onClick={() => setEditing(true)} style={iconBtn} title="Editar">
           <Pencil style={{ width: 12, height: 12 }} />
         </button>
@@ -212,7 +199,7 @@ function VarianteRow({ variante, produtoId }: { variante: ProdutoVariante; produ
   );
 }
 
-// ─── Produto Form (create or edit) ────────────────────────────────────────────
+// ─── Produto Form ─────────────────────────────────────────────────────────────
 function ProdutoForm({
   categoriaId,
   produto,
@@ -248,9 +235,8 @@ function ProdutoForm({
       <form action={handleSubmit}>
         <input type="hidden" name="categoria_id" value={categoriaId} />
 
-        <div style={{ display: "flex", gap: 14, marginBottom: 12 }}>
-          {/* Image upload */}
-          <div style={{ flexShrink: 0 }}>
+        <div className="flex flex-wrap gap-3 mb-3">
+          <div className="shrink-0">
             <label style={lbl}>Foto</label>
             <ImageUpload
               currentUrl={produto?.imagem_url}
@@ -259,8 +245,7 @@ function ProdutoForm({
             />
           </div>
 
-          {/* Fields */}
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+          <div className="flex-1 min-w-[160px] flex flex-col gap-2">
             <div>
               <label style={lbl}>Nome</label>
               <input
@@ -316,7 +301,7 @@ function ProdutoForm({
   );
 }
 
-// ─── Produto row ──────────────────────────────────────────────────────────────
+// ─── Produto Row ──────────────────────────────────────────────────────────────
 function ProdutoRow({
   produto,
   categoriaId,
@@ -343,30 +328,29 @@ function ProdutoRow({
 
   return (
     <div style={{ marginBottom: 2 }}>
-      {/* Linha principal */}
       <div
+        className="group flex items-center gap-2.5"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
           padding: "10px 12px",
           borderRadius: variantesOpen ? "4px 4px 0 0" : 4,
-          background: hovered || variantesOpen ? "color-mix(in srgb, var(--fg) 4%, transparent)" : "transparent",
+          background: hovered || variantesOpen
+            ? "color-mix(in srgb, var(--fg) 4%, transparent)"
+            : "transparent",
           opacity: produto.ativo ? 1 : 0.45,
           transition: "background 0.1s",
         }}
       >
         {/* Thumb */}
         <div style={{
-          width: 80, height: 80, borderRadius: 4, flexShrink: 0,
+          width: 56, height: 56, borderRadius: 4, flexShrink: 0,
           background: produto.imagem_url
             ? `url(${produto.imagem_url}) center/cover`
             : "var(--bg-inset)",
           display: "flex", alignItems: "center", justifyContent: "center",
         }}>
-          {!produto.imagem_url && <ImageIcon style={{ width: 28, height: 28, color: "var(--fg-subtle)" }} />}
+          {!produto.imagem_url && <ImageIcon style={{ width: 22, height: 22, color: "var(--fg-subtle)" }} />}
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -386,14 +370,23 @@ function ProdutoRow({
           onClick={() => { setVariantesOpen(v => !v); setAddingVariante(false); }}
           style={{
             display: "flex", alignItems: "center", gap: 4,
-            background: variantesOpen ? "color-mix(in srgb, var(--accent-bright) 16%, transparent)" : "color-mix(in srgb, var(--fg) 6%, transparent)",
-            border: "none", borderRadius: 4, padding: "3px 9px",
+            background: variantesOpen
+              ? "color-mix(in srgb, var(--accent-bright) 16%, transparent)"
+              : "color-mix(in srgb, var(--fg) 6%, transparent)",
+            border: "none", borderRadius: 4, padding: "3px 8px",
             color: variantesOpen ? "var(--accent-bright)" : "var(--fg-muted)",
             fontSize: 11, fontWeight: 500, cursor: "pointer",
             flexShrink: 0,
           }}
         >
-          {variantes.length > 0 ? `${variantes.length} variante${variantes.length > 1 ? "s" : ""}` : "Variantes"}
+          <span className="hidden sm:inline">
+            {variantes.length > 0
+              ? `${variantes.length} variante${variantes.length > 1 ? "s" : ""}`
+              : "Variantes"}
+          </span>
+          <span className="sm:hidden">
+            {variantes.length > 0 ? variantes.length : "+"}
+          </span>
           {variantesOpen
             ? <ChevronUp style={{ width: 11, height: 11 }} />
             : <ChevronDown style={{ width: 11, height: 11 }} />}
@@ -403,9 +396,9 @@ function ProdutoRow({
           {currency.format(produto.preco)}
         </span>
 
-        {/* Actions — shown on hover */}
-        <div style={{ display: "flex", gap: 2, flexShrink: 0, opacity: hovered ? 1 : 0, transition: "opacity 0.1s" }}>
-          <button onClick={() => setEditing(true)} style={{ ...iconBtn }} title="Editar">
+        {/* Actions — always visible on mobile, hover-only on desktop */}
+        <div className="flex gap-0.5 shrink-0 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-100">
+          <button onClick={() => setEditing(true)} style={iconBtn} title="Editar">
             <Pencil style={{ width: 13, height: 13 }} />
           </button>
           <form action={toggleProduto.bind(null, produto.id, produto.ativo)}>
@@ -414,7 +407,9 @@ function ProdutoRow({
               style={{ ...iconBtn, color: produto.ativo ? "var(--fg-subtle)" : "var(--ok)" }}
               title={produto.ativo ? "Desativar" : "Ativar"}
             >
-              {produto.ativo ? <EyeOff style={{ width: 13, height: 13 }} /> : <Eye style={{ width: 13, height: 13 }} />}
+              {produto.ativo
+                ? <EyeOff style={{ width: 13, height: 13 }} />
+                : <Eye style={{ width: 13, height: 13 }} />}
             </button>
           </form>
           <form action={deletarProduto.bind(null, produto.id)}>
@@ -474,7 +469,7 @@ function ProdutoRow({
   );
 }
 
-// ─── Categoria sidebar item ───────────────────────────────────────────────────
+// ─── Categoria item ───────────────────────────────────────────────────────────
 function CategoriaItem({
   grupo,
   selected,
@@ -490,7 +485,7 @@ function CategoriaItem({
     return (
       <form
         action={async (fd) => { await editarCategoria(grupo.categoria.id, fd); setEditingNome(false); }}
-        style={{ padding: "4px 8px" }}
+        className="shrink-0 lg:shrink px-2 py-1"
       >
         <input
           name="nome"
@@ -514,24 +509,17 @@ function CategoriaItem({
   return (
     <div
       onClick={onSelect}
+      className="group shrink-0 lg:shrink flex items-center gap-2 cursor-pointer rounded transition-colors"
       style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
         padding: "8px 12px",
-        borderRadius: 4,
-        cursor: "pointer",
         background: selected ? "color-mix(in srgb, var(--fg) 6%, transparent)" : "transparent",
-        transition: "background 0.1s",
       }}
-      className="group"
     >
       <span style={{
-        flex: 1,
         fontSize: 13,
         fontWeight: selected ? 500 : 400,
         color: selected ? "var(--fg)" : "var(--fg-muted)",
-        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        whiteSpace: "nowrap",
       }}>
         {grupo.categoria.nome}
       </span>
@@ -539,8 +527,8 @@ function CategoriaItem({
         {grupo.produtos.length}
       </span>
 
-      {/* Hover actions */}
-      <div style={{ display: "flex", gap: 1, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
+      {/* Edit / delete — desktop only */}
+      <div className="hidden lg:flex gap-0.5 shrink-0" onClick={e => e.stopPropagation()}>
         <button
           onClick={() => setEditingNome(true)}
           style={{ ...iconBtn, width: 22, height: 22, padding: 0, opacity: selected ? 0.7 : 0 }}
@@ -563,128 +551,162 @@ function CategoriaItem({
 }
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
-export function CardapioClient({ cardapio }: { cardapio: CategoriaComProdutosAdmin[] }) {
+export function CardapioClient({
+  cardapio,
+  barId,
+}: {
+  cardapio: CategoriaComProdutosAdmin[];
+  barId: string;
+}) {
   const [selectedId, setSelectedId] = useState(cardapio[0]?.categoria.id ?? "");
   const [addingProduto, setAddingProduto] = useState(false);
   const [addingCategoria, setAddingCategoria] = useState(false);
+  const [importPanelOpen, setImportPanelOpen] = useState(false);
+
+  const nomesExistentes = cardapio.flatMap((g) => g.produtos.map((p) => p.nome));
 
   const selectedGrupo = cardapio.find(g => g.categoria.id === selectedId);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
+    <div className="flex flex-col lg:h-full lg:overflow-hidden">
 
       {/* Page header */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 24, flexShrink: 0 }}>
+      <div className="flex items-start justify-between gap-3 flex-wrap mb-5 shrink-0">
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", letterSpacing: "-0.01em", margin: 0 }}>Cardápio</h1>
-          <p style={{ fontSize: 13, color: "var(--fg-muted)", margin: "4px 0 0" }}>Gerencie categorias e produtos do seu bar.</p>
+          <h1 style={{ fontSize: 22, fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", letterSpacing: "-0.01em", margin: 0 }}>
+            Cardápio
+          </h1>
+          <p style={{ fontSize: 13, color: "var(--fg-muted)", margin: "4px 0 0" }}>
+            Gerencie categorias e produtos do seu bar.
+          </p>
         </div>
-        {selectedGrupo && (
+        <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
           <button
-            onClick={() => setAddingProduto(p => !p)}
-            style={{ ...btnPrimary, display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", flexShrink: 0 }}
-          >
-            <Plus style={{ width: 14, height: 14 }} />
-            Novo produto
-          </button>
-        )}
-      </div>
-
-    <div style={{ display: "flex", gap: 0, flex: 1, minHeight: 0, overflow: "hidden" }}>
-
-      {/* ── Left: category list ── */}
-      <div style={{
-        width: 240,
-        flexShrink: 0,
-        borderRight: "1px solid var(--border)",
-        paddingRight: 16,
-        overflowY: "auto",
-        paddingBottom: 16,
-      }}>
-        <p style={{ ...lbl, marginBottom: 12 }}>Categorias</p>
-
-        {cardapio.map(grupo => (
-          <CategoriaItem
-            key={grupo.categoria.id}
-            grupo={grupo}
-            selected={selectedId === grupo.categoria.id}
-            onSelect={() => { setSelectedId(grupo.categoria.id); setAddingProduto(false); }}
-          />
-        ))}
-
-        {/* Nova categoria */}
-        {addingCategoria ? (
-          <form
-            action={async (fd) => { await criarCategoria(fd); setAddingCategoria(false); }}
-            style={{ padding: "4px 8px", marginTop: 4 }}
-          >
-            <input
-              autoFocus
-              name="nome"
-              placeholder="Nome da categoria"
-              style={{ ...input, fontSize: 13, padding: "6px 10px", marginBottom: 6 }}
-              onKeyDown={e => { if (e.key === "Escape") setAddingCategoria(false); }}
-              required
-            />
-            <div style={{ display: "flex", gap: 4 }}>
-              <button type="submit" style={{ ...btnPrimary, padding: "5px 12px", fontSize: 12 }}>Criar</button>
-              <button type="button" onClick={() => setAddingCategoria(false)} style={{ ...btnSecondary, padding: "5px 12px", fontSize: 12 }}>×</button>
-            </div>
-          </form>
-        ) : (
-          <button
-            onClick={() => setAddingCategoria(true)}
+            onClick={() => setImportPanelOpen(true)}
             style={{
               display: "flex", alignItems: "center", gap: 6,
-              width: "100%", padding: "8px 12px", marginTop: 4,
-              background: "none", border: "none",
-              color: "var(--fg-subtle)", fontSize: 13, cursor: "pointer",
+              padding: "8px 14px",
+              background: "transparent",
+              border: "1px solid var(--border-strong)",
               borderRadius: 4,
+              color: "var(--fg-muted)",
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: "pointer",
             }}
           >
-            <Plus style={{ width: 13, height: 13 }} />
-            Nova categoria
+            <FileSpreadsheet style={{ width: 14, height: 14 }} />
+            Importar planilha
           </button>
-        )}
+          {selectedGrupo && (
+            <button
+              onClick={() => setAddingProduto(p => !p)}
+              style={{ ...btnPrimary, display: "flex", alignItems: "center", gap: 6, padding: "8px 16px" }}
+            >
+              <Plus style={{ width: 14, height: 14 }} />
+              Novo produto
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* ── Right: product list ── */}
-      <div style={{ flex: 1, paddingLeft: 28, overflowY: "auto" }}>
-        {!selectedGrupo ? (
-          <p style={{ fontSize: 14, color: "var(--fg-subtle)", paddingTop: 20 }}>
-            Selecione uma categoria.
-          </p>
-        ) : (
-          <>
-            {/* Header */}
-            <div style={{ marginBottom: 20 }}>
-              <h2 style={{ fontSize: 14, fontWeight: 500, color: "var(--fg-muted)", margin: 0, fontFamily: "var(--font-mono)" }}>
-                {selectedGrupo.categoria.nome}
-              </h2>
-            </div>
+      {/* Main content */}
+      <div className="flex flex-col lg:flex-row flex-1 lg:min-h-0 lg:overflow-hidden">
 
-            {/* New product form */}
-            {addingProduto && (
-              <ProdutoForm
-                categoriaId={selectedGrupo.categoria.id}
-                onDone={() => setAddingProduto(false)}
+        {/* ── Categories: horizontal scroll strip on mobile, vertical sidebar on desktop ── */}
+        <div
+          className="flex flex-row overflow-x-auto gap-1 pb-3 border-b lg:flex-col lg:overflow-x-visible lg:overflow-y-auto lg:w-[240px] lg:border-b-0 lg:border-r lg:pr-4 lg:pb-4 shrink-0"
+          style={{ borderColor: "var(--border)" }}
+        >
+          <p className="hidden lg:block shrink-0" style={{ ...lbl, marginBottom: 12 }}>Categorias</p>
+
+          {cardapio.map(grupo => (
+            <CategoriaItem
+              key={grupo.categoria.id}
+              grupo={grupo}
+              selected={selectedId === grupo.categoria.id}
+              onSelect={() => { setSelectedId(grupo.categoria.id); setAddingProduto(false); }}
+            />
+          ))}
+
+          {/* Nova categoria */}
+          {addingCategoria ? (
+            <form
+              action={async (fd) => { await criarCategoria(fd); setAddingCategoria(false); }}
+              className="shrink-0 lg:shrink px-2 py-1 mt-1"
+            >
+              <input
+                autoFocus
+                name="nome"
+                placeholder="Nome da categoria"
+                style={{ ...input, fontSize: 13, padding: "6px 10px", marginBottom: 6 }}
+                onKeyDown={e => { if (e.key === "Escape") setAddingCategoria(false); }}
+                required
               />
-            )}
+              <div style={{ display: "flex", gap: 4 }}>
+                <button type="submit" style={{ ...btnPrimary, padding: "5px 12px", fontSize: 12 }}>Criar</button>
+                <button type="button" onClick={() => setAddingCategoria(false)} style={{ ...btnSecondary, padding: "5px 12px", fontSize: 12 }}>×</button>
+              </div>
+            </form>
+          ) : (
+            <button
+              onClick={() => setAddingCategoria(true)}
+              className="shrink-0 lg:w-full flex items-center gap-1.5 rounded"
+              style={{
+                padding: "8px 12px",
+                background: "none", border: "none",
+                color: "var(--fg-subtle)", fontSize: 13, cursor: "pointer",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <Plus style={{ width: 13, height: 13 }} />
+              <span className="hidden lg:inline">Nova categoria</span>
+              <span className="lg:hidden">+Cat</span>
+            </button>
+          )}
+        </div>
 
-            {/* Product list */}
-            {selectedGrupo.produtos.length === 0 && !addingProduto ? (
-              <p style={{ fontSize: 13, color: "var(--fg-subtle)", paddingTop: 8 }}>
-                Nenhum produto nesta categoria ainda.
-              </p>
-            ) : (
-              selectedGrupo.produtos.map(p => (
-                <ProdutoRow key={p.id} produto={p} categoriaId={selectedGrupo.categoria.id} />
-              ))
-            )}
-          </>
-        )}
+        {/* ── Product list ── */}
+        <div className="flex-1 pt-4 lg:pt-0 lg:pl-7 overflow-y-auto">
+          {!selectedGrupo ? (
+            <p style={{ fontSize: 14, color: "var(--fg-subtle)", paddingTop: 20 }}>
+              Selecione uma categoria.
+            </p>
+          ) : (
+            <>
+              <div style={{ marginBottom: 16 }}>
+                <h2 style={{ fontSize: 14, fontWeight: 500, color: "var(--fg-muted)", margin: 0, fontFamily: "var(--font-mono)" }}>
+                  {selectedGrupo.categoria.nome}
+                </h2>
+              </div>
+
+              {addingProduto && (
+                <ProdutoForm
+                  categoriaId={selectedGrupo.categoria.id}
+                  onDone={() => setAddingProduto(false)}
+                />
+              )}
+
+              {selectedGrupo.produtos.length === 0 && !addingProduto ? (
+                <p style={{ fontSize: 13, color: "var(--fg-subtle)", paddingTop: 8 }}>
+                  Nenhum produto nesta categoria ainda.
+                </p>
+              ) : (
+                selectedGrupo.produtos.map(p => (
+                  <ProdutoRow key={p.id} produto={p} categoriaId={selectedGrupo.categoria.id} />
+                ))
+              )}
+            </>
+          )}
+        </div>
       </div>
-    </div>
+
+      <ImportarCardapioPanel
+        barId={barId}
+        nomesExistentes={nomesExistentes}
+        open={importPanelOpen}
+        onClose={() => setImportPanelOpen(false)}
+      />
     </div>
   );
 }
