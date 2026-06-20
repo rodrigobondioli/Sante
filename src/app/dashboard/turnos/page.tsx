@@ -68,40 +68,42 @@ export default async function TurnosPage() {
           <tbody>
             {turnos.map((turno, i) => (
               <tr key={turno.id} style={{ background: i % 2 === 1 ? "color-mix(in srgb, var(--fg) 2%, transparent)" : undefined }}>
-                <td style={{ padding: "14px 20px" }}>
+                <td className="align-middle" style={{ padding: "14px 20px" }}>
                   <span style={{
                     display: "inline-block",
                     fontSize: "11px",
                     fontWeight: 500,
                     padding: "3px 10px",
                     borderRadius: "2px",
+                    whiteSpace: "nowrap",
                     background: turno.status === "aberto" ? "var(--ok-bg)" : "color-mix(in srgb, var(--fg) 8%, transparent)",
                     color: turno.status === "aberto" ? "var(--ok)" : "var(--fg-muted)",
                   }}>
                     {turno.status === "aberto" ? "Aberto" : "Fechado"}
                   </span>
                 </td>
-                <td style={{ padding: "14px 20px", fontSize: "14px", color: "var(--fg)" }}>
+                <td className="align-middle" style={{ padding: "14px 20px", fontSize: "14px", color: "var(--fg)", whiteSpace: "nowrap" }}>
                   {dataHora.format(new Date(turno.abertoEm))}
                 </td>
-                <td className="hidden sm:table-cell" style={{ padding: "14px 20px", fontSize: "14px", color: "var(--fg-muted)" }}>
+                <td className="hidden sm:table-cell align-middle" style={{ padding: "14px 20px", fontSize: "14px", color: "var(--fg-muted)", whiteSpace: "nowrap" }}>
                   {turno.fechadoEm ? dataHora.format(new Date(turno.fechadoEm)) : "—"}
                 </td>
-                <td className="hidden sm:table-cell" style={{ padding: "14px 20px", fontSize: "14px", color: "var(--fg-muted)" }}>
+                <td className="hidden sm:table-cell align-middle" style={{ padding: "14px 20px", fontSize: "14px", color: "var(--fg-muted)" }}>
                   {turno.abertoPorNome}
                 </td>
-                <td className="hidden sm:table-cell" style={{ padding: "14px 20px", fontSize: "14px", color: "var(--fg)", textAlign: "right" }}>
+                <td className="hidden sm:table-cell align-middle" style={{ padding: "14px 20px", fontSize: "14px", color: "var(--fg)", textAlign: "right" }}>
                   {turno.totalComandas}
                 </td>
-                <td style={{ padding: "14px 20px", fontSize: "14px", color: "var(--fg)", textAlign: "right", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums" }}>
+                <td className="align-middle" style={{ padding: "14px 16px 14px 20px", fontSize: "14px", color: "var(--fg)", textAlign: "right", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
                   {currency.format(turno.totalVendas)}
                 </td>
-                <td style={{ padding: "14px 20px", textAlign: "right" }}>
+                <td className="align-middle w-12 shrink-0" style={{ padding: "14px 20px 14px 8px", textAlign: "right" }}>
                   <Link href={`/dashboard/turnos/${turno.id}`} style={{
                     fontSize: "13px",
                     color: "var(--fg-subtle)",
                     textDecoration: "none",
                     transition: "color 0.15s",
+                    whiteSpace: "nowrap",
                   }}>
                     Ver →
                   </Link>
