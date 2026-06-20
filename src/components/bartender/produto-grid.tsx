@@ -185,11 +185,12 @@ function ProdutoCard({
       {temVariantes && (
         <div style={{
           position: "absolute", top: 8, right: 8,
-          background: "color-mix(in srgb, var(--accent-bright) 75%, transparent)",
-          borderRadius: 4, padding: "2px 6px",
-          fontSize: 9, fontWeight: 700, color: "var(--accent-bright)",
+          background: "var(--accent-bright)",
+          borderRadius: 4, padding: "2px 8px",
+          fontSize: 9, fontWeight: 800, color: "#fff",
+          letterSpacing: "0.04em",
         }}>
-          {produto.produto_variantes.length} vars
+          {produto.produto_variantes.length} opções
         </div>
       )}
 
