@@ -27,6 +27,14 @@ const overline: React.CSSProperties = {
   color: "var(--fg-subtle)",
 };
 
+const metricCard: React.CSSProperties = {
+  background: "var(--bg-elevated)",
+  border: "1px solid var(--border)",
+  borderRadius: "4px",
+  padding: "20px 24px",
+  minWidth: 0,
+};
+
 export function LiveBar({
   turnoId,
   barId,
@@ -101,8 +109,6 @@ export function LiveBar({
     { label: "Drinks vendidos", value: String(data.drinks) },
   ];
 
-  // Dot pulsante "AO VIVO" — aparece à direita no mobile (mesmo lugar do TrendText)
-  // e como sufixo do label do primeiro card no desktop
   const liveDot = (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
       <span
@@ -122,45 +128,36 @@ export function LiveBar({
   );
 
   return (
-    <div className="px-5 py-4 lg:p-0">
-      <div
-        className="grid grid-cols-1 lg:grid-cols-3 overflow-hidden rounded-[4px] lg:rounded-none"
-        style={{ gap: "1px", background: "var(--border)", border: "1px solid var(--border)" }}
-      >
-        {metrics.map((m, i) => (
-          <div
-            key={m.label}
-            className="flex items-center justify-between lg:block"
-            style={{ background: "var(--bg-elevated)", padding: "16px 20px", minWidth: 0 }}
-          >
-            {/* Label + valor */}
-            <div className="flex flex-col lg:block">
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <p style={overline}>{m.label}</p>
-                {/* "AO VIVO" badge no label do primeiro card — só desktop */}
-                {i === 0 && <span className="hidden lg:inline-flex">{liveDot}</span>}
-              </div>
-              <p
-                className="text-[22px] lg:text-[26px]"
-                style={{
-                  fontWeight: 600,
-                  color: "var(--fg)",
-                  fontFamily: "var(--font-mono)",
-                  fontVariantNumeric: "tabular-nums",
-                  marginTop: "4px",
-                }}
-              >
-                {m.value}
-              </p>
+    <div className="grid grid-cols-1 lg:grid-cols-3" style={{ gap: "12px" }}>
+      {metrics.map((m, i) => (
+        <div
+          key={m.label}
+          className="flex items-center justify-between lg:block"
+          style={metricCard}
+        >
+          <div className="flex flex-col lg:block">
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <p style={overline}>{m.label}</p>
+              {i === 0 && <span className="hidden lg:inline-flex">{liveDot}</span>}
             </div>
-
-            {/* Direita no mobile: dot "AO VIVO" no primeiro card, vazio nos demais */}
-            <div className="flex-shrink-0 ml-4 lg:hidden">
-              {i === 0 ? liveDot : null}
-            </div>
+            <p
+              className="text-[22px] lg:text-[26px]"
+              style={{
+                fontWeight: 600,
+                color: "var(--fg)",
+                fontFamily: "var(--font-mono)",
+                fontVariantNumeric: "tabular-nums",
+                marginTop: "4px",
+              }}
+            >
+              {m.value}
+            </p>
           </div>
-        ))}
-      </div>
+          <div className="flex-shrink-0 ml-4 lg:hidden">
+            {i === 0 ? liveDot : null}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
