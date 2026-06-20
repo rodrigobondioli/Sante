@@ -1,3 +1,5 @@
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { ClipboardList, Boxes, Wallet, Check, Activity, Calculator, Package, Shield } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { SectionHeading } from "@/components/marketing/section-heading";
@@ -62,7 +64,11 @@ const planFeatures = [
   "Sem multa para cancelar",
 ];
 
-export default function Home() {
+export default async function Home() {
+  const headersList = await headers();
+  const host = headersList.get("host") ?? "";
+  if (host.startsWith("app.")) redirect("/login");
+
   return (
     <>
       {/* Hero */}
