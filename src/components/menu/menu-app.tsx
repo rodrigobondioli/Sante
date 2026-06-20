@@ -65,28 +65,17 @@ function ordinal(n: number) {
 }
 
 // ─── SPLASH ───────────────────────────────────────────────────────────────────
+// Timer via setTimeout (não RAF) — mais robusto em tabs em background e
+// durante hydration. Progresso via CSS animation pura, sem estado JS.
 function SplashScreen({ bar, onNext }: { bar: Bar; onNext: () => void }) {
-  const DURATION = 2800;
-  const [progress, setProgress] = useState(0);
+  const DURATION = 2000;
   const onNextRef = useRef(onNext);
 
-  // Keep ref current on every render without restarting the timer
   useEffect(() => { onNextRef.current = onNext; });
 
   useEffect(() => {
-    const start = Date.now();
-    let raf: number;
-    const tick = () => {
-      const p = Math.min((Date.now() - start) / DURATION, 1);
-      setProgress(p);
-      if (p < 1) {
-        raf = requestAnimationFrame(tick);
-      } else {
-        onNextRef.current();
-      }
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    const id = setTimeout(() => { onNextRef.current(); }, DURATION);
+    return () => clearTimeout(id);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
@@ -106,6 +95,10 @@ function SplashScreen({ bar, onNext }: { bar: Bar; onNext: () => void }) {
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(16px); }
           to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes splashProgress {
+          from { width: 0% }
+          to   { width: 100% }
         }
       `}</style>
 
@@ -153,7 +146,7 @@ function SplashScreen({ bar, onNext }: { bar: Bar; onNext: () => void }) {
         </p>
       </div>
 
-      {/* Progress bar */}
+      {/* Progress bar — CSS animation, sem estado JS */}
       <div style={{
         position: "absolute", bottom: 52, left: 48, right: 48,
         height: 2, background: "var(--border)", borderRadius: 2,
@@ -161,8 +154,7 @@ function SplashScreen({ bar, onNext }: { bar: Bar; onNext: () => void }) {
         <div style={{
           height: "100%", borderRadius: 2,
           background: ACCENT,
-          width: `${progress * 100}%`,
-          transition: "width 60ms linear",
+          animation: `splashProgress ${DURATION}ms linear forwards`,
         }} />
       </div>
     </div>
