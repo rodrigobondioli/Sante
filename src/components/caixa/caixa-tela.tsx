@@ -304,108 +304,71 @@ function ComandaCard({ comanda, onPago }: { comanda: ComandaPendente; onPago: (m
 
       {/* Pagamento */}
       <div style={{ padding: "14px 20px 18px", borderTop: "1px solid var(--border)" }}>
-        {/* danger token — semantic allowed in Caixa */}
         {error && <p style={{ fontSize: 12, color: "var(--danger)", margin: "0 0 10px" }}>{error}</p>}
 
-        {/* Primários: Pix e Dinheiro */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-          {(["pix", "dinheiro"] as PagamentoMetodo[]).map(key => {
-            const m = METODOS.find(x => x.key === key)!;
-            return (
-              <button
-                key={key}
-                onClick={() => pagar(key)}
+        {cartaoAberto ? (
+          /* Expansão cartão: Débito | Crédito | ✕ */
+          <div style={{ display: "flex", gap: 8 }}>
+            {(["debito", "credito"] as PagamentoMetodo[]).map(key => (
+              <button key={key}
+                onClick={() => { pagar(key); setCartaoAberto(false); }}
                 disabled={isPending}
                 style={{
-                  flex: 1, height: 64,
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-                  background: "color-mix(in srgb, var(--fg) 9%, transparent)", borderRadius: 8, border: "none",
+                  flex: 1, height: 56,
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  background: "color-mix(in srgb, var(--fg) 8%, transparent)",
+                  borderRadius: 8, border: "1px solid var(--border)",
+                  cursor: "pointer", opacity: isPending ? 0.5 : 1,
+                }}
+              >
+                <span style={{ fontSize: 18 }}>💳</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: "var(--fg)" }}>
+                  {key === "debito" ? "Débito" : "Crédito"}
+                </span>
+              </button>
+            ))}
+            <button onClick={() => setCartaoAberto(false)}
+              style={{
+                width: 44, height: 56, borderRadius: 8, border: "none",
+                background: "color-mix(in srgb, var(--fg) 5%, transparent)",
+                color: "var(--fg-subtle)", fontSize: 16, cursor: "pointer", flexShrink: 0,
+              }}
+            >✕</button>
+          </div>
+        ) : (
+          /* Grade 2×2: Pix | Dinheiro / Cartão | Cortesia */
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            {([
+              { key: "pix",      label: "Pix",      icon: "⚡",  primary: true,  action: () => pagar("pix") },
+              { key: "dinheiro", label: "Dinheiro", icon: "💵",  primary: true,  action: () => pagar("dinheiro") },
+              { key: "cartao",   label: "Cartão",   icon: "💳",  primary: false, action: () => setCartaoAberto(true) },
+              { key: "cortesia", label: "Cortesia", icon: "🎁",  primary: false, action: () => setShowCortesia(true), warn: true },
+            ]).map(b => (
+              <button key={b.key}
+                onClick={b.action}
+                disabled={isPending}
+                style={{
+                  height: 56,
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  background: b.warn
+                    ? "color-mix(in srgb, var(--warn) 12%, transparent)"
+                    : b.primary
+                      ? "color-mix(in srgb, var(--fg) 9%, transparent)"
+                      : "color-mix(in srgb, var(--fg) 5%, transparent)",
+                  borderRadius: 8, border: "none",
                   cursor: isPending ? "not-allowed" : "pointer",
                   opacity: isPending ? 0.5 : 1,
                   transition: "background 150ms",
                 }}
               >
-                <span style={{ fontSize: 22 }}>{m.icon}</span>
-                <span style={{ fontSize: 15, fontWeight: 700, color: "var(--fg)" }}>{m.label}</span>
+                <span style={{ fontSize: 18 }}>{b.icon}</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: b.warn ? "var(--warn)" : b.primary ? "var(--fg)" : "var(--fg-muted)" }}>
+                  {b.label}
+                </span>
               </button>
-            );
-          })}
-        </div>
-
-        {/* Secundários: Cartão (toggle Débito/Crédito) + Cortesia */}
-        <div style={{ display: "flex", gap: 8 }}>
-          {cartaoAberto ? (
-            <>
-              <button
-                onClick={() => { pagar("debito"); setCartaoAberto(false); }}
-                disabled={isPending}
-                style={{
-                  flex: 1, height: 52,
-                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3,
-                  background: "color-mix(in srgb, var(--fg) 8%, transparent)",
-                  borderRadius: 8, border: "1px solid var(--border)",
-                  cursor: isPending ? "not-allowed" : "pointer", opacity: isPending ? 0.5 : 1,
-                }}
-              >
-                <span style={{ fontSize: 15 }}>💳</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-muted)" }}>Débito</span>
-              </button>
-              <button
-                onClick={() => { pagar("credito"); setCartaoAberto(false); }}
-                disabled={isPending}
-                style={{
-                  flex: 1, height: 52,
-                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3,
-                  background: "color-mix(in srgb, var(--fg) 8%, transparent)",
-                  borderRadius: 8, border: "1px solid var(--border)",
-                  cursor: isPending ? "not-allowed" : "pointer", opacity: isPending ? 0.5 : 1,
-                }}
-              >
-                <span style={{ fontSize: 15 }}>💳</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-muted)" }}>Crédito</span>
-              </button>
-              <button
-                onClick={() => setCartaoAberto(false)}
-                style={{
-                  width: 44, height: 52, borderRadius: 8, border: "none",
-                  background: "color-mix(in srgb, var(--fg) 5%, transparent)",
-                  color: "var(--fg-subtle)", fontSize: 16, cursor: "pointer",
-                }}
-              >✕</button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => setCartaoAberto(true)}
-                disabled={isPending}
-                style={{
-                  flex: 2, height: 52,
-                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3,
-                  background: "color-mix(in srgb, var(--fg) 5%, transparent)",
-                  borderRadius: 8, border: "none",
-                  cursor: isPending ? "not-allowed" : "pointer", opacity: isPending ? 0.5 : 1,
-                }}
-              >
-                <span style={{ fontSize: 15 }}>💳</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-muted)" }}>Cartão</span>
-              </button>
-              <button
-                onClick={() => setShowCortesia(true)}
-                disabled={isPending}
-                style={{
-                  flex: 1, height: 52,
-                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3,
-                  background: "color-mix(in srgb, var(--warn) 12%, transparent)",
-                  borderRadius: 8, border: "none",
-                  cursor: isPending ? "not-allowed" : "pointer", opacity: isPending ? 0.5 : 1,
-                }}
-              >
-                <span style={{ fontSize: 15 }}>🎁</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--warn)" }}>Cortesia</span>
-              </button>
-            </>
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {showCortesia && (
