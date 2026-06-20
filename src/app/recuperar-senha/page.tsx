@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { traduzirErro } from "@/lib/utils";
 
 export default function RecuperarSenhaPage() {
   const supabase = createClient();
@@ -36,7 +37,7 @@ export default function RecuperarSenhaPage() {
     setLoading(false);
 
     if (error) {
-      setErro(error.message);
+      setErro(traduzirErro(error.message));
       return;
     }
 

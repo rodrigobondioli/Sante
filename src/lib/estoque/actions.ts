@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentBar } from "@/lib/dashboard/queries";
+import { traduzirErro } from "@/lib/utils";
 import type { MovimentoTipo } from "@/types/database";
 
 export type EstoqueResult = { ok: true } | { error: string } | null;
@@ -46,7 +47,7 @@ export async function registrarMovimento(
     .update({ quantidade_atual: posterior })
     .eq("id", estoqueId);
 
-  if (updateError) return { error: updateError.message };
+  if (updateError) return { error: traduzirErro(updateError.message) };
 
   // Registra movimento (log imutável)
   await supabase.from("estoque_movimentos").insert({
@@ -85,7 +86,7 @@ export async function atualizarMinimo(
     .eq("id", estoqueId)
     .eq("bar_id", current.bar.id);
 
-  if (error) return { error: error.message };
+  if (error) return { error: traduzirErro(error.message) };
 
   revalidatePath("/dashboard/estoque");
   revalidatePath("/dashboard");

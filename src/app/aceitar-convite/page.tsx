@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { processarConvite } from "./actions";
+import { traduzirErro } from "@/lib/utils";
 
 type Fase = "aguardando" | "definir_senha" | "processando" | "erro";
 
@@ -67,7 +68,7 @@ export default function AceitarConvitePage() {
     // Define a senha da nova conta
     const { error: pwError } = await supabase.auth.updateUser({ password: senha });
     if (pwError) {
-      setErro(pwError.message);
+      setErro(traduzirErro(pwError.message));
       setFase("definir_senha");
       return;
     }

@@ -4,16 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-
-function traduzirErro(msg: string): string {
-  if (msg.includes("already registered") || msg.includes("User already registered"))
-    return "Este email já está em uso.";
-  if (msg.includes("Password should be at least"))
-    return "A senha deve ter pelo menos 6 caracteres.";
-  if (msg.includes("valid email"))
-    return "Insira um email válido.";
-  return msg;
-}
+import { traduzirErro } from "@/lib/utils";
 
 export default function CadastroPage() {
   const router = useRouter();

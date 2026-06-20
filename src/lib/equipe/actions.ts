@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentBar } from "@/lib/dashboard/queries";
+import { traduzirErro } from "@/lib/utils";
 import type { BarRole } from "@/types/database";
 
 async function assertDono() {
@@ -149,7 +150,7 @@ export async function convidarMembro(
     if (inviteError) {
       // Rollback: remove linha pendente se o email falhou
       await supabase.from("bar_members").delete().eq("id", pendingRow.id);
-      return { error: "Erro ao enviar convite: " + inviteError.message };
+      return { error: "Erro ao enviar convite. " + traduzirErro(inviteError.message) };
     }
 
     revalidatePath("/dashboard/equipe");

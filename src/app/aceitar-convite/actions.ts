@@ -34,7 +34,7 @@ export async function processarConvite(): Promise<ProcessarConviteResult> {
     const { error } = await admin.from("bar_members")
       .update({ user_id: user.id, ativo: true })
       .eq("id", meta.bar_member_id);
-    if (error) return { error: "Erro ao ativar acesso: " + error.message };
+    if (error) return { error: "Erro ao ativar acesso. Tente novamente." };
   } else {
     // Caminho sem linha pendente — verifica se já é membro e insere se não for
     const { data: existing } = await admin.from("bar_members")
@@ -50,7 +50,7 @@ export async function processarConvite(): Promise<ProcessarConviteResult> {
         role: meta.role,
         ativo: true,
       });
-      if (error) return { error: "Erro ao configurar acesso: " + error.message };
+      if (error) return { error: "Erro ao configurar acesso. Tente novamente." };
     }
   }
 

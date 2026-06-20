@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { traduzirErro } from "@/lib/utils";
 
 export type ActionResult = { ok: true } | { error: string } | null;
 
@@ -47,7 +48,7 @@ export async function atualizarPerfil(barId: string, formData: FormData): Promis
     configuracoes,
   }).eq("id", barId);
 
-  if (error) return { error: error.message };
+  if (error) return { error: traduzirErro(error.message) };
 
   revalidatePath("/dashboard");
   return { ok: true };
@@ -56,7 +57,7 @@ export async function atualizarPerfil(barId: string, formData: FormData): Promis
 export async function atualizarLogo(barId: string, logoUrl: string | null): Promise<ActionResult> {
   const supabase = await createClient();
   const { error } = await supabase.from("bars").update({ logo_url: logoUrl }).eq("id", barId);
-  if (error) return { error: error.message };
+  if (error) return { error: traduzirErro(error.message) };
   revalidatePath("/dashboard");
   return { ok: true };
 }
@@ -64,7 +65,7 @@ export async function atualizarLogo(barId: string, logoUrl: string | null): Prom
 export async function atualizarAvatar(userId: string, avatarUrl: string | null): Promise<ActionResult> {
   const supabase = await createClient();
   const { error } = await supabase.from("profiles").update({ avatar_url: avatarUrl }).eq("id", userId);
-  if (error) return { error: error.message };
+  if (error) return { error: traduzirErro(error.message) };
   revalidatePath("/dashboard");
   return { ok: true };
 }
@@ -81,7 +82,7 @@ export async function atualizarConta(userId: string, formData: FormData): Promis
     avatar_url: avatarUrl,
   }).eq("id", userId);
 
-  if (error) return { error: error.message };
+  if (error) return { error: traduzirErro(error.message) };
 
   revalidatePath("/dashboard");
   return { ok: true };

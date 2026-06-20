@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { traduzirErro } from "@/lib/utils";
 
 export default function NovaSenhaPage() {
   const router = useRouter();
@@ -72,7 +73,7 @@ export default function NovaSenhaPage() {
     setLoading(false);
 
     if (error) {
-      setErro(error.message);
+      setErro(traduzirErro(error.message));
       return;
     }
 
