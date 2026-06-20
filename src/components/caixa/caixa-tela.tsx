@@ -275,26 +275,26 @@ function ComandaCard({ comanda, onPago }: { comanda: ComandaPendente; onPago: (m
   return (
     <div style={{ background: "color-mix(in srgb, var(--fg) 4%, transparent)", borderRadius: 8, overflow: "hidden", border: "1px solid var(--border)" }}>
       {/* Header do card */}
-      <div style={{ padding: "16px 20px 14px", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+      <div style={{ padding: "12px 16px 10px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
-          <p style={{ fontSize: 17, fontWeight: 800, color: "var(--fg)", margin: 0, letterSpacing: "-0.3px" }}>{comanda.mesa}</p>
-          <p style={{ fontSize: 12, color: "var(--fg-subtle)", margin: "3px 0 0" }}>esperando há {tempo}</p>
+          <p style={{ fontSize: 15, fontWeight: 800, color: "var(--fg)", margin: 0, letterSpacing: "-0.2px" }}>{comanda.mesa}</p>
+          <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: "2px 0 0" }}>esperando há {tempo}</p>
         </div>
-        <p style={{ fontSize: 24, fontWeight: 900, color: "var(--fg)", margin: 0, letterSpacing: "-0.5px", fontVariantNumeric: "tabular-nums", fontFamily: "var(--font-mono)" }}>
+        <p style={{ fontSize: 20, fontWeight: 900, color: "var(--fg)", margin: 0, letterSpacing: "-0.4px", fontVariantNumeric: "tabular-nums", fontFamily: "var(--font-mono)" }}>
           {currency.format(comanda.total)}
         </p>
       </div>
 
       {/* Itens */}
       {comanda.itens.length > 0 && (
-        <div style={{ padding: "0 20px 14px" }}>
+        <div style={{ padding: "0 16px 10px" }}>
           {comanda.itens.map((item, i) => (
-            <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "3px 0" }}>
-              <p style={{ fontSize: 13, color: "var(--fg-muted)", margin: 0 }}>
-                <span style={{ color: "var(--fg-subtle)", marginRight: 7 }}>{item.quantidade}×</span>
+            <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "2px 0" }}>
+              <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: 0 }}>
+                <span style={{ color: "var(--fg-subtle)", marginRight: 6 }}>{item.quantidade}×</span>
                 {item.nome}
               </p>
-              <p style={{ fontSize: 13, color: "var(--fg-subtle)", margin: 0, fontVariantNumeric: "tabular-nums", fontFamily: "var(--font-mono)" }}>
+              <p style={{ fontSize: 12, color: "var(--fg-subtle)", margin: 0, fontVariantNumeric: "tabular-nums", fontFamily: "var(--font-mono)" }}>
                 {currency.format(item.preco_total)}
               </p>
             </div>
@@ -303,66 +303,63 @@ function ComandaCard({ comanda, onPago }: { comanda: ComandaPendente; onPago: (m
       )}
 
       {/* Pagamento */}
-      <div style={{ padding: "14px 20px 18px", borderTop: "1px solid var(--border)" }}>
+      <div style={{ padding: "10px 16px 14px", borderTop: "1px solid var(--border)" }}>
         {error && <p style={{ fontSize: 12, color: "var(--danger)", margin: "0 0 10px" }}>{error}</p>}
 
         {cartaoAberto ? (
-          /* Expansão cartão: Débito | Crédito | ✕ */
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 6 }}>
             {(["debito", "credito"] as PagamentoMetodo[]).map(key => (
               <button key={key}
                 onClick={() => { pagar(key); setCartaoAberto(false); }}
                 disabled={isPending}
                 style={{
-                  flex: 1, height: 56,
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  flex: 1, height: 44,
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                   background: "color-mix(in srgb, var(--fg) 8%, transparent)",
-                  borderRadius: 8, border: "1px solid var(--border)",
+                  borderRadius: 6, border: "1px solid var(--border)",
                   cursor: "pointer", opacity: isPending ? 0.5 : 1,
                 }}
               >
-                <span style={{ fontSize: 18 }}>💳</span>
-                <span style={{ fontSize: 14, fontWeight: 700, color: "var(--fg)" }}>
+                <span style={{ fontSize: 15 }}>💳</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--fg)" }}>
                   {key === "debito" ? "Débito" : "Crédito"}
                 </span>
               </button>
             ))}
             <button onClick={() => setCartaoAberto(false)}
               style={{
-                width: 44, height: 56, borderRadius: 8, border: "none",
+                width: 38, height: 44, borderRadius: 6, border: "none",
                 background: "color-mix(in srgb, var(--fg) 5%, transparent)",
-                color: "var(--fg-subtle)", fontSize: 16, cursor: "pointer", flexShrink: 0,
+                color: "var(--fg-subtle)", fontSize: 14, cursor: "pointer", flexShrink: 0,
               }}
             >✕</button>
           </div>
         ) : (
-          /* Grade 2×2: Pix | Dinheiro / Cartão | Cortesia */
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
             {([
-              { key: "pix",      label: "Pix",      icon: "⚡",  primary: true,  action: () => pagar("pix") },
-              { key: "dinheiro", label: "Dinheiro", icon: "💵",  primary: true,  action: () => pagar("dinheiro") },
-              { key: "cartao",   label: "Cartão",   icon: "💳",  primary: false, action: () => setCartaoAberto(true) },
-              { key: "cortesia", label: "Cortesia", icon: "🎁",  primary: false, action: () => setShowCortesia(true), warn: true },
+              { key: "pix",      label: "Pix",      icon: "⚡", primary: true,  action: () => pagar("pix") },
+              { key: "dinheiro", label: "Dinheiro", icon: "💵", primary: true,  action: () => pagar("dinheiro") },
+              { key: "cartao",   label: "Cartão",   icon: "💳", primary: false, action: () => setCartaoAberto(true) },
+              { key: "cortesia", label: "Cortesia", icon: "🎁", primary: false, action: () => setShowCortesia(true), warn: true },
             ]).map(b => (
               <button key={b.key}
                 onClick={b.action}
                 disabled={isPending}
                 style={{
-                  height: 56,
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  height: 44,
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
                   background: b.warn
                     ? "color-mix(in srgb, var(--warn) 12%, transparent)"
                     : b.primary
                       ? "color-mix(in srgb, var(--fg) 9%, transparent)"
                       : "color-mix(in srgb, var(--fg) 5%, transparent)",
-                  borderRadius: 8, border: "none",
+                  borderRadius: 6, border: "none",
                   cursor: isPending ? "not-allowed" : "pointer",
                   opacity: isPending ? 0.5 : 1,
-                  transition: "background 150ms",
                 }}
               >
-                <span style={{ fontSize: 18 }}>{b.icon}</span>
-                <span style={{ fontSize: 14, fontWeight: 700, color: b.warn ? "var(--warn)" : b.primary ? "var(--fg)" : "var(--fg-muted)" }}>
+                <span style={{ fontSize: 16 }}>{b.icon}</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: b.warn ? "var(--warn)" : b.primary ? "var(--fg)" : "var(--fg-muted)" }}>
                   {b.label}
                 </span>
               </button>
@@ -554,7 +551,7 @@ export function CaixaTela({ comandas, insights, barNome, barId, turnoId }: {
       )}
 
       <div style={{ height: 1, background: "var(--border)" }} />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3" style={{ flex: 1, padding: "16px 20px", alignItems: "start" }}>
+      <div style={{ flex: 1, padding: "12px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
         {listaAtual.length === 0 ? (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "80px 0", gap: 8 }}>
             <p style={{ fontSize: 36, margin: 0, color: "var(--ok)" }}>✓</p>
@@ -566,10 +563,8 @@ export function CaixaTela({ comandas, insights, barNome, barId, turnoId }: {
             <p style={{ fontSize: 13, color: "var(--fg-subtle)", margin: 0 }}>Nenhuma comanda para {filtro}.</p>
           </div>
         ) : (
-          listaFiltrada.map((c, i) => (
-            <div key={c.id} className={i === listaFiltrada.length - 1 && listaFiltrada.length % 2 !== 0 ? "md:col-span-2" : ""}>
-              <ComandaCard comanda={c} onPago={metodo => onPago(c, metodo)} />
-            </div>
+          listaFiltrada.map(c => (
+            <ComandaCard key={c.id} comanda={c} onPago={metodo => onPago(c, metodo)} />
           ))
         )}
       </div>
