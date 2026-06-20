@@ -1,5 +1,6 @@
 import { Minus } from "lucide-react";
-import { fecharComanda, cancelarComanda, removerItem } from "@/lib/bartender/actions";
+import { cancelarComanda, removerItem } from "@/lib/bartender/actions";
+import { FecharComandaBtn } from "./fechar-comanda-btn";
 import type { ItemAgrupado } from "@/lib/bartender/queries";
 import type { Comanda } from "@/types/database";
 
@@ -98,19 +99,7 @@ export function ComandaConteudo({ comanda, itens, subtotal }: ComandaConteudoPro
             </button>
           </form>
         ) : (
-          <form action={comanda ? fecharComanda.bind(null, comanda.id) : undefined}>
-            <button
-              type="submit"
-              style={{
-                width: "100%", padding: "14px",
-                background: "var(--accent)", color: "var(--accent-fg)",
-                border: "none", borderRadius: 8,
-                fontSize: 15, fontWeight: 700, cursor: "pointer",
-              }}
-            >
-              Fechar e enviar
-            </button>
-          </form>
+          comanda && <FecharComandaBtn comandaId={comanda.id} />
         )}
       </div>
     </div>

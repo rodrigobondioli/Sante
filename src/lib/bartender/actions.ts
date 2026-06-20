@@ -94,12 +94,16 @@ export async function removerItem(itemId: string, comandaId: string) {
 
 export async function fecharComanda(comandaId: string) {
   const supabase = await createClient();
-  await supabase.from("comandas")
+  const { error } = await supabase.from("comandas")
     .update({ status: "aguardando_pagamento", fechada_em: new Date().toISOString() })
     .eq("id", comandaId)
     .eq("status", "aberta");
 
-  redirect("/bartender");
+  if (error) return { error: "Erro ao fechar comanda." };
+
+  revalidatePath("/caixa");
+  revalidatePath("/bartender");
+  return { ok: true };
 }
 
 export async function cancelarComanda(comandaId: string) {
