@@ -17,23 +17,34 @@ export default async function BartenderLayout({
 
   if (!current) redirect("/onboarding");
 
-  // Busca membros ativos para a tela "Quem é você?"
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: rows } = await (supabase.from("bar_members") as any)
+  // Busca todos os membros ativos — sem filtro de role para que dono/gerente
+  // também apareçam quando são eles que estão operando.
+  const { data: rows } = await supabase
+    .from("bar_members")
     .select("id, nome, role")
     .eq("bar_id", current.bar.id)
     .eq("ativo", true)
-    .in("role", ["bartender", "garcom", "caixa"])
     .not("nome", "is", null)
-    .order("created_at", { ascending: true }) as {
-      data: { id: string; nome: string | null; role: string }[] | null;
-    };
+    .order("created_at", { ascending: true })
+    .returns<{ id: string; nome: string | null; role: string }[]>();
 
-  const membros: MembroSimples[] = (rows ?? []).map(r => ({
+  let membros: MembroSimples[] = (rows ?? []).map(r => ({
     id: r.id,
     nome: r.nome ?? "Sem nome",
     role: r.role,
   }));
+
+  // Fallback: bar sem nenhum membro ainda → exibe o perfil do dono logado
+  if (membros.length === 0) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id, nome")
+      .eq("id", current.userId)
+      .maybeSingle();
+    if (profile) {
+      membros = [{ id: profile.id, nome: profile.nome, role: current.role }];
+    }
+  }
 
   return (
     <OperadorShell membros={membros} barNome={current.bar.nome}>

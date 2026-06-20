@@ -101,7 +101,14 @@ export function OperadorShell({
   useEffect(() => {
     try {
       const salvo = localStorage.getItem(STORAGE_KEY);
-      if (salvo) setOperador(JSON.parse(salvo));
+      if (salvo) {
+        setOperador(JSON.parse(salvo));
+      } else if (membros.length === 1) {
+        // Único membro ativo — entra direto sem pedir seleção
+        const m = membros[0];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(m));
+        setOperador(m);
+      }
     } catch {}
     setCarregado(true);
   }, []);
