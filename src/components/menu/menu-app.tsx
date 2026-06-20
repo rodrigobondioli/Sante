@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition, useCallback, useRef } from "react";
 import { submeterPedido, pedirConta } from "@/lib/menu/actions";
 import type { Bar, Mesa, Categoria, Produto } from "@/types/database";
 
@@ -68,6 +68,10 @@ function ordinal(n: number) {
 function SplashScreen({ bar, onNext }: { bar: Bar; onNext: () => void }) {
   const DURATION = 2800;
   const [progress, setProgress] = useState(0);
+  const onNextRef = useRef(onNext);
+
+  // Keep ref current on every render without restarting the timer
+  useEffect(() => { onNextRef.current = onNext; });
 
   useEffect(() => {
     const start = Date.now();
@@ -78,12 +82,12 @@ function SplashScreen({ bar, onNext }: { bar: Bar; onNext: () => void }) {
       if (p < 1) {
         raf = requestAnimationFrame(tick);
       } else {
-        onNext();
+        onNextRef.current();
       }
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [onNext]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div style={{
@@ -1103,7 +1107,7 @@ export function MenuApp({
     setTimeout(() => setToast(false), 2000);
   };
 
-  const handleSplashNext = () => {
+  const handleSplashNext = useCallback(() => {
     if (cliente) {
       const updated = { ...cliente, visitas: cliente.visitas + 1, ultimaVisita: new Date().toISOString() };
       setCliente(updated);
@@ -1112,7 +1116,7 @@ export function MenuApp({
     } else {
       setScreen("welcome-new");
     }
-  };
+  }, [cliente, bar.slug]);
 
   const handleNomeConfirm = (nome: string) => {
     const novo: ClienteLocal = { nome, visitas: 1, ultimaVisita: new Date().toISOString() };
