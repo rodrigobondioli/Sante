@@ -87,16 +87,22 @@ export default async function TurnoDetalhePage({
       </div>
 
       {/* KPI cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+      <div className="grid grid-cols-2 gap-4">
         <div style={card}>
           <p style={sectionLabel}>Faturamento do turno</p>
-          <p style={{ fontSize: "30px", fontWeight: 600, color: "var(--fg)", margin: "10px 0 0", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums" }}>
+          <p
+            className="text-[22px] sm:text-[30px]"
+            style={{ fontWeight: 600, color: "var(--fg)", margin: "10px 0 0", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums" }}
+          >
             {currency.format(turno.totalVendas)}
           </p>
         </div>
         <div style={card}>
           <p style={sectionLabel}>Comandas pagas</p>
-          <p style={{ fontSize: "30px", fontWeight: 600, color: "var(--fg)", margin: "10px 0 0", fontFamily: "var(--font-mono)" }}>
+          <p
+            className="text-[22px] sm:text-[30px]"
+            style={{ fontWeight: 600, color: "var(--fg)", margin: "10px 0 0", fontFamily: "var(--font-mono)" }}
+          >
             {turno.totalComandas}
           </p>
         </div>

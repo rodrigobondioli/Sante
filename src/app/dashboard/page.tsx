@@ -418,18 +418,6 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        {/* Aviso mobile */}
-        <p
-          className="lg:hidden"
-          style={{
-            fontSize: "12px",
-            color: "var(--fg-subtle)",
-            textAlign: "center",
-          }}
-        >
-          Acesse o desktop para gráficos e análises completas.
-        </p>
-
       </div>
     </div>
   );

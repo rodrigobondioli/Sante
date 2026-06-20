@@ -51,22 +51,18 @@ export default async function TurnosPage() {
         <TurnoControles turnoAtual={turnoAtual} />
       </div>
 
-      {/* Table card */}
+      {/* Table card — 4 colunas no mobile, 7 no sm+ */}
       <div className="overflow-x-auto" style={card}>
-        <table style={{ width: "100%", minWidth: 640, borderCollapse: "collapse", textAlign: "left" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
           <thead>
             <tr>
-              {["Status", "Abertura", "Fechamento", "Aberto por", "Comandas", "Faturamento", ""].map((h, i) => (
-                <th key={i} style={{
-                  ...label,
-                  padding: "14px 20px",
-                  borderBottom: "1px solid var(--border)",
-                  textAlign: i >= 4 && i <= 5 ? "right" : "left",
-                  fontWeight: 500,
-                }}>
-                  {h}
-                </th>
-              ))}
+              <th style={{ ...label, padding: "14px 20px", borderBottom: "1px solid var(--border)", fontWeight: 500 }}>Status</th>
+              <th style={{ ...label, padding: "14px 20px", borderBottom: "1px solid var(--border)", fontWeight: 500 }}>Abertura</th>
+              <th className="hidden sm:table-cell" style={{ ...label, padding: "14px 20px", borderBottom: "1px solid var(--border)", fontWeight: 500 }}>Fechamento</th>
+              <th className="hidden sm:table-cell" style={{ ...label, padding: "14px 20px", borderBottom: "1px solid var(--border)", fontWeight: 500 }}>Aberto por</th>
+              <th className="hidden sm:table-cell" style={{ ...label, padding: "14px 20px", borderBottom: "1px solid var(--border)", textAlign: "right", fontWeight: 500 }}>Comandas</th>
+              <th style={{ ...label, padding: "14px 20px", borderBottom: "1px solid var(--border)", textAlign: "right", fontWeight: 500 }}>Faturamento</th>
+              <th style={{ padding: "14px 20px", borderBottom: "1px solid var(--border)" }} />
             </tr>
           </thead>
           <tbody>
@@ -88,13 +84,13 @@ export default async function TurnosPage() {
                 <td style={{ padding: "14px 20px", fontSize: "14px", color: "var(--fg)" }}>
                   {dataHora.format(new Date(turno.abertoEm))}
                 </td>
-                <td style={{ padding: "14px 20px", fontSize: "14px", color: "var(--fg-muted)" }}>
+                <td className="hidden sm:table-cell" style={{ padding: "14px 20px", fontSize: "14px", color: "var(--fg-muted)" }}>
                   {turno.fechadoEm ? dataHora.format(new Date(turno.fechadoEm)) : "—"}
                 </td>
-                <td style={{ padding: "14px 20px", fontSize: "14px", color: "var(--fg-muted)" }}>
+                <td className="hidden sm:table-cell" style={{ padding: "14px 20px", fontSize: "14px", color: "var(--fg-muted)" }}>
                   {turno.abertoPorNome}
                 </td>
-                <td style={{ padding: "14px 20px", fontSize: "14px", color: "var(--fg)", textAlign: "right" }}>
+                <td className="hidden sm:table-cell" style={{ padding: "14px 20px", fontSize: "14px", color: "var(--fg)", textAlign: "right" }}>
                   {turno.totalComandas}
                 </td>
                 <td style={{ padding: "14px 20px", fontSize: "14px", color: "var(--fg)", textAlign: "right", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums" }}>

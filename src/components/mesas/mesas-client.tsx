@@ -261,13 +261,13 @@ function MesaRow({
         {label}
       </span>
 
-      {/* Capacidade */}
+      {/* Capacidade — oculta em mobile para dar espaço ao nome */}
       {mesa.capacidade ? (
-        <span style={{ fontSize: 12, color: "var(--fg-subtle)", minWidth: 80 }}>
+        <span className="hidden sm:block" style={{ fontSize: 12, color: "var(--fg-subtle)", minWidth: 80 }}>
           {mesa.capacidade} lugares
         </span>
       ) : (
-        <span style={{ minWidth: 80 }} />
+        <span className="hidden sm:block" style={{ minWidth: 80 }} />
       )}
 
       {/* Ações — sempre visível no mobile, hover no desktop */}
@@ -374,7 +374,7 @@ export function MesasClient({ mesas, barId, mesasOcupadas, nextNumero }: MesasCl
           <span style={{ width: 20, flexShrink: 0 }} />
           <span style={{ ...lbl, width: 36, flexShrink: 0, margin: 0 }}>#</span>
           <span style={{ ...lbl, flex: 1, margin: 0 }}>Nome</span>
-          <span style={{ ...lbl, minWidth: 80, margin: 0 }}>Lugares</span>
+          <span className="hidden sm:block" style={{ ...lbl, minWidth: 80, margin: 0 }}>Lugares</span>
           <span style={{ width: 72, flexShrink: 0 }} />
         </div>
 
