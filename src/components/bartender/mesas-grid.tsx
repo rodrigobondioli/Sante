@@ -58,11 +58,17 @@ function SeletorPessoas({
     <>
       <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.72)", zIndex: 50 }} />
       <div style={{
-        position: "fixed", bottom: 0, left: 0, right: 0,
-        background: "var(--bg-elevated)", borderTop: "1px solid var(--border)",
-        borderRadius: "8px 8px 0 0", padding: "24px 24px 40px", zIndex: 51,
+        position: "fixed", inset: 0, zIndex: 51,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "20px",
+        pointerEvents: "none",
       }}>
-        <div style={{ width: 36, height: 4, borderRadius: 4, background: "var(--border-strong)", margin: "0 auto 20px" }} />
+      <div style={{
+        background: "var(--bg-elevated)", border: "1px solid var(--border)",
+        borderRadius: 12, padding: "28px 28px 24px",
+        width: "100%", maxWidth: 480,
+        pointerEvents: "all",
+      }}>
         <p style={{ fontSize: 10, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 4px" }}>
           Nova comanda
         </p>
@@ -135,6 +141,7 @@ function SeletorPessoas({
             </button>
           </>
         )}
+      </div>
       </div>
     </>
   );
