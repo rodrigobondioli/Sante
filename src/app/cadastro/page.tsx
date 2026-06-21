@@ -10,7 +10,6 @@ export default function CadastroPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  const [nomeBar, setNomeBar] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [confirmar, setConfirmar] = useState("");
@@ -18,7 +17,7 @@ export default function CadastroPage() {
   const [erro, setErro] = useState<string | null>(null);
   const [sucesso, setSucesso] = useState(false);
 
-  const [focos, setFocos] = useState({ nomeBar: false, email: false, senha: false, confirmar: false });
+  const [focos, setFocos] = useState({ email: false, senha: false, confirmar: false });
 
   const inputStyle = (focused: boolean): React.CSSProperties => ({
     width: "100%",
@@ -50,7 +49,6 @@ export default function CadastroPage() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password: senha,
-      options: { data: { nome_bar: nomeBar.trim() } },
     });
     setLoading(false);
 
@@ -60,7 +58,6 @@ export default function CadastroPage() {
     }
 
     if (data.user && data.session) {
-      // Confirmação de email desabilitada — já tem sessão
       router.push("/onboarding");
     } else {
       setSucesso(true);
@@ -104,16 +101,6 @@ export default function CadastroPage() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                <input
-                  type="text"
-                  placeholder="Nome do bar"
-                  required
-                  value={nomeBar}
-                  onChange={(e) => setNomeBar(e.target.value)}
-                  style={inputStyle(focos.nomeBar)}
-                  onFocus={() => setFocos((f) => ({ ...f, nomeBar: true }))}
-                  onBlur={() => setFocos((f) => ({ ...f, nomeBar: false }))}
-                />
                 <input
                   type="email"
                   placeholder="E-mail"
