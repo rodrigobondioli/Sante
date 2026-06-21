@@ -665,7 +665,59 @@ export function CardapioClient({
       </div>
 
       {/* Main content */}
-      <div className="flex flex-col lg:flex-row flex-1 lg:min-h-0 lg:overflow-hidden">
+
+      {/* ── Zero categorias: full-width empty state ── */}
+      {cardapio.length === 0 && !addingCategoria && (
+        <EmptyState
+          icon="🍹"
+          title="Seu cardápio está vazio"
+          description="Crie categorias (ex: Drinks, Cervejas, Petiscos) e depois adicione os produtos com preços e custos."
+          action={
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+              <EmptyStateButton onClick={() => setAddingCategoria(true)}>
+                <Plus style={{ width: 13, height: 13 }} />
+                Criar primeira categoria
+              </EmptyStateButton>
+              <button
+                onClick={() => setImportPanelOpen(true)}
+                style={{
+                  background: "none", border: "none",
+                  fontSize: 12, color: "var(--fg-subtle)", cursor: "pointer",
+                  textDecoration: "underline", textUnderlineOffset: 3,
+                }}
+              >
+                ou importe de uma planilha
+              </button>
+            </div>
+          }
+        />
+      )}
+
+      {/* ── Form para criar primeira categoria (quando clicado no empty state) ── */}
+      {cardapio.length === 0 && addingCategoria && (
+        <div style={{ display: "flex", justifyContent: "center", paddingTop: 48 }}>
+          <form
+            action={async (fd) => { await criarCategoria(fd); setAddingCategoria(false); }}
+            style={{ width: 280 }}
+          >
+            <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", marginBottom: 12 }}>Nova categoria</p>
+            <input
+              autoFocus
+              name="nome"
+              placeholder="Ex: Drinks, Cervejas, Petiscos…"
+              style={{ ...input, marginBottom: 10 }}
+              onKeyDown={e => { if (e.key === "Escape") setAddingCategoria(false); }}
+              required
+            />
+            <div style={{ display: "flex", gap: 6 }}>
+              <button type="submit" style={{ ...btnPrimary, flex: 1, padding: "9px 0", fontSize: 13 }}>Criar</button>
+              <button type="button" onClick={() => setAddingCategoria(false)} style={{ ...btnSecondary, padding: "9px 16px", fontSize: 13 }}>Cancelar</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <div className={`flex flex-col lg:flex-row flex-1 lg:min-h-0 lg:overflow-hidden${cardapio.length === 0 ? " hidden" : ""}`}>
 
         {/* ── Categories: horizontal scroll strip on mobile, vertical sidebar on desktop ── */}
         <div
@@ -722,31 +774,7 @@ export function CardapioClient({
 
         {/* ── Product list ── */}
         <div className="flex-1 pt-4 lg:pt-0 lg:pl-7 overflow-y-auto">
-          {!selectedGrupo ? (
-            <EmptyState
-              icon="🍹"
-              title="Seu cardápio está vazio"
-              description="Crie categorias (ex: Drinks, Cervejas, Petiscos) e depois adicione os produtos com preços e custos."
-              action={
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-                  <EmptyStateButton onClick={() => setAddingCategoria(true)}>
-                    <Plus style={{ width: 13, height: 13 }} />
-                    Criar primeira categoria
-                  </EmptyStateButton>
-                  <button
-                    onClick={() => setImportPanelOpen(true)}
-                    style={{
-                      background: "none", border: "none",
-                      fontSize: 12, color: "var(--fg-subtle)", cursor: "pointer",
-                      textDecoration: "underline", textUnderlineOffset: 3,
-                    }}
-                  >
-                    ou importe de uma planilha
-                  </button>
-                </div>
-              }
-            />
-          ) : (
+          {!selectedGrupo ? null : (
             <>
               <div style={{ marginBottom: 16 }}>
                 <h2 style={{ fontSize: 14, fontWeight: 500, color: "var(--fg-muted)", margin: 0, fontFamily: "var(--font-mono)" }}>
@@ -782,7 +810,7 @@ export function CardapioClient({
             </>
           )}
         </div>
-      </div>
+      </div> {/* fim grid duas colunas */}
 
       <ImportarCardapioPanel
         barId={barId}
