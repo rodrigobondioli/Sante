@@ -402,7 +402,7 @@ export function EstoqueClient({ itens }: { itens: ItemEstoque[] }) {
         icon="📦"
         title="Nenhum produto com estoque ativo"
         description="Ative o controle de estoque em cada produto no Cardápio para monitorar quantidade e receber alertas de mínimo."
-        action={<EmptyStateButton variant="secondary" href="/dashboard/cardapio">Ir para o Cardápio →</EmptyStateButton>}
+        action={<EmptyStateButton href="/dashboard/cardapio">Ir para o Cardápio →</EmptyStateButton>}
       />
     );
   }
