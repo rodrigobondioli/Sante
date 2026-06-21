@@ -55,8 +55,8 @@ function MesaCard({
     const inner = (
       <div style={{
         ...CARD_STYLE,
-        background: "color-mix(in srgb, var(--fg) 3%, transparent)",
-        border: "1px solid var(--border)",
+        background: "rgba(255,255,255,0.07)",
+        border: "1px solid rgba(255,255,255,0.16)",
         padding: "18px 18px 16px",
         justifyContent: "space-between",
         cursor: "pointer",
@@ -65,13 +65,13 @@ function MesaCard({
         boxSizing: "border-box",
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-          <span style={{ fontSize: 15, fontWeight: 700, color: "var(--fg-muted)", letterSpacing: "-0.2px" }}>
+          <span style={{ fontSize: 15, fontWeight: 700, color: "var(--fg)", letterSpacing: "-0.2px" }}>
             {label}
           </span>
           <span style={{
             fontSize: 9, fontWeight: 700, padding: "3px 8px", borderRadius: 4,
-            background: "color-mix(in srgb, var(--fg) 6%, transparent)",
-            color: "var(--fg-subtle)",
+            background: "rgba(255,255,255,0.08)",
+            color: "rgba(255,255,255,0.45)",
             textTransform: "uppercase", letterSpacing: "0.08em",
           }}>
             Livre
@@ -107,15 +107,12 @@ function MesaCard({
     return inner;
   }
 
-  // ── Ocupada — semantic colors allowed in Bartender ──
-  const bgColor     = querPagar
-    ? "color-mix(in srgb, var(--danger) 12%, transparent)"
-    : "color-mix(in srgb, var(--accent) 22%, transparent)";
+  // ── Ocupada — purple para todas, badge vermelho só pra "quer pagar" ──
+  const bgColor     = "color-mix(in srgb, #8B5CF6 16%, transparent)";
   const borderColor = querPagar
-    ? "color-mix(in srgb, var(--danger) 35%, transparent)"
-    : "color-mix(in srgb, var(--accent-bright) 35%, transparent)";
-  const topBarColor = querPagar ? "var(--danger)" : "var(--accent-bright)";
-  const totalColor  = querPagar ? "var(--danger)" : "var(--fg)";
+    ? "color-mix(in srgb, #8B5CF6 45%, transparent)"
+    : "color-mix(in srgb, #8B5CF6 28%, transparent)";
+  const totalColor  = "var(--fg)";
 
   return (
     <Link
@@ -128,9 +125,6 @@ function MesaCard({
         padding: "0",
       }}
     >
-      {/* Barra de cor no topo — solid */}
-      <div style={{ height: 3, background: topBarColor, flexShrink: 0 }} />
-
       <div style={{ flex: 1, padding: "14px 16px 14px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
         {/* Topo: nome + badge */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
@@ -151,7 +145,7 @@ function MesaCard({
           ) : (
             <span style={{
               width: 8, height: 8, borderRadius: "50%",
-              background: "var(--ok)",
+              background: "#8B5CF6",
               flexShrink: 0, marginTop: 4,
             }} />
           )}
@@ -175,12 +169,11 @@ function MesaCard({
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{
             fontSize: 11, fontWeight: 600,
-            color: querPagar ? "var(--danger)" : "var(--fg-subtle)",
+            color: querPagar ? "var(--danger)" : "rgba(255,255,255,0.45)",
             background: querPagar
               ? "color-mix(in srgb, var(--danger) 10%, transparent)"
-              : "color-mix(in srgb, var(--fg) 6%, transparent)",
+              : "rgba(255,255,255,0.06)",
             borderRadius: 4, padding: "2px 7px",
-            opacity: querPagar ? 1 : 0.8,
           }}>
             {tempoAberta(comanda.aberta_em)}
           </span>
