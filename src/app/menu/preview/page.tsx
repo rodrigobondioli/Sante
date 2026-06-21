@@ -23,6 +23,7 @@ const mesa: Mesa = {
   nome: "Varanda",
   capacidade: 4,
   ativo: true,
+  ordem: null,
   created_at: "",
 };
 
