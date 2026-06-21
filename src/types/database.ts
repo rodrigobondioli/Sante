@@ -388,6 +388,14 @@ export interface Database {
         Args: { p_turno_id: string; p_valor: number };
         Returns: undefined;
       };
+      marcar_comanda_paga: {
+        Args: { p_comanda_id: string; p_bar_id: string };
+        Returns: { ok: boolean; total?: number };
+      };
+      merge_bar_config: {
+        Args: { p_bar_id: string; p_patch: string };
+        Returns: undefined;
+      };
     };
   };
 }
