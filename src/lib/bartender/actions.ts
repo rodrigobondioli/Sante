@@ -7,7 +7,7 @@ import { getCurrentBar, getTurnoAtual } from "@/lib/dashboard/queries";
 import type { Comanda } from "@/types/database";
 
 /** Abre comanda para uma mesa específica (ou balcão se mesaId for null). */
-export async function abrirComanda(mesaId: string | null) {
+export async function abrirComanda(mesaId: string | null, totalPessoas?: number) {
   const current = await getCurrentBar();
   if (!current) return;
 
@@ -21,6 +21,7 @@ export async function abrirComanda(mesaId: string | null) {
       turno_id: turno.id,
       bartender_id: current.userId,
       mesa_id: mesaId,
+      total_pessoas: totalPessoas ?? null,
     })
     .select("id")
     .single();

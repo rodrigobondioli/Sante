@@ -221,6 +221,7 @@ export interface Comanda {
   identificador: string | null;
   status: ComandaStatus;
   total: number;
+  total_pessoas: number | null;
   aberta_em: string;
   fechada_em: string | null;
   created_at: string;
