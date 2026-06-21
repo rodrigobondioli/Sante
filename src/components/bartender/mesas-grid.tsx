@@ -344,6 +344,7 @@ export function MesasGrid({ barId, initialMesas, initialBalcao }: MesasGridProps
   // Modal de quantas pessoas (nova comanda)
   const [pendingAbrir, setPendingAbrir] = useState<{ mesaId: string | null; label: string } | null>(null);
   const [isOpening, setIsOpening] = useState(false);
+  const [openError, setOpenError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
   // ── Realtime — comandas ───────────────────────────────────────────────────
@@ -444,8 +445,15 @@ export function MesasGrid({ barId, initialMesas, initialBalcao }: MesasGridProps
     setIsOpening(true);
     try {
       const result = await abrirComanda(mesaId, n > 0 ? n : undefined, undefined, nome);
-      if (result?.id) router.push(`/bartender/${result.id}`);
-    } finally {
+      if (result?.id) {
+        // hard navigation — router.push fica preso dentro de async em App Router
+        window.location.href = `/bartender/${result.id}`;
+      } else {
+        setOpenError("Não foi possível abrir a comanda. Verifique se há um turno aberto.");
+        setIsOpening(false);
+      }
+    } catch {
+      setOpenError("Erro ao abrir comanda. Tente novamente.");
       setIsOpening(false);
     }
   };
@@ -611,6 +619,68 @@ export function MesasGrid({ barId, initialMesas, initialBalcao }: MesasGridProps
           </section>
         )}
       </div>
+
+      {/* Overlay: abrindo comanda */}
+      {isOpening && (
+        <>
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 60 }} />
+          <div style={{
+            position: "fixed", inset: 0, zIndex: 61,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <div style={{
+              background: "var(--bg-elevated)", border: "1px solid var(--border)",
+              borderRadius: 12, padding: "28px 36px",
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 14,
+            }}>
+              <div style={{
+                width: 28, height: 28, borderRadius: "50%",
+                border: "3px solid var(--border-strong)",
+                borderTopColor: "var(--accent)", animation: "spin 0.7s linear infinite",
+              }} />
+              <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>
+                Abrindo comanda…
+              </p>
+            </div>
+          </div>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </>
+      )}
+
+      {/* Banner de erro */}
+      {openError && (
+        <>
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 60 }}
+            onClick={() => setOpenError(null)} />
+          <div style={{
+            position: "fixed", inset: 0, zIndex: 61,
+            display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+          }}>
+            <div style={{
+              background: "var(--bg-elevated)", border: "1px solid var(--danger)",
+              borderRadius: 12, padding: "24px 28px", maxWidth: 360, width: "100%",
+              display: "flex", flexDirection: "column", gap: 16,
+            }}>
+              <p style={{ fontSize: 14, fontWeight: 600, color: "var(--danger)", margin: 0 }}>
+                ⚠ Erro ao abrir comanda
+              </p>
+              <p style={{ fontSize: 13, color: "var(--fg-muted)", margin: 0, lineHeight: 1.5 }}>
+                {openError}
+              </p>
+              <button
+                onClick={() => setOpenError(null)}
+                style={{
+                  background: "var(--bg-inset)", border: "1px solid var(--border)",
+                  borderRadius: 6, padding: "10px", fontSize: 13, fontWeight: 600,
+                  color: "var(--fg)", cursor: "pointer",
+                }}
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Modal: quantas pessoas (nova comanda) */}
       {pendingAbrir && (
