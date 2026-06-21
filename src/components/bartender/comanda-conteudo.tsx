@@ -1,5 +1,9 @@
-import { Minus } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Minus, Loader2 } from "lucide-react";
 import { cancelarComanda, removerItem } from "@/lib/bartender/actions";
+import { toast } from "@/components/ui/toaster";
 import { FecharComandaBtn } from "./fechar-comanda-btn";
 import type { ItemAgrupado } from "@/lib/bartender/queries";
 import type { Comanda } from "@/types/database";
@@ -13,8 +17,40 @@ interface ComandaConteudoProps {
 }
 
 export function ComandaConteudo({ comanda, itens, subtotal }: ComandaConteudoProps) {
+  const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
+  const [cancelando, setCancelando] = useState(false);
+
+  async function handleRemover(itemId: string, comandaId: string) {
+    if (removingIds.has(itemId)) return;
+    setRemovingIds(prev => { const n = new Set(prev); n.add(itemId); return n; });
+    try {
+      await removerItem(itemId, comandaId);
+    } catch {
+      toast("Erro ao remover item.", "error");
+      setRemovingIds(prev => { const n = new Set(prev); n.delete(itemId); return n; });
+    }
+  }
+
+  async function handleCancelar() {
+    if (!comanda || cancelando) return;
+    setCancelando(true);
+    try {
+      const result = await cancelarComanda(comanda.id);
+      if ("error" in result) {
+        toast(result.error, "error");
+        setCancelando(false);
+      } else {
+        window.location.href = "/bartender";
+      }
+    } catch {
+      toast("Erro ao cancelar comanda.", "error");
+      setCancelando(false);
+    }
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
         <div>
           <p style={{ fontSize: 11, fontWeight: 500, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 4px" }}>Comanda atual</p>
@@ -29,6 +65,7 @@ export function ComandaConteudo({ comanda, itens, subtotal }: ComandaConteudoPro
         )}
       </div>
 
+      {/* Items list */}
       <div style={{ flex: 1, overflowY: "auto", padding: "0 20px" }}>
         {itens.length === 0 ? (
           <p style={{ fontSize: 13, color: "var(--fg-subtle)", textAlign: "center", paddingTop: 40, paddingBottom: 40 }}>
@@ -36,37 +73,58 @@ export function ComandaConteudo({ comanda, itens, subtotal }: ComandaConteudoPro
           </p>
         ) : (
           <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
-            {itens.map((item) => (
-              <li key={item.produtoId} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "12px 0", borderBottom: "1px solid var(--border)" }}>
-                <div style={{ display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }}>
-                  <p style={{ fontSize: 14, color: "var(--fg)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.produtoNome}</p>
-                  <p style={{ fontSize: 12, color: "var(--fg-subtle)", margin: "2px 0 0" }}>
-                    {currency.format(item.precoUnitario)} cada
-                  </p>
-                </div>
-                <div style={{ display: "flex", flexShrink: 0, alignItems: "center", gap: 8 }}>
-                  <form action={removerItem.bind(null, item.ultimoItemId, comanda?.id ?? "")}>
+            {itens.map((item) => {
+              const isRemoving = removingIds.has(item.ultimoItemId);
+              return (
+                <li
+                  key={item.produtoId}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    gap: 8, padding: "12px 0", borderBottom: "1px solid var(--border)",
+                    opacity: isRemoving ? 0.4 : 1, transition: "opacity 150ms",
+                  }}
+                >
+                  <div style={{ display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }}>
+                    <p style={{ fontSize: 14, color: "var(--fg)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {item.produtoNome}
+                    </p>
+                    <p style={{ fontSize: 12, color: "var(--fg-subtle)", margin: "2px 0 0" }}>
+                      {currency.format(item.precoUnitario)} cada
+                    </p>
+                  </div>
+                  <div style={{ display: "flex", flexShrink: 0, alignItems: "center", gap: 8 }}>
                     <button
-                      type="submit"
+                      type="button"
                       aria-label={`Remover um ${item.produtoNome}`}
-                      style={{ width: 32, height: 32, borderRadius: "50%", background: "color-mix(in srgb, var(--fg) 6%, transparent)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--fg-muted)", flexShrink: 0 }}
+                      disabled={isRemoving || !comanda}
+                      onClick={() => comanda && handleRemover(item.ultimoItemId, comanda.id)}
+                      style={{
+                        width: 32, height: 32, borderRadius: "50%",
+                        background: "color-mix(in srgb, var(--fg) 6%, transparent)",
+                        border: "none", cursor: isRemoving ? "not-allowed" : "pointer",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        color: "var(--fg-muted)", flexShrink: 0,
+                      }}
                     >
-                      <Minus style={{ width: 14, height: 14 }} strokeWidth={2} />
+                      {isRemoving
+                        ? <Loader2 style={{ width: 14, height: 14 }} className="animate-spin" />
+                        : <Minus style={{ width: 14, height: 14 }} strokeWidth={2} />}
                     </button>
-                  </form>
-                  <span style={{ fontSize: 14, color: "var(--fg)", width: 20, textAlign: "center", fontFamily: "var(--font-mono)" }}>
-                    {item.quantidade}
-                  </span>
-                  <span style={{ fontSize: 14, color: "var(--fg)", fontFamily: "var(--font-mono)", width: 70, textAlign: "right" }}>
-                    {currency.format(item.precoTotal)}
-                  </span>
-                </div>
-              </li>
-            ))}
+                    <span style={{ fontSize: 14, color: "var(--fg)", width: 20, textAlign: "center", fontFamily: "var(--font-mono)" }}>
+                      {item.quantidade}
+                    </span>
+                    <span style={{ fontSize: 14, color: "var(--fg)", fontFamily: "var(--font-mono)", width: 70, textAlign: "right" }}>
+                      {currency.format(item.precoTotal)}
+                    </span>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
 
+      {/* Footer */}
       <div style={{ borderTop: "1px solid var(--border)", padding: "16px 20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
           <span style={{ fontSize: 13, color: "var(--fg-subtle)" }}>Subtotal</span>
@@ -83,21 +141,25 @@ export function ComandaConteudo({ comanda, itens, subtotal }: ComandaConteudoPro
             Aguardando pagamento no caixa
           </div>
         ) : itens.length === 0 ? (
-          <form action={comanda ? cancelarComanda.bind(null, comanda.id) : undefined}>
-            <button
-              type="submit"
-              style={{
-                width: "100%", padding: "14px",
-                background: "color-mix(in srgb, var(--fg) 5%, transparent)",
-                color: "var(--fg-muted)",
-                border: "1px solid var(--border)",
-                borderRadius: 8, fontSize: 15, fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
-              Cancelar comanda
-            </button>
-          </form>
+          <button
+            type="button"
+            disabled={cancelando || !comanda}
+            onClick={handleCancelar}
+            style={{
+              width: "100%", padding: "14px",
+              background: "color-mix(in srgb, var(--fg) 5%, transparent)",
+              color: cancelando ? "var(--fg-subtle)" : "var(--fg-muted)",
+              border: "1px solid var(--border)",
+              borderRadius: 8, fontSize: 15, fontWeight: 600,
+              cursor: cancelando ? "not-allowed" : "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              opacity: cancelando ? 0.7 : 1, transition: "opacity 150ms",
+            }}
+          >
+            {cancelando
+              ? <><Loader2 style={{ width: 15, height: 15 }} className="animate-spin" /> Cancelando…</>
+              : "Cancelar comanda"}
+          </button>
         ) : (
           comanda && <FecharComandaBtn comandaId={comanda.id} />
         )}

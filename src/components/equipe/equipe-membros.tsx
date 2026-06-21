@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { Pencil, Check, X, Trash2, Eye, EyeOff } from "lucide-react";
+import { useState, useTransition } from "react";
+import { Pencil, Check, X, Trash2, Eye, EyeOff, Loader2 } from "lucide-react";
 import { alterarRole, desativarMembro, reativarMembro, removerMembro } from "@/lib/equipe/actions";
+import { toast } from "@/components/ui/toaster";
 import { CARD, LABEL, BTN_ICON, BTN_SECONDARY } from "@/lib/ui";
 import type { BarRole } from "@/types/database";
 
@@ -47,15 +48,55 @@ function MembroRow({
   const [editing, setEditing] = useState(false);
   const [role, setRole] = useState<BarRole>(m.role);
   const [saving, setSaving] = useState(false);
+  const [toggling, setToggling] = useState(false);
+  const [removing, setRemoving] = useState(false);
+  const [, startTransition] = useTransition();
   const isPending = m.userId === null;
   const isOwn = m.userId === currentUserId;
   const canEdit = isDono && !isOwn && !isPending;
 
   async function saveRole() {
     setSaving(true);
-    await alterarRole(m.id, role);
-    setSaving(false);
-    setEditing(false);
+    try {
+      await alterarRole(m.id, role);
+      toast("Função atualizada.", "ok");
+    } catch {
+      toast("Erro ao alterar função.", "error");
+    } finally {
+      setSaving(false);
+      setEditing(false);
+    }
+  }
+
+  async function handleToggleAtivo() {
+    if (toggling) return;
+    setToggling(true);
+    try {
+      if (m.ativo) {
+        await desativarMembro(m.id);
+        toast(`${m.nome} desativado.`, "ok");
+      } else {
+        await reativarMembro(m.id);
+        toast(`${m.nome} reativado.`, "ok");
+      }
+    } catch {
+      toast("Erro ao alterar acesso.", "error");
+    } finally {
+      setToggling(false);
+    }
+  }
+
+  async function handleRemover() {
+    if (removing) return;
+    if (!window.confirm(`Remover ${m.nome} da equipe permanentemente?`)) return;
+    setRemoving(true);
+    try {
+      await removerMembro(m.id);
+      toast(`${m.nome} removido.`, "ok");
+    } catch {
+      toast("Erro ao remover membro.", "error");
+      setRemoving(false);
+    }
   }
 
   return (
@@ -144,29 +185,32 @@ function MembroRow({
           </button>
 
           {/* Toggle ativo/inativo */}
-          <form action={m.ativo ? desativarMembro.bind(null, m.id) : reativarMembro.bind(null, m.id)}>
-            <button
-              type="submit"
-              style={{ ...BTN_ICON, color: m.ativo ? "var(--fg-muted)" : "var(--fg-subtle)" }}
-              title={m.ativo ? "Desativar acesso" : "Reativar acesso"}
-            >
-              {m.ativo
+          <button
+            type="button"
+            disabled={toggling}
+            onClick={handleToggleAtivo}
+            style={{ ...BTN_ICON, color: m.ativo ? "var(--fg-muted)" : "var(--fg-subtle)", opacity: toggling ? 0.5 : 1 }}
+            title={m.ativo ? "Desativar acesso" : "Reativar acesso"}
+          >
+            {toggling
+              ? <Loader2 style={{ width: 13, height: 13 }} className="animate-spin" />
+              : m.ativo
                 ? <EyeOff style={{ width: 13, height: 13 }} />
                 : <Eye style={{ width: 13, height: 13 }} />}
-            </button>
-          </form>
+          </button>
 
           {/* Deletar */}
-          <form action={removerMembro.bind(null, m.id)}>
-            <button
-              type="submit"
-              onClick={e => { if (!window.confirm(`Remover ${m.nome} da equipe permanentemente?`)) e.preventDefault(); }}
-              style={{ ...BTN_ICON, color: "var(--danger)" }}
-              title="Remover permanentemente"
-            >
-              <Trash2 style={{ width: 13, height: 13 }} />
-            </button>
-          </form>
+          <button
+            type="button"
+            disabled={removing}
+            onClick={handleRemover}
+            style={{ ...BTN_ICON, color: "var(--danger)", opacity: removing ? 0.5 : 1 }}
+            title="Remover permanentemente"
+          >
+            {removing
+              ? <Loader2 style={{ width: 13, height: 13 }} className="animate-spin" />
+              : <Trash2 style={{ width: 13, height: 13 }} />}
+          </button>
         </div>
       ) : <span className="hidden lg:block" />}
     </div>

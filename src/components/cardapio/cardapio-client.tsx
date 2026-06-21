@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Pencil, Trash2, EyeOff, Eye, X, Check, ChevronDown, ChevronUp, ImageIcon, FileSpreadsheet } from "lucide-react";
+import { useState, useTransition } from "react";
+import { Plus, Pencil, Trash2, EyeOff, Eye, X, Check, ChevronDown, ChevronUp, ImageIcon, FileSpreadsheet, Loader2 } from "lucide-react";
+import { toast } from "@/components/ui/toaster";
 import { ImportarCardapioPanel } from "./importar-cardapio-panel";
 import {
   criarCategoria,
@@ -154,6 +155,19 @@ function VarianteForm({
 // ─── Variante Row ─────────────────────────────────────────────────────────────
 function VarianteRow({ variante, produtoId }: { variante: ProdutoVariante; produtoId: string }) {
   const [editing, setEditing] = useState(false);
+  const [deletando, setDeletando] = useState(false);
+
+  async function handleDeletar() {
+    if (!window.confirm(`Deletar variante "${variante.nome}"?`)) return;
+    setDeletando(true);
+    try {
+      await deletarVariante(variante.id);
+      toast(`Variante "${variante.nome}" removida.`, "ok");
+    } catch {
+      toast("Erro ao deletar variante.", "error");
+      setDeletando(false);
+    }
+  }
 
   if (editing) {
     return (
@@ -188,16 +202,17 @@ function VarianteRow({ variante, produtoId }: { variante: ProdutoVariante; produ
         <button type="button" onClick={() => setEditing(true)} style={iconBtn} title="Editar">
           <Pencil style={{ width: 12, height: 12 }} />
         </button>
-        <form action={deletarVariante.bind(null, variante.id)}>
-          <button
-            type="submit"
-            onClick={e => { if (!window.confirm(`Deletar variante "${variante.nome}"?`)) e.preventDefault(); }}
-            style={{ ...iconBtn, color: "var(--danger)" }}
-            title="Deletar variante"
-          >
-            <Trash2 style={{ width: 12, height: 12 }} />
-          </button>
-        </form>
+        <button
+          type="button"
+          disabled={deletando}
+          onClick={handleDeletar}
+          style={{ ...iconBtn, color: "var(--danger)", opacity: deletando ? 0.5 : 1 }}
+          title="Deletar variante"
+        >
+          {deletando
+            ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" />
+            : <Trash2 style={{ width: 12, height: 12 }} />}
+        </button>
       </div>
     </div>
   );
@@ -317,8 +332,35 @@ function ProdutoRow({
   const [hovered, setHovered] = useState(false);
   const [variantesOpen, setVariantesOpen] = useState(false);
   const [addingVariante, setAddingVariante] = useState(false);
+  const [toggling, setToggling] = useState(false);
+  const [deletando, setDeletando] = useState(false);
 
   const variantes = produto.produto_variantes ?? [];
+
+  async function handleToggle() {
+    if (toggling) return;
+    setToggling(true);
+    try {
+      await toggleProduto(produto.id, produto.ativo);
+      toast(produto.ativo ? `"${produto.nome}" desativado.` : `"${produto.nome}" ativado.`, "ok");
+    } catch {
+      toast("Erro ao alterar produto.", "error");
+    } finally {
+      setToggling(false);
+    }
+  }
+
+  async function handleDeletar() {
+    if (!window.confirm(`Deletar "${produto.nome}"?`)) return;
+    setDeletando(true);
+    try {
+      await deletarProduto(produto.id);
+      toast(`"${produto.nome}" deletado.`, "ok");
+    } catch {
+      toast("Erro ao deletar produto.", "error");
+      setDeletando(false);
+    }
+  }
 
   if (editing) {
     return (
@@ -409,27 +451,30 @@ function ProdutoRow({
           <button onClick={() => setEditing(true)} style={iconBtn} title="Editar">
             <Pencil style={{ width: 13, height: 13 }} />
           </button>
-          <form action={toggleProduto.bind(null, produto.id, produto.ativo)}>
-            <button
-              type="submit"
-              style={{ ...iconBtn, color: produto.ativo ? "var(--fg-subtle)" : "var(--ok)" }}
-              title={produto.ativo ? "Desativar" : "Ativar"}
-            >
-              {produto.ativo
+          <button
+            type="button"
+            disabled={toggling}
+            onClick={handleToggle}
+            style={{ ...iconBtn, color: produto.ativo ? "var(--fg-subtle)" : "var(--ok)", opacity: toggling ? 0.5 : 1 }}
+            title={produto.ativo ? "Desativar" : "Ativar"}
+          >
+            {toggling
+              ? <Loader2 style={{ width: 13, height: 13 }} className="animate-spin" />
+              : produto.ativo
                 ? <EyeOff style={{ width: 13, height: 13 }} />
                 : <Eye style={{ width: 13, height: 13 }} />}
-            </button>
-          </form>
-          <form action={deletarProduto.bind(null, produto.id)}>
-            <button
-              type="submit"
-              onClick={e => { if (!window.confirm(`Deletar "${produto.nome}"?`)) e.preventDefault(); }}
-              style={{ ...iconBtn, color: "var(--danger)" }}
-              title="Deletar produto"
-            >
-              <Trash2 style={{ width: 13, height: 13 }} />
-            </button>
-          </form>
+          </button>
+          <button
+            type="button"
+            disabled={deletando}
+            onClick={handleDeletar}
+            style={{ ...iconBtn, color: "var(--danger)", opacity: deletando ? 0.5 : 1 }}
+            title="Deletar produto"
+          >
+            {deletando
+              ? <Loader2 style={{ width: 13, height: 13 }} className="animate-spin" />
+              : <Trash2 style={{ width: 13, height: 13 }} />}
+          </button>
         </div>
       </div>
 

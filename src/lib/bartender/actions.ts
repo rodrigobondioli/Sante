@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentBar, getTurnoAtual } from "@/lib/dashboard/queries";
 import type { CartItem, Comanda } from "@/types/database";
@@ -142,18 +141,23 @@ export async function fecharComanda(comandaId: string) {
   return { ok: true };
 }
 
-export async function cancelarComanda(comandaId: string) {
+export async function cancelarComanda(
+  comandaId: string,
+): Promise<{ ok: true } | { error: string }> {
   const current = await getCurrentBar();
-  if (!current) return;
+  if (!current) return { error: "Sessão expirada." };
 
   const supabase = await createClient();
-  await supabase.from("comandas")
+  const { error } = await supabase.from("comandas")
     .update({ status: "cancelada", fechada_em: new Date().toISOString() })
     .eq("id", comandaId)
     .eq("bar_id", current.bar.id)
     .eq("status", "aberta");
 
-  redirect("/bartender");
+  if (error) return { error: "Erro ao cancelar comanda." };
+
+  revalidatePath("/bartender");
+  return { ok: true };
 }
 
 // Usado por NovaComandaButton via form action — abre comanda de balcão (sem mesa)
