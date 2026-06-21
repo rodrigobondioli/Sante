@@ -42,3 +42,19 @@ export async function removerMesa(id: string) {
   await supabase.from("mesas").update({ ativo: false }).eq("id", id);
   revalidatePath("/dashboard/mesas");
 }
+
+export async function reordenarMesas(barId: string, ids: string[]): Promise<void> {
+  const current = await getCurrentBar();
+  if (!current || current.bar.id !== barId) return;
+
+  const supabase = await createClient();
+  await Promise.all(
+    ids.map((id, i) =>
+      supabase.from("mesas")
+        .update({ ordem: i + 1 })
+        .eq("id", id)
+        .eq("bar_id", barId)
+    )
+  );
+  revalidatePath("/dashboard/mesas");
+}

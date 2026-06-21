@@ -15,7 +15,7 @@ export default async function MesasPage() {
     .select("*")
     .eq("bar_id", current.bar.id)
     .eq("ativo", true)
-    .order("numero", { ascending: true })
+    .order("ordem", { ascending: true, nullsFirst: false })
     .returns<Mesa[]>();
 
   const mesaList = mesas ?? [];

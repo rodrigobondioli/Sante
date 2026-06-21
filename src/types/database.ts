@@ -110,6 +110,7 @@ export interface Mesa {
   nome: string | null;
   capacidade: number | null;
   ativo: boolean;
+  ordem: number | null;
   created_at: string;
 }
 

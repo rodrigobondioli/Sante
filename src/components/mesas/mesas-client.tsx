@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, X, QrCode, Printer } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Plus, Pencil, Trash2, X, QrCode, Printer, GripVertical } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
-import { criarMesa, editarMesa, removerMesa } from "@/lib/mesas/actions";
+import { criarMesa, editarMesa, removerMesa, reordenarMesas } from "@/lib/mesas/actions";
 import type { Mesa } from "@/types/database";
 
 // ─── Shared styles ─────────────────────────────────────────────────────────────
@@ -348,13 +348,19 @@ function QRModal({ mesa, onClose }: { mesa: Mesa; onClose: () => void }) {
 // ─── Mesa row ─────────────────────────────────────────────────────────────────
 
 function MesaRow({
-  mesa, isLast, ocupada, onEdit, onQR,
+  mesa, isLast, ocupada, onEdit, onQR, isDragging, isOver,
+  onDragStart, onDragEnter, onDragEnd,
 }: {
   mesa: Mesa;
   isLast: boolean;
   ocupada: boolean;
   onEdit: (m: Mesa) => void;
   onQR: (m: Mesa) => void;
+  isDragging: boolean;
+  isOver: boolean;
+  onDragStart: () => void;
+  onDragEnter: () => void;
+  onDragEnd: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
   const label = mesa.nome ?? `Mesa ${mesa.numero}`;
@@ -362,18 +368,35 @@ function MesaRow({
   return (
     <div
       className="group"
+      draggable
+      onDragStart={onDragStart}
+      onDragEnter={onDragEnter}
+      onDragEnd={onDragEnd}
+      onDragOver={e => e.preventDefault()}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
         display: "flex", alignItems: "center", gap: 12,
         padding: "13px 20px",
         borderBottom: isLast ? undefined : "1px solid var(--border)",
-        background: hovered ? "color-mix(in srgb, var(--fg) 2%, transparent)" : "transparent",
-        transition: "background 0.1s",
+        background: isOver
+          ? "color-mix(in srgb, var(--accent) 8%, transparent)"
+          : hovered
+            ? "color-mix(in srgb, var(--fg) 2%, transparent)"
+            : "transparent",
+        opacity: isDragging ? 0.4 : 1,
+        transition: "background 0.1s, opacity 0.1s",
+        cursor: "grab",
+        borderTop: isOver ? "2px solid var(--accent)" : undefined,
       }}
     >
-      {/* Status */}
+      {/* Drag handle */}
       <div style={{ width: 20, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <GripVertical style={{ width: 14, height: 14, color: "var(--fg-subtle)", opacity: hovered ? 0.8 : 0.3, transition: "opacity 0.1s" }} />
+      </div>
+
+      {/* Status */}
+      <div style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <StatusDot ocupada={ocupada} />
       </div>
 
@@ -404,6 +427,7 @@ function MesaRow({
       <div
         className="flex gap-0.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-100"
         style={{ flexShrink: 0 }}
+        onClick={e => e.stopPropagation()}
       >
         <button
           onClick={() => onQR(mesa)}
@@ -447,26 +471,52 @@ interface MesasClientProps {
 }
 
 export function MesasClient({ mesas, barId, mesasOcupadas, nextNumero }: MesasClientProps) {
-  void barId;
   const [panelMode, setPanelMode] = useState<"create" | "edit" | null>(null);
   const [editingMesa, setEditingMesa] = useState<Mesa | null>(null);
   const [qrMesa, setQrMesa] = useState<Mesa | null>(null);
 
+  // Drag state
+  const [localMesas, setLocalMesas] = useState<Mesa[]>(mesas);
+  const localMesasRef = useRef<Mesa[]>(mesas);
+  const draggingIdx = useRef<number | null>(null);
+  const [overIdx, setOverIdx] = useState<number | null>(null);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Keep ref in sync
+  useEffect(() => { localMesasRef.current = localMesas; }, [localMesas]);
+
+  // Sync when server refreshes mesas list
+  useEffect(() => { setLocalMesas(mesas); }, [mesas]);
+
   const ocupadasSet = new Set(mesasOcupadas);
 
-  function openCreate() {
-    setEditingMesa(null);
-    setPanelMode("create");
+  function openCreate() { setEditingMesa(null); setPanelMode("create"); }
+  function openEdit(mesa: Mesa) { setEditingMesa(mesa); setPanelMode("edit"); }
+  function closePanel() { setPanelMode(null); setEditingMesa(null); }
+
+  function handleDragStart(idx: number) {
+    draggingIdx.current = idx;
   }
 
-  function openEdit(mesa: Mesa) {
-    setEditingMesa(mesa);
-    setPanelMode("edit");
+  function handleDragEnter(idx: number) {
+    if (draggingIdx.current === null || draggingIdx.current === idx) return;
+    setOverIdx(idx);
+    setLocalMesas(prev => {
+      const next = [...prev];
+      const [item] = next.splice(draggingIdx.current!, 1);
+      next.splice(idx, 0, item);
+      draggingIdx.current = idx;
+      return next;
+    });
   }
 
-  function closePanel() {
-    setPanelMode(null);
-    setEditingMesa(null);
+  function handleDragEnd() {
+    draggingIdx.current = null;
+    setOverIdx(null);
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      reordenarMesas(barId, localMesasRef.current.map(m => m.id));
+    }, 400);
   }
 
   return (
@@ -480,7 +530,7 @@ export function MesasClient({ mesas, barId, mesasOcupadas, nextNumero }: MesasCl
           fontSize: 11, fontWeight: 500, color: "var(--fg-subtle)",
           textTransform: "uppercase", letterSpacing: "0.1em", margin: 0,
         }}>
-          {mesas.length} mesa{mesas.length !== 1 ? "s" : ""} cadastrada{mesas.length !== 1 ? "s" : ""}
+          {localMesas.length} mesa{localMesas.length !== 1 ? "s" : ""} cadastrada{localMesas.length !== 1 ? "s" : ""}
         </p>
         <button
           onClick={openCreate}
@@ -511,37 +561,44 @@ export function MesasClient({ mesas, barId, mesasOcupadas, nextNumero }: MesasCl
           borderBottom: "1px solid var(--border)",
         }}>
           <span style={{ width: 20, flexShrink: 0 }} />
+          <span style={{ width: 7, flexShrink: 0 }} />
           <span style={{ ...lbl, width: 36, flexShrink: 0, margin: 0 }}>#</span>
           <span style={{ ...lbl, flex: 1, margin: 0 }}>Nome</span>
           <span className="hidden sm:block" style={{ ...lbl, minWidth: 80, margin: 0 }}>Lugares</span>
           <span style={{ width: 72, flexShrink: 0 }} />
         </div>
 
-        {mesas.length === 0 && (
+        {localMesas.length === 0 && (
           <p style={{ fontSize: 14, color: "var(--fg-subtle)", padding: "28px 20px", margin: 0 }}>
             Nenhuma mesa cadastrada ainda. Clique em <strong>Nova mesa</strong> para começar.
           </p>
         )}
 
-        {mesas.map((mesa, i) => (
+        {localMesas.map((mesa, i) => (
           <MesaRow
             key={mesa.id}
             mesa={mesa}
-            isLast={i === mesas.length - 1}
+            isLast={i === localMesas.length - 1}
             ocupada={ocupadasSet.has(mesa.id)}
             onEdit={openEdit}
             onQR={setQrMesa}
+            isDragging={draggingIdx.current === i}
+            isOver={overIdx === i}
+            onDragStart={() => handleDragStart(i)}
+            onDragEnter={() => handleDragEnter(i)}
+            onDragEnd={handleDragEnd}
           />
         ))}
 
         {/* Balcão note — sem ações */}
-        {mesas.length > 0 && (
+        {localMesas.length > 0 && (
           <div style={{
             padding: "11px 20px",
             borderTop: "1px solid var(--border)",
             display: "flex", alignItems: "center", gap: 12,
           }}>
-            <div style={{ width: 20, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: 20, flexShrink: 0 }} />
+            <div style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <span style={{
                 width: 7, height: 7, borderRadius: "50%", display: "inline-block",
                 background: "var(--fg-subtle)", opacity: 0.25,
