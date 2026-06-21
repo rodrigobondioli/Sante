@@ -445,11 +445,11 @@ export function MesasGrid({ barId, initialMesas, initialBalcao }: MesasGridProps
     setIsOpening(true);
     try {
       const result = await abrirComanda(mesaId, n > 0 ? n : undefined, undefined, nome);
-      if (result?.id) {
-        // hard navigation — router.push fica preso dentro de async em App Router
+      if (result && "id" in result) {
         window.location.href = `/bartender/${result.id}`;
       } else {
-        setOpenError("Não foi possível abrir a comanda. Verifique se há um turno aberto.");
+        const msg = (result && "error" in result) ? result.error : "Não foi possível abrir a comanda.";
+        setOpenError(msg);
         setIsOpening(false);
       }
     } catch {

@@ -12,15 +12,15 @@ export async function abrirComanda(
   totalPessoas?: number,
   identificador?: string,
   nomeCliente?: string,
-) {
+): Promise<{ id: string } | { error: string } | null> {
   const current = await getCurrentBar();
-  if (!current) return;
+  if (!current) return { error: "Sessão expirada. Faça login novamente." };
 
   const turno = await getTurnoAtual(current.bar.id);
-  if (!turno) return;
+  if (!turno) return { error: "Nenhum turno aberto. Peça para o gerente abrir o turno." };
 
   const supabase = await createClient();
-  const { data: novaComanda } = await supabase.from("comandas")
+  const { data: novaComanda, error: dbError } = await supabase.from("comandas")
     .insert({
       bar_id: current.bar.id,
       turno_id: turno.id,
@@ -33,7 +33,7 @@ export async function abrirComanda(
     .select("id")
     .single();
 
-  if (!novaComanda?.id) return null;
+  if (!novaComanda?.id) return { error: dbError?.message ?? "Erro ao inserir comanda no banco." };
   return { id: novaComanda.id };
 }
 
