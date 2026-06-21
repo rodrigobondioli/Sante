@@ -150,13 +150,12 @@ function SeletorPessoas({
 
 // ─── Card individual de mesa ──────────────────────────────────────────────────
 
-function MesaCard({ label, comandas, capacidade, chamadaId, onAbrir, onNovaComanda, onAtender }: {
+function MesaCard({ label, comandas, capacidade, chamadaId, onAbrir, onAtender }: {
   label: string;
   comandas: Comanda[];
   capacidade?: number | null;
   chamadaId?: string;
   onAbrir?: () => void;
-  onNovaComanda?: () => void;
   onAtender?: () => void;
 }) {
   const livre         = comandas.length === 0;
@@ -264,9 +263,8 @@ function MesaCard({ label, comandas, capacidade, chamadaId, onAbrir, onNovaComan
         </span>
       </div>
 
-      {/* Linha por pessoa */}
-      {comandas.map((c, i) => {
-        const nome = c.nome_cliente ?? c.identificador ?? `Comanda ${i + 1}`;
+      {/* Comanda da mesa — link direto */}
+      {comandas.map((c) => {
         const querPagar = c.status === "aguardando_pagamento";
         return (
           <Link
@@ -274,48 +272,19 @@ function MesaCard({ label, comandas, capacidade, chamadaId, onAbrir, onNovaComan
             href={`/bartender/${c.id}`}
             style={{
               display: "flex", justifyContent: "space-between", alignItems: "center",
-              padding: "11px 16px", textDecoration: "none",
-              borderBottom: "1px solid var(--border)",
+              padding: "14px 16px", textDecoration: "none",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)" }}>{nome}</span>
-              {querPagar && (
-                <span style={{
-                  fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 4,
-                  background: "var(--warn-bg)",
-                  color: "var(--warn)", textTransform: "uppercase" as const, letterSpacing: "0.06em",
-                }}>
-                  Pagar
-                </span>
-              )}
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 13, fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--fg)" }}>
-                {currency.format(c.total)}
-              </span>
-              <span style={{ fontSize: 10, color: "var(--fg-subtle)" }}>›</span>
-            </div>
+            <span style={{
+              fontSize: 12, fontWeight: 600,
+              color: querPagar ? "var(--warn)" : "var(--fg-subtle)",
+            }}>
+              {querPagar ? "Aguardando pagamento" : "Ver comanda →"}
+            </span>
+            <span style={{ fontSize: 10, color: "var(--fg-subtle)" }}>›</span>
           </Link>
         );
       })}
-
-      {/* Rodapé: + nova comanda */}
-      <div style={{ padding: "10px 12px" }}>
-        <button
-          onClick={onNovaComanda}
-          style={{
-            width: "100%", padding: "8px 12px",
-            background: "color-mix(in srgb, var(--fg) 5%, transparent)",
-            border: "1px solid var(--border)",
-            borderRadius: 4, cursor: "pointer",
-            fontSize: 11, fontWeight: 600, color: "var(--fg-subtle)",
-            WebkitTapHighlightColor: "transparent",
-          }}
-        >
-          + Nova comanda
-        </button>
-      </div>
     </div>
   );
 }
@@ -467,7 +436,6 @@ export function MesasGrid({ barId, initialMesas, initialBalcao }: MesasGridProps
     capacidade?: number | null;
     chamadaId?: string;
     onAbrir?: () => void;
-    onNovaComanda?: () => void;
     onAtender?: () => void;
   };
 
@@ -485,9 +453,6 @@ export function MesasGrid({ barId, initialMesas, initialBalcao }: MesasGridProps
         onAbrir: comandas.length === 0
           ? () => setPendingAbrir({ mesaId: mesa.id, label })
           : undefined,
-        onNovaComanda: comandas.length > 0
-          ? () => setPendingAbrir({ mesaId: mesa.id, label })
-          : undefined,
         onAtender: chamadaId
           ? () => handleAtenderChamada(chamadaId, mesa.id)
           : undefined,
@@ -499,7 +464,6 @@ export function MesasGrid({ barId, initialMesas, initialBalcao }: MesasGridProps
       label: "Balcão",
       comandas: balcao ? [balcao] : [],
       onAbrir: !balcao ? () => setPendingAbrir({ mesaId: null, label: "Balcão" }) : undefined,
-      onNovaComanda: balcao ? () => setPendingAbrir({ mesaId: null, label: "Balcão" }) : undefined,
     },
   ];
 
@@ -598,7 +562,7 @@ export function MesasGrid({ barId, initialMesas, initialBalcao }: MesasGridProps
           <section>
             <SecLabel label="Aguardando pagamento" count={aguardando.length} />
             <div style={GRID_OCUPADAS}>
-              {aguardando.map(e => <MesaCard key={e.key} label={e.label} comandas={e.comandas} capacidade={e.capacidade} chamadaId={e.chamadaId} onAbrir={e.onAbrir} onNovaComanda={e.onNovaComanda} onAtender={e.onAtender} />)}
+              {aguardando.map(e => <MesaCard key={e.key} label={e.label} comandas={e.comandas} capacidade={e.capacidade} chamadaId={e.chamadaId} onAbrir={e.onAbrir} onAtender={e.onAtender} />)}
             </div>
           </section>
         )}
@@ -606,7 +570,7 @@ export function MesasGrid({ barId, initialMesas, initialBalcao }: MesasGridProps
           <section>
             <SecLabel label="Abertas" count={abertas.length} />
             <div style={GRID_OCUPADAS}>
-              {abertas.map(e => <MesaCard key={e.key} label={e.label} comandas={e.comandas} capacidade={e.capacidade} chamadaId={e.chamadaId} onAbrir={e.onAbrir} onNovaComanda={e.onNovaComanda} onAtender={e.onAtender} />)}
+              {abertas.map(e => <MesaCard key={e.key} label={e.label} comandas={e.comandas} capacidade={e.capacidade} chamadaId={e.chamadaId} onAbrir={e.onAbrir} onAtender={e.onAtender} />)}
             </div>
           </section>
         )}
@@ -614,7 +578,7 @@ export function MesasGrid({ barId, initialMesas, initialBalcao }: MesasGridProps
           <section>
             <SecLabel label="Livres" count={livres.length} />
             <div style={GRID_LIVRES}>
-              {livres.map(e => <MesaCard key={e.key} label={e.label} comandas={e.comandas} capacidade={e.capacidade} onAbrir={e.onAbrir} onNovaComanda={e.onNovaComanda} />)}
+              {livres.map(e => <MesaCard key={e.key} label={e.label} comandas={e.comandas} capacidade={e.capacidade} onAbrir={e.onAbrir} />)}
             </div>
           </section>
         )}
