@@ -15,6 +15,7 @@ import {
   getProdutosVendidosTurno,
   getMetaMes,
   getLiveStats,
+  getPrimeirosPassos,
 } from "@/lib/dashboard/queries";
 import { categorizarProdutos, calcularCmv } from "@/lib/dashboard/menu-engineering";
 import { getFaturamentoPorDia, getComparacaoPeriodo } from "@/lib/dashboard/relatorios";
@@ -77,32 +78,110 @@ export default async function DashboardPage() {
   const turno = await getTurnoAtual(current.bar.id);
 
   if (!turno) {
+    const passos = await getPrimeirosPassos(current.bar.id, current.userId);
+    const tudo_pronto = passos.nProdutos > 0 && passos.nMesas > 0;
+    const steps = [
+      { label: "Conta criada",           done: true,                   href: null },
+      { label: `Cardápio — ${passos.nProdutos} ${passos.nProdutos === 1 ? "produto" : "produtos"}`,
+        done: passos.nProdutos > 0,   href: "/dashboard/cardapio" },
+      { label: `Mesas — ${passos.nMesas} ${passos.nMesas === 1 ? "mesa" : "mesas"}`,
+        done: passos.nMesas > 0,      href: "/dashboard/mesas" },
+      { label: passos.nEquipe === 0
+          ? "Equipe — só você por enquanto"
+          : `Equipe — ${passos.nEquipe} ${passos.nEquipe === 1 ? "membro" : "membros"}`,
+        done: passos.nEquipe > 0,     href: "/dashboard/equipe" },
+    ];
+
     return (
-      <div style={{ padding: "32px", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
-        <div style={{ ...card, maxWidth: "400px", textAlign: "center", padding: "40px 32px" }}>
-          <p style={{ fontSize: "28px", margin: "0 0 16px" }}>🕐</p>
-          <p style={{ fontSize: "16px", fontWeight: 700, color: "var(--fg)", margin: "0 0 8px" }}>
-            Nenhum turno aberto
+      <div style={{ padding: "32px 24px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "70vh" }}>
+        <div style={{ width: "100%", maxWidth: 440 }}>
+
+          {/* Título contextual */}
+          <h2 style={{ fontFamily: "var(--font-mono)", fontSize: 22, fontWeight: 700, color: "var(--fg)", margin: "0 0 6px", textAlign: "center" }}>
+            {passos.nTurnos === 0 ? "Vamos configurar seu bar" : "Nenhum turno aberto"}
+          </h2>
+          <p style={{ fontSize: 13, color: "var(--fg-subtle)", margin: "0 0 28px", textAlign: "center", lineHeight: 1.6 }}>
+            {passos.nTurnos === 0
+              ? "Complete os passos abaixo antes de abrir o primeiro turno."
+              : "Abra um turno para começar a operação e ver os dados ao vivo."}
           </p>
-          <p style={{ fontSize: "13px", color: "var(--fg-muted)", margin: "0 0 24px", lineHeight: 1.5 }}>
-            Os dados do dashboard ficam disponíveis assim que um turno for aberto.
-          </p>
+
+          {/* Checklist — só aparece no primeiro acesso */}
+          {passos.nTurnos === 0 && (
+            <div style={{ ...card, padding: 0, marginBottom: 20 }}>
+              {steps.map((step, i) => (
+                <div
+                  key={i}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 14,
+                    padding: "14px 20px",
+                    borderBottom: i < steps.length - 1 ? "1px solid var(--border)" : "none",
+                  }}
+                >
+                  {/* Indicador */}
+                  <div style={{
+                    width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
+                    background: step.done ? "var(--ok-bg)" : "color-mix(in srgb, var(--fg) 5%, transparent)",
+                    border: `1.5px solid ${step.done ? "var(--ok)" : "var(--border)"}`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 11, fontWeight: 700, color: "var(--ok)",
+                  }}>
+                    {step.done ? "✓" : ""}
+                  </div>
+
+                  {/* Label */}
+                  <span style={{
+                    flex: 1, fontSize: 13,
+                    color: step.done ? "var(--fg-muted)" : "var(--fg)",
+                    textDecoration: step.done ? "none" : "none",
+                  }}>
+                    {step.label}
+                  </span>
+
+                  {/* CTA */}
+                  {step.href && !step.done && (
+                    <a
+                      href={step.href}
+                      style={{
+                        fontSize: 12, fontWeight: 600,
+                        color: "var(--accent-bright)",
+                        textDecoration: "none",
+                        whiteSpace: "nowrap",
+                        flexShrink: 0,
+                      }}
+                    >
+                      Configurar →
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* CTA principal */}
           <a
             href="/dashboard/turnos"
             style={{
-              display: "inline-block",
-              padding: "12px 24px",
-              background: "var(--accent)",
+              display: "block", textAlign: "center",
+              padding: "14px 24px",
+              background: tudo_pronto || passos.nTurnos > 0 ? "var(--accent)" : "color-mix(in srgb, var(--accent) 40%, var(--bg-elevated))",
               color: "var(--accent-fg)",
               borderRadius: "6px",
-              fontSize: "13px",
-              fontWeight: 700,
+              fontSize: "14px", fontWeight: 700,
               textDecoration: "none",
               letterSpacing: "0.01em",
+              border: tudo_pronto || passos.nTurnos > 0 ? "none" : "1px solid var(--border)",
+              cursor: "pointer",
             }}
           >
-            Abrir turno →
+            {passos.nTurnos === 0 ? "Abrir primeiro turno →" : "Abrir turno →"}
           </a>
+
+          {passos.nTurnos === 0 && !tudo_pronto && (
+            <p style={{ fontSize: 11, color: "var(--fg-subtle)", textAlign: "center", marginTop: 10, lineHeight: 1.5 }}>
+              Você pode abrir o turno agora, mas complete o cardápio e as mesas antes da primeira noite.
+            </p>
+          )}
         </div>
       </div>
     );

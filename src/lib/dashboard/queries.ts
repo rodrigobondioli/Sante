@@ -314,3 +314,28 @@ export async function getMetaMes(barId: string, metaMensalConfigurada?: number) 
 
   return { faturamentoAtual, meta, progresso, falta, faturamentoAnterior }
 }
+
+export interface PrimeirosPassosData {
+  nProdutos: number;
+  nMesas: number;
+  nEquipe: number;    // membros ativos excluindo o próprio dono
+  nTurnos: number;    // total de turnos já abertos (0 = bar novo)
+}
+
+export async function getPrimeirosPassos(barId: string, userId: string): Promise<PrimeirosPassosData> {
+  const supabase = await createClient();
+
+  const [produtos, mesas, equipe, turnos] = await Promise.all([
+    supabase.from("produtos").select("id", { count: "exact", head: true }).eq("bar_id", barId).eq("ativo", true),
+    supabase.from("mesas").select("id", { count: "exact", head: true }).eq("bar_id", barId).eq("ativo", true),
+    supabase.from("bar_members").select("id", { count: "exact", head: true }).eq("bar_id", barId).eq("ativo", true).neq("user_id", userId),
+    supabase.from("turnos").select("id", { count: "exact", head: true }).eq("bar_id", barId),
+  ]);
+
+  return {
+    nProdutos: produtos.count ?? 0,
+    nMesas:    mesas.count    ?? 0,
+    nEquipe:   equipe.count   ?? 0,
+    nTurnos:   turnos.count   ?? 0,
+  };
+}
