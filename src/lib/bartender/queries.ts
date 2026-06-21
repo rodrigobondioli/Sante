@@ -76,7 +76,7 @@ export async function getMesasComStatus(barId: string, turnoId: string): Promise
       .select("*")
       .eq("bar_id", barId)
       .eq("ativo", true)
-      .order("numero", { ascending: true })
+      .order("ordem", { ascending: true, nullsFirst: false })
       .returns<Mesa[]>(),
     supabase
       .from("comandas")

@@ -162,25 +162,33 @@ function MesaCard({ label, comandas, capacidade, chamadaId, onAbrir, onNovaComan
   if (livre) {
     return (
       <button type="button" onClick={onAbrir} style={{
-        display: "flex", justifyContent: "space-between", alignItems: "center",
-        borderRadius: 8, padding: "14px 16px",
+        display: "flex", flexDirection: "column", alignItems: "stretch",
+        borderRadius: 8, padding: 0,
         background: "color-mix(in srgb, var(--fg) 5%, transparent)",
         border: "1px solid var(--border-strong)",
         cursor: "pointer", width: "100%", textAlign: "left",
-        WebkitTapHighlightColor: "transparent",
+        WebkitTapHighlightColor: "transparent", overflow: "hidden",
       }}>
-        <span style={{ fontSize: 14, fontWeight: 700, color: "var(--fg-muted)" }}>
-          {label}
-        </span>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        {/* Nome + capacidade */}
+        <div style={{ padding: "14px 14px 12px", display: "flex", flexDirection: "column", gap: 6 }}>
+          <span style={{ fontSize: 14, fontWeight: 700, color: "var(--fg-muted)", lineHeight: 1.2 }}>
+            {label}
+          </span>
           {capacidade && (
             <span style={{ fontSize: 11, color: "var(--fg-subtle)", display: "flex", alignItems: "center", gap: 3 }}>
-              <IconPessoas />{capacidade}
+              <IconPessoas />{capacidade} lugares
             </span>
           )}
-          <span style={{ fontSize: 12, color: "var(--fg-subtle)", fontWeight: 500 }}>
-            + Abrir comanda
-          </span>
+        </div>
+        {/* CTA */}
+        <div style={{
+          borderTop: "1px solid var(--border)",
+          padding: "9px 14px",
+          fontSize: 12, fontWeight: 600,
+          color: "var(--accent)",
+          background: "color-mix(in srgb, var(--accent) 6%, transparent)",
+        }}>
+          + Abrir comanda
         </div>
       </button>
     );
