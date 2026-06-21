@@ -78,18 +78,23 @@ function MesaCard({
           </span>
         </div>
 
-        <div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
           <p style={{
             fontSize: 13, fontWeight: 600,
-            color: "var(--fg-subtle)",
-            margin: "0 0 6px",
+            color: "rgba(255,255,255,0.35)",
+            margin: 0,
           }}>
             + Abrir comanda
           </p>
           {capacidade && (
-            <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0, opacity: 0.6 }}>
-              {capacidade} lugares
-            </p>
+            <span style={{
+              fontSize: 11, fontWeight: 600,
+              color: "rgba(255,255,255,0.25)",
+              display: "flex", alignItems: "center", gap: 3,
+            }}>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              {capacidade}
+            </span>
           )}
         </div>
       </div>
@@ -152,34 +157,42 @@ function MesaCard({
         </div>
 
         {/* Total — destaque */}
-        <div>
-          <p style={{
-            fontSize: 22, fontWeight: 900,
-            color: totalColor,
-            margin: 0,
-            letterSpacing: "-0.5px",
-            fontVariantNumeric: "tabular-nums",
-            fontFamily: "var(--font-mono)",
-          }}>
-            {currency.format(comanda.total)}
-          </p>
-        </div>
+        <p style={{
+          fontSize: 24, fontWeight: 900,
+          color: totalColor,
+          margin: 0,
+          letterSpacing: "-0.5px",
+          fontVariantNumeric: "tabular-nums",
+          fontFamily: "var(--font-mono)",
+          lineHeight: 1,
+        }}>
+          {currency.format(comanda.total)}
+        </p>
 
         {/* Rodapé: tempo + capacidade */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          {/* Tempo */}
           <span style={{
             fontSize: 11, fontWeight: 600,
-            color: querPagar ? "var(--danger)" : "rgba(255,255,255,0.45)",
+            color: querPagar ? "var(--danger)" : "rgba(255,255,255,0.5)",
             background: querPagar
               ? "color-mix(in srgb, var(--danger) 10%, transparent)"
               : "rgba(255,255,255,0.06)",
-            borderRadius: 4, padding: "2px 7px",
+            borderRadius: 4, padding: "3px 8px",
+            display: "flex", alignItems: "center", gap: 4,
           }}>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             {tempoAberta(comanda.aberta_em)}
           </span>
+          {/* Capacidade */}
           {capacidade && (
-            <span style={{ fontSize: 10, color: "var(--fg-subtle)", opacity: 0.6 }}>
-              {capacidade} lug.
+            <span style={{
+              fontSize: 11, fontWeight: 600,
+              color: "rgba(255,255,255,0.35)",
+              display: "flex", alignItems: "center", gap: 3,
+            }}>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              {capacidade}
             </span>
           )}
         </div>
