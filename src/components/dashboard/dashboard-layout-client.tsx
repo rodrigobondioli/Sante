@@ -9,6 +9,15 @@ import { SettingsButton } from "./settings-button";
 import type { BarRole, Bar } from "@/types/database";
 import type { AlertaEstoque } from "@/lib/dashboard/queries";
 
+const ROLE_LABEL: Record<BarRole, string> = {
+  dono:        "Dono",
+  gerente:     "Gerente",
+  bar_manager: "Manager",
+  bartender:   "Bartender",
+  garcom:      "Garçom",
+  caixa:       "Caixa",
+};
+
 interface DashboardLayoutClientProps {
   barNome: string;
   userNome: string;
@@ -49,12 +58,20 @@ export function DashboardLayoutClient({
           background: "var(--bg)",
         }}
       >
-        <span style={{
-          fontSize: 14, fontWeight: 600,
-          color: "var(--fg)", fontFamily: "var(--font-mono)",
-        }}>
-          {barNome}
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, overflow: "hidden" }}>
+          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            {barNome}
+          </span>
+          <span style={{
+            fontSize: 10, fontWeight: 600, padding: "3px 9px", borderRadius: 4,
+            background: "color-mix(in srgb, var(--accent) 30%, transparent)",
+            color: "var(--accent-bright)",
+            letterSpacing: "0.04em", textTransform: "uppercase",
+            flexShrink: 0,
+          }}>
+            {ROLE_LABEL[role] ?? role}
+          </span>
+        </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <AlertasBell alertas={alertas} />
