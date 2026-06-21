@@ -19,7 +19,7 @@ function tempoAberta(abertaEm: string) {
 
 export interface MesaComStatus {
   mesa: Mesa;
-  comanda: Comanda | null;
+  comandas: Comanda[]; // vazio = livre; múltiplas = individual por pessoa
 }
 
 const IconClock = () => (
@@ -54,7 +54,7 @@ function SeletorPessoas({
       }}>
         <div style={{ width: 36, height: 4, borderRadius: 4, background: "var(--border-strong)", margin: "0 auto 20px" }} />
         <p style={{ fontSize: 10, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 4px" }}>
-          Abrir comanda
+          Nova comanda
         </p>
         <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--fg)", margin: "0 0 20px" }}>
           {label} — Quantas pessoas?
@@ -83,29 +83,131 @@ function SeletorPessoas({
   );
 }
 
-// ─── Card individual ──────────────────────────────────────────────────────────
+// ─── Sheet: lista de comandas abertas de uma mesa ────────────────────────────
+
+function MesaComandaSheet({
+  label,
+  comandas,
+  onNovaComanda,
+  onClose,
+}: {
+  label: string;
+  comandas: Comanda[];
+  onNovaComanda: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <>
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.72)", zIndex: 50 }} />
+      <div style={{
+        position: "fixed", bottom: 0, left: 0, right: 0,
+        background: "var(--bg-elevated)", borderTop: "1px solid var(--border)",
+        borderRadius: "10px 10px 0 0", padding: "24px 24px 40px", zIndex: 51,
+        maxHeight: "80vh", overflowY: "auto",
+      }}>
+        <div style={{ width: 36, height: 4, borderRadius: 4, background: "var(--border-strong)", margin: "0 auto 20px" }} />
+        <p style={{ fontSize: 10, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 4px" }}>
+          {label}
+        </p>
+        <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--fg)", margin: "0 0 16px" }}>
+          {comandas.length} comanda{comandas.length > 1 ? "s" : ""} aberta{comandas.length > 1 ? "s" : ""}
+        </h2>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
+          {comandas.map((c, i) => {
+            const querPagar = c.status === "aguardando_pagamento";
+            return (
+              <Link
+                key={c.id}
+                href={`/bartender/${c.id}`}
+                style={{
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  padding: "14px 16px", borderRadius: 10, textDecoration: "none",
+                  background: querPagar
+                    ? "color-mix(in srgb, #9333EA 18%, transparent)"
+                    : "color-mix(in srgb, var(--fg) 6%, transparent)",
+                  border: querPagar
+                    ? "1.5px solid color-mix(in srgb, #9333EA 40%, transparent)"
+                    : "1px solid var(--border)",
+                }}
+              >
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "var(--fg)" }}>
+                      Comanda {i + 1}
+                    </span>
+                    {querPagar && (
+                      <span style={{
+                        fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 4,
+                        background: "color-mix(in srgb, #9333EA 25%, transparent)",
+                        color: "#C084FC", textTransform: "uppercase", letterSpacing: "0.06em",
+                      }}>
+                        Quer pagar
+                      </span>
+                    )}
+                  </div>
+                  <span style={{ fontSize: 11, color: "var(--fg-subtle)", display: "flex", alignItems: "center", gap: 4 }}>
+                    <IconClock />{tempoAberta(c.aberta_em)}
+                    {c.total_pessoas && (
+                      <span style={{ display: "flex", alignItems: "center", gap: 2, marginLeft: 6 }}>
+                        <IconPessoas />{c.total_pessoas}
+                      </span>
+                    )}
+                  </span>
+                </div>
+                <span style={{
+                  fontSize: 20, fontWeight: 800, color: "var(--fg)",
+                  fontFamily: "var(--font-mono)", letterSpacing: "-0.4px",
+                }}>
+                  {currency.format(c.total)}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+
+        <button onClick={onNovaComanda} style={{
+          width: "100%", padding: "16px",
+          background: "color-mix(in srgb, var(--accent) 22%, transparent)",
+          border: "1px solid color-mix(in srgb, var(--accent-bright) 30%, transparent)",
+          borderRadius: 10, color: "var(--accent-bright)",
+          fontSize: 15, fontWeight: 700, cursor: "pointer",
+          WebkitTapHighlightColor: "transparent",
+        }}>
+          + Nova comanda nesta mesa
+        </button>
+      </div>
+    </>
+  );
+}
+
+// ─── Card individual de mesa ──────────────────────────────────────────────────
 
 const CARD_H = 220;
 
-function MesaCard({ label, comanda, capacidade, href, onAbrir }: {
+function MesaCard({ label, comandas, capacidade, onAbrir, onSelect }: {
   label: string;
-  comanda: Comanda | null;
+  comandas: Comanda[];
   capacidade?: number | null;
-  href?: string;
-  onAbrir?: () => void;
+  onAbrir?: () => void;   // mesa livre → abre nova comanda direto
+  onSelect?: () => void;  // mesa ocupada → abre sheet de seleção
 }) {
-  const querPagar = comanda?.status === "aguardando_pagamento";
-  const ocupada   = comanda !== null;
-  const pessoas   = comanda?.total_pessoas ?? null;
+  const livre        = comandas.length === 0;
+  const hasAguardando = comandas.some(c => c.status === "aguardando_pagamento");
+  const totalValor   = comandas.reduce((sum, c) => sum + c.total, 0);
+  const maisAntiga   = comandas.length > 0
+    ? comandas.reduce((a, b) => a.aberta_em < b.aberta_em ? a : b)
+    : null;
 
   const base: React.CSSProperties = {
     display: "flex", flexDirection: "column", height: CARD_H,
-    borderRadius: 10, position: "relative", transition: "opacity 0.15s",
+    borderRadius: 10, position: "relative",
     padding: "16px 18px 16px", boxSizing: "border-box",
+    transition: "opacity 0.15s",
   };
 
   // ── Livre ──
-  if (!ocupada) {
+  if (livre) {
     return (
       <button type="button" onClick={onAbrir} style={{
         ...base,
@@ -132,25 +234,36 @@ function MesaCard({ label, comanda, capacidade, href, onAbrir }: {
     );
   }
 
-  // ── Ocupada (aberta ou aguardando) ──
-  // Aguardando: roxo mais saturado + borda mais visível
-  // Aberta:     roxo suave
-  const bg     = querPagar
+  // ── Ocupada (1 ou mais comandas) ──
+  const bg = hasAguardando
     ? "color-mix(in srgb, #9333EA 22%, transparent)"
     : "color-mix(in srgb, #8B5CF6 13%, transparent)";
-  const border = querPagar
+  const border = hasAguardando
     ? "1.5px solid color-mix(in srgb, #9333EA 55%, transparent)"
     : "1px solid color-mix(in srgb, #8B5CF6 25%, transparent)";
 
   return (
-    <Link href={href!} style={{
-      ...base, background: bg, border, textDecoration: "none",
+    <button type="button" onClick={onSelect} style={{
+      ...base, background: bg, border,
       justifyContent: "space-between",
+      cursor: "pointer", width: "100%", textAlign: "left",
+      WebkitTapHighlightColor: "transparent",
     }}>
-      {/* Topo: nome da mesa */}
-      <span style={{ fontSize: 15, fontWeight: 800, color: "var(--fg)", letterSpacing: "-0.3px", lineHeight: 1.1 }}>
-        {label}
-      </span>
+      {/* Topo: nome */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <span style={{ fontSize: 15, fontWeight: 800, color: "var(--fg)", letterSpacing: "-0.3px", lineHeight: 1.1 }}>
+          {label}
+        </span>
+        {comandas.length > 1 && (
+          <span style={{
+            fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 20,
+            background: "rgba(255,255,255,0.10)",
+            color: "rgba(255,255,255,0.55)",
+          }}>
+            {comandas.length} comandas
+          </span>
+        )}
+      </div>
 
       {/* Centro: total em destaque */}
       <p style={{
@@ -158,27 +271,20 @@ function MesaCard({ label, comanda, capacidade, href, onAbrir }: {
         margin: 0, letterSpacing: "-0.6px",
         fontVariantNumeric: "tabular-nums", fontFamily: "var(--font-mono)", lineHeight: 1,
       }}>
-        {currency.format(comanda.total)}
+        {currency.format(totalValor)}
       </p>
 
-      {/* Rodapé: tempo + pessoas */}
+      {/* Rodapé: tempo da mesa + pessoas */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{
-          fontSize: 11, fontWeight: 600,
-          color: "rgba(255,255,255,0.45)",
-          background: "rgba(255,255,255,0.06)",
-          borderRadius: 4, padding: "3px 8px",
+          fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.45)",
+          background: "rgba(255,255,255,0.06)", borderRadius: 4, padding: "3px 8px",
           display: "flex", alignItems: "center", gap: 4,
         }}>
-          <IconClock />{tempoAberta(comanda.aberta_em)}
+          <IconClock />{maisAntiga ? tempoAberta(maisAntiga.aberta_em) : ""}
         </span>
-        {pessoas != null && (
-          <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.35)", display: "flex", alignItems: "center", gap: 3 }}>
-            <IconPessoas />{pessoas}
-          </span>
-        )}
       </div>
-    </Link>
+    </button>
   );
 }
 
@@ -193,30 +299,66 @@ interface MesasGridProps {
 export function MesasGrid({ barId, initialMesas, initialBalcao }: MesasGridProps) {
   const [mesas, setMesas]   = useState<MesaComStatus[]>(initialMesas);
   const [balcao, setBalcao] = useState<Comanda | null>(initialBalcao);
+
+  // Sheet de seleção de comanda para mesa ocupada
+  const [selectedMesa, setSelectedMesa] = useState<{ mesaId: string | null; label: string; comandas: Comanda[] } | null>(null);
+  // Modal de quantas pessoas (nova comanda)
   const [pendingAbrir, setPendingAbrir] = useState<{ mesaId: string | null; label: string } | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  // ── Realtime ──────────────────────────────────────────────────────────────
   useEffect(() => {
     const supabase = createClient();
     const channel = supabase
       .channel(`bartender_comandas_${barId}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "comandas", filter: `bar_id=eq.${barId}` }, (payload) => {
         const atualizada = payload.new as Comanda;
+
         if (!atualizada.mesa_id) {
-          if (atualizada.status === "aberta" || atualizada.status === "aguardando_pagamento") setBalcao(atualizada);
-          else setBalcao(prev => prev?.id === atualizada.id ? null : prev);
+          // Balcão
+          if (atualizada.status === "aberta" || atualizada.status === "aguardando_pagamento") {
+            setBalcao(atualizada);
+          } else {
+            setBalcao(prev => prev?.id === atualizada.id ? null : prev);
+          }
           return;
         }
+
         setMesas(prev => prev.map(m => {
-          if (m.comanda?.id !== atualizada.id) return m;
-          if (atualizada.status === "aberta" || atualizada.status === "aguardando_pagamento") return { ...m, comanda: atualizada };
-          return { ...m, comanda: null };
+          const idx = m.comandas.findIndex(c => c.id === atualizada.id);
+          if (idx === -1) return m;
+          // Se fechou/cancelou → remove do array
+          if (atualizada.status === "paga" || atualizada.status === "cancelada") {
+            return { ...m, comandas: m.comandas.filter(c => c.id !== atualizada.id) };
+          }
+          // Atualiza no array
+          const novas = [...m.comandas];
+          novas[idx] = atualizada;
+          return { ...m, comandas: novas };
         }));
+
+        // Atualiza sheet aberto se for a mesma mesa
+        setSelectedMesa(prev => {
+          if (!prev) return prev;
+          const idx = prev.comandas.findIndex(c => c.id === atualizada.id);
+          if (idx === -1) return prev;
+          if (atualizada.status === "paga" || atualizada.status === "cancelada") {
+            const novas = prev.comandas.filter(c => c.id !== atualizada.id);
+            return novas.length === 0 ? null : { ...prev, comandas: novas };
+          }
+          const novas = [...prev.comandas];
+          novas[idx] = atualizada;
+          return { ...prev, comandas: novas };
+        });
       })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "comandas", filter: `bar_id=eq.${barId}` }, (payload) => {
         const nova = payload.new as Comanda;
         if (!nova.mesa_id) { setBalcao(nova); return; }
-        setMesas(prev => prev.map(m => m.mesa.id === nova.mesa_id ? { ...m, comanda: nova } : m));
+        setMesas(prev => prev.map(m =>
+          m.mesa.id === nova.mesa_id
+            ? { ...m, comandas: [...m.comandas, nova] }
+            : m
+        ));
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -225,33 +367,51 @@ export function MesasGrid({ barId, initialMesas, initialBalcao }: MesasGridProps
   const handleConfirmarPessoas = (n: number) => {
     if (!pendingAbrir) return;
     const { mesaId } = pendingAbrir;
+    setPendingAbrir(null);
+    setSelectedMesa(null);
     startTransition(async () => {
       await abrirComanda(mesaId, n > 0 ? n : undefined);
-      setPendingAbrir(null);
     });
   };
 
-  type MesaEntry = { key: string; label: string; comanda: Comanda | null; capacidade?: number | null; href?: string; onAbrir?: () => void };
+  // ── Construir entradas ────────────────────────────────────────────────────
+  type MesaEntry = {
+    key: string;
+    label: string;
+    comandas: Comanda[];
+    capacidade?: number | null;
+    onAbrir?: () => void;
+    onSelect?: () => void;
+  };
 
   const todasEntradas: MesaEntry[] = [
-    ...mesas.map(({ mesa, comanda }) => ({
-      key: mesa.id,
-      label: mesa.nome ?? `Mesa ${mesa.numero}`,
-      comanda,
-      capacidade: mesa.capacidade,
-      href: comanda ? `/bartender/${comanda.id}` : undefined,
-      onAbrir: comanda ? undefined : () => setPendingAbrir({ mesaId: mesa.id, label: mesa.nome ?? `Mesa ${mesa.numero}` }),
-    })),
+    ...mesas.map(({ mesa, comandas }) => {
+      const label = mesa.nome ?? `Mesa ${mesa.numero}`;
+      return {
+        key: mesa.id,
+        label,
+        comandas,
+        capacidade: mesa.capacidade,
+        onAbrir: comandas.length === 0
+          ? () => setPendingAbrir({ mesaId: mesa.id, label })
+          : undefined,
+        onSelect: comandas.length > 0
+          ? () => setSelectedMesa({ mesaId: mesa.id, label, comandas })
+          : undefined,
+      };
+    }),
     {
-      key: "balcao", label: "Balcão", comanda: balcao,
-      href: balcao ? `/bartender/${balcao.id}` : undefined,
-      onAbrir: balcao ? undefined : () => setPendingAbrir({ mesaId: null, label: "Balcão" }),
+      key: "balcao",
+      label: "Balcão",
+      comandas: balcao ? [balcao] : [],
+      onAbrir: !balcao ? () => setPendingAbrir({ mesaId: null, label: "Balcão" }) : undefined,
+      onSelect: balcao ? () => setSelectedMesa({ mesaId: null, label: "Balcão", comandas: [balcao] }) : undefined,
     },
   ];
 
-  const aguardando    = todasEntradas.filter(e => e.comanda?.status === "aguardando_pagamento");
-  const abertas       = todasEntradas.filter(e => e.comanda?.status === "aberta");
-  const livres        = todasEntradas.filter(e => !e.comanda);
+  const aguardando    = todasEntradas.filter(e => e.comandas.some(c => c.status === "aguardando_pagamento"));
+  const abertas       = todasEntradas.filter(e => e.comandas.length > 0 && !e.comandas.some(c => c.status === "aguardando_pagamento"));
+  const livres        = todasEntradas.filter(e => e.comandas.length === 0);
   const totalOcupadas = aguardando.length + abertas.length;
 
   const GRID: React.CSSProperties = {
@@ -263,8 +423,7 @@ export function MesasGrid({ barId, initialMesas, initialBalcao }: MesasGridProps
   const SecLabel = ({ label, count }: { label: string; count: number }) => (
     <p style={{
       fontSize: 10, fontWeight: 700, letterSpacing: "0.12em",
-      textTransform: "uppercase", margin: "0 0 12px",
-      color: "var(--fg-subtle)",
+      textTransform: "uppercase", margin: "0 0 12px", color: "var(--fg-subtle)",
     }}>
       {label} · {count}
     </p>
@@ -273,7 +432,7 @@ export function MesasGrid({ barId, initialMesas, initialBalcao }: MesasGridProps
   return (
     <div className="flex-1 overflow-y-auto p-4 md:px-7 md:py-6">
 
-      {/* ── Header limpo ── */}
+      {/* Header */}
       <div style={{ marginBottom: 28 }}>
         <p style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 6px" }}>
           Mesas
@@ -282,12 +441,10 @@ export function MesasGrid({ barId, initialMesas, initialBalcao }: MesasGridProps
           <p style={{ fontSize: 22, fontWeight: 800, color: "var(--fg)", margin: 0, letterSpacing: "-0.4px", fontFamily: "var(--font-mono)" }}>
             {totalOcupadas > 0 ? `${totalOcupadas} ocupada${totalOcupadas > 1 ? "s" : ""}` : "Todas livres"}
           </p>
-          {/* Pills de resumo — sem vermelho, só informação */}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {aguardando.length > 0 && (
               <span style={{
-                fontSize: 11, fontWeight: 600,
-                padding: "3px 10px", borderRadius: 20,
+                fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 20,
                 background: "color-mix(in srgb, #9333EA 18%, transparent)",
                 border: "1px solid color-mix(in srgb, #9333EA 35%, transparent)",
                 color: "color-mix(in srgb, #C084FC 90%, white)",
@@ -297,10 +454,8 @@ export function MesasGrid({ barId, initialMesas, initialBalcao }: MesasGridProps
             )}
             {livres.length > 0 && (
               <span style={{
-                fontSize: 11, fontWeight: 600,
-                padding: "3px 10px", borderRadius: 20,
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.1)",
+                fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 20,
+                background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
                 color: "rgba(255,255,255,0.35)",
               }}>
                 {livres.length} livre{livres.length > 1 ? "s" : ""}
@@ -328,30 +483,39 @@ export function MesasGrid({ barId, initialMesas, initialBalcao }: MesasGridProps
           <section>
             <SecLabel label="Aguardando pagamento" count={aguardando.length} />
             <div style={GRID}>
-              {aguardando.map(e => <MesaCard key={e.key} label={e.label} comanda={e.comanda} capacidade={e.capacidade} href={e.href} onAbrir={e.onAbrir} />)}
+              {aguardando.map(e => <MesaCard key={e.key} label={e.label} comandas={e.comandas} capacidade={e.capacidade} onAbrir={e.onAbrir} onSelect={e.onSelect} />)}
             </div>
           </section>
         )}
-
         {abertas.length > 0 && (
           <section>
             <SecLabel label="Abertas" count={abertas.length} />
             <div style={GRID}>
-              {abertas.map(e => <MesaCard key={e.key} label={e.label} comanda={e.comanda} capacidade={e.capacidade} href={e.href} onAbrir={e.onAbrir} />)}
+              {abertas.map(e => <MesaCard key={e.key} label={e.label} comandas={e.comandas} capacidade={e.capacidade} onAbrir={e.onAbrir} onSelect={e.onSelect} />)}
             </div>
           </section>
         )}
-
         {livres.length > 0 && (
           <section>
             <SecLabel label="Livres" count={livres.length} />
             <div style={GRID}>
-              {livres.map(e => <MesaCard key={e.key} label={e.label} comanda={e.comanda} capacidade={e.capacidade} href={e.href} onAbrir={e.onAbrir} />)}
+              {livres.map(e => <MesaCard key={e.key} label={e.label} comandas={e.comandas} capacidade={e.capacidade} onAbrir={e.onAbrir} onSelect={e.onSelect} />)}
             </div>
           </section>
         )}
       </div>
 
+      {/* Sheet: seleção de comanda numa mesa ocupada */}
+      {selectedMesa && (
+        <MesaComandaSheet
+          label={selectedMesa.label}
+          comandas={selectedMesa.comandas}
+          onNovaComanda={() => setPendingAbrir({ mesaId: selectedMesa.mesaId, label: selectedMesa.label })}
+          onClose={() => setSelectedMesa(null)}
+        />
+      )}
+
+      {/* Modal: quantas pessoas (nova comanda) */}
       {pendingAbrir && (
         <SeletorPessoas
           label={pendingAbrir.label}

@@ -24,10 +24,9 @@ const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "
 // ─── Tab: Mesas ───────────────────────────────────────────────────────────────
 
 function TabMesas({ mesas }: { mesas: MesaComStatus[] }) {
-  const livreCount      = mesas.filter(m => !m.comanda).length;
-  const abertaCount     = mesas.filter(m => m.comanda?.status === "aberta").length;
-  const aguardandoCount = mesas.filter(m => m.comanda?.status === "aguardando_pagamento").length;
-  const totalOcupadas   = abertaCount + aguardandoCount;
+  const livreCount      = mesas.filter(m => m.comandas.length === 0).length;
+  const aguardandoCount = mesas.filter(m => m.comandas.some(c => c.status === "aguardando_pagamento")).length;
+  const totalOcupadas   = mesas.filter(m => m.comandas.length > 0).length;
 
   return (
     <div style={{ padding: "20px 20px 32px", overflowY: "auto", height: "100%" }}>
@@ -43,8 +42,7 @@ function TabMesas({ mesas }: { mesas: MesaComStatus[] }) {
           </p>
           {aguardandoCount > 0 && (
             <span style={{
-              fontSize: 11, fontWeight: 600,
-              padding: "2px 9px", borderRadius: 20,
+              fontSize: 11, fontWeight: 600, padding: "2px 9px", borderRadius: 20,
               background: "color-mix(in srgb, #9333EA 18%, transparent)",
               border: "1px solid color-mix(in srgb, #9333EA 35%, transparent)",
               color: "color-mix(in srgb, #C084FC 90%, white)",
@@ -54,10 +52,8 @@ function TabMesas({ mesas }: { mesas: MesaComStatus[] }) {
           )}
           {livreCount > 0 && (
             <span style={{
-              fontSize: 11, fontWeight: 600,
-              padding: "2px 9px", borderRadius: 20,
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.1)",
+              fontSize: 11, fontWeight: 600, padding: "2px 9px", borderRadius: 20,
+              background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
               color: "rgba(255,255,255,0.35)",
             }}>
               {livreCount} livre{livreCount > 1 ? "s" : ""}
@@ -66,35 +62,42 @@ function TabMesas({ mesas }: { mesas: MesaComStatus[] }) {
         </div>
       </div>
 
-      {/* Grid compacto de mesas */}
+      {/* Grid compacto */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(80px, 1fr))", gap: 8 }}>
-        {mesas.map(({ mesa, comanda }) => {
-          const status = !comanda ? "livre" : comanda.status;
-          const isAguardando = status === "aguardando_pagamento";
-          const isAberta     = status === "aberta";
+        {mesas.map(({ mesa, comandas }) => {
+          const livre        = comandas.length === 0;
+          const hasAguardando = comandas.some(c => c.status === "aguardando_pagamento");
+          const totalValor   = comandas.reduce((sum, c) => sum + c.total, 0);
 
           const bg =
-            isAguardando ? "color-mix(in srgb, #9333EA 20%, transparent)" :
-            isAberta     ? "color-mix(in srgb, #8B5CF6 13%, transparent)" :
-                           "rgba(255,255,255,0.05)";
+            hasAguardando ? "color-mix(in srgb, #9333EA 20%, transparent)" :
+            !livre        ? "color-mix(in srgb, #8B5CF6 13%, transparent)" :
+                            "rgba(255,255,255,0.05)";
           const border =
-            isAguardando ? "1.5px solid color-mix(in srgb, #9333EA 50%, transparent)" :
-            isAberta     ? "1px solid color-mix(in srgb, #8B5CF6 25%, transparent)" :
-                           "1px solid rgba(255,255,255,0.10)";
+            hasAguardando ? "1.5px solid color-mix(in srgb, #9333EA 50%, transparent)" :
+            !livre        ? "1px solid color-mix(in srgb, #8B5CF6 25%, transparent)" :
+                            "1px solid rgba(255,255,255,0.10)";
           const labelColor =
-            isAguardando ? "#C084FC" :
-            isAberta     ? "rgba(255,255,255,0.8)" :
-                           "rgba(255,255,255,0.3)";
+            hasAguardando ? "#C084FC" :
+            !livre        ? "rgba(255,255,255,0.8)" :
+                            "rgba(255,255,255,0.3)";
 
           return (
             <div key={mesa.id} style={{ background: bg, borderRadius: 8, border, padding: "10px 8px", textAlign: "center" }}>
               <p style={{ fontSize: 13, fontWeight: 700, color: labelColor, margin: 0, lineHeight: 1.2 }}>
                 {mesa.nome ?? mesa.numero}
               </p>
-              {comanda && (
-                <p style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", margin: "5px 0 0", fontFamily: "var(--font-mono)", fontWeight: 600 }}>
-                  {currency.format(comanda.total)}
-                </p>
+              {!livre && (
+                <>
+                  <p style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", margin: "4px 0 0", fontFamily: "var(--font-mono)", fontWeight: 600 }}>
+                    {currency.format(totalValor)}
+                  </p>
+                  {comandas.length > 1 && (
+                    <p style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", margin: "2px 0 0" }}>
+                      {comandas.length} comandas
+                    </p>
+                  )}
+                </>
               )}
             </div>
           );

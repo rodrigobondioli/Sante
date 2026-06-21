@@ -63,10 +63,10 @@ export async function getCardapio(barId: string): Promise<CategoriaComProdutos[]
 
 export interface MesaComStatus {
   mesa: Mesa;
-  comanda: Comanda | null; // null = livre
+  comandas: Comanda[]; // vazio = livre; múltiplas = cada pessoa tem a sua
 }
 
-/** Mesas ativas do bar, com comanda aberta se houver. */
+/** Mesas ativas do bar, com TODAS as comandas abertas por mesa. */
 export async function getMesasComStatus(barId: string, turnoId: string): Promise<MesaComStatus[]> {
   const supabase = await createClient();
 
@@ -84,17 +84,23 @@ export async function getMesasComStatus(barId: string, turnoId: string): Promise
       .eq("bar_id", barId)
       .eq("turno_id", turnoId)
       .in("status", ["aberta", "aguardando_pagamento"])
+      .order("aberta_em", { ascending: true })
       .returns<Comanda[]>(),
   ]);
 
-  const comandaPorMesa = new Map<string, Comanda>();
+  // Agrupa TODAS as comandas por mesa (múltiplas por mesa são válidas)
+  const comandasPorMesa = new Map<string, Comanda[]>();
   for (const c of comandas ?? []) {
-    if (c.mesa_id) comandaPorMesa.set(c.mesa_id, c);
+    if (c.mesa_id) {
+      const lista = comandasPorMesa.get(c.mesa_id) ?? [];
+      lista.push(c);
+      comandasPorMesa.set(c.mesa_id, lista);
+    }
   }
 
   return (mesas ?? []).map(mesa => ({
     mesa,
-    comanda: comandaPorMesa.get(mesa.id) ?? null,
+    comandas: comandasPorMesa.get(mesa.id) ?? [],
   }));
 }
 
