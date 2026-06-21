@@ -22,6 +22,7 @@ export async function abrirTurno() {
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/turnos");
+  revalidatePath("/caixa");
 }
 
 export async function fecharTurno(turnoId: string) {
@@ -51,4 +52,5 @@ export async function fecharTurno(turnoId: string) {
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/turnos");
+  revalidatePath("/caixa");
 }

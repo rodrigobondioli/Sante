@@ -399,12 +399,14 @@ function notificarNovaMesa() {
 
 // ─── Shell principal ──────────────────────────────────────────────────────────
 
-export function CaixaTela({ comandas, insights, barNome, barId, turnoId }: {
+export function CaixaTela({ comandas, insights, barNome, barId, turnoId, embedded = false }: {
   comandas: ComandaPendente[];
   insights: CaixaInsights;
   barNome: string;
   barId: string;
   turnoId: string;
+  /** Quando true, renderiza dentro de um shell externo (sem minHeight, sem header próprio) */
+  embedded?: boolean;
 }) {
   const [listaAtual, setListaAtual] = useState(comandas);
   const [insightsAtual, setInsightsAtual] = useState(insights);
@@ -522,25 +524,27 @@ export function CaixaTela({ comandas, insights, barNome, barId, turnoId }: {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100dvh" }}>
-      {/* Header */}
-      <div style={{
-        padding: "14px 24px",
-        borderBottom: "1px solid var(--border)",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        position: "sticky", top: 0, zIndex: 10,
-        background: "var(--bg)",
-        height: 56, boxSizing: "border-box",
-      }}>
-        <div>
-          <p style={{ fontSize: 10, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>{barNome}</p>
-          <h1 style={{ fontSize: 17, fontWeight: 700, color: "var(--fg)", margin: "2px 0 0", fontFamily: "var(--font-mono)" }}>Caixa</h1>
+    <div style={{ display: "flex", flexDirection: "column", ...(embedded ? { height: "100%", overflowY: "auto" } : { minHeight: "100dvh" }) }}>
+      {/* Header — oculto quando embedded (o shell externo fornece contexto) */}
+      {!embedded && (
+        <div style={{
+          padding: "14px 24px",
+          borderBottom: "1px solid var(--border)",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          position: "sticky", top: 0, zIndex: 10,
+          background: "var(--bg)",
+          height: 56, boxSizing: "border-box",
+        }}>
+          <div>
+            <p style={{ fontSize: 10, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>{barNome}</p>
+            <h1 style={{ fontSize: 17, fontWeight: 700, color: "var(--fg)", margin: "2px 0 0", fontFamily: "var(--font-mono)" }}>Caixa</h1>
+          </div>
+          {/* ok token — semantic allowed in Caixa */}
+          {listaAtual.length === 0 && (
+            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--ok)" }}>Caixa limpo ✓</span>
+          )}
         </div>
-        {/* ok token — semantic allowed in Caixa */}
-        {listaAtual.length === 0 && (
-          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--ok)" }}>Caixa limpo ✓</span>
-        )}
-      </div>
+      )}
 
       <InsightsBar insights={insightsAtual} />
 
