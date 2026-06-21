@@ -218,7 +218,8 @@ export interface Comanda {
   turno_id: string;
   mesa_id: string | null;
   bartender_id: string;
-  identificador: string | null;
+  identificador: string | null;  // nº do cartão de comanda
+  nome_cliente: string | null;   // nome da pessoa (opcional)
   status: ComandaStatus;
   total: number;
   total_pessoas: number | null;

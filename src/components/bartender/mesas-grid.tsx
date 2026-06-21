@@ -41,10 +41,19 @@ function SeletorPessoas({
   label, onConfirm, onClose, isPending,
 }: {
   label: string;
-  onConfirm: (n: number) => void;
+  onConfirm: (n: number, nome?: string) => void;
   onClose: () => void;
   isPending: boolean;
 }) {
+  const [step, setStep] = useState<"pessoas" | "nome">("pessoas");
+  const [qtd, setQtd]   = useState(0);
+  const [nome, setNome] = useState("");
+
+  const confirmarQtd = (n: number) => {
+    if (n === 1) { setQtd(1); setStep("nome"); }
+    else onConfirm(n);
+  };
+
   return (
     <>
       <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.72)", zIndex: 50 }} />
@@ -57,28 +66,75 @@ function SeletorPessoas({
         <p style={{ fontSize: 10, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 4px" }}>
           Nova comanda
         </p>
-        <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--fg)", margin: "0 0 20px" }}>
-          {label} — Quantas pessoas?
-        </h2>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 16 }}>
-          {[1,2,3,4,5,6,7,8].map(n => (
-            <button key={n} onClick={() => !isPending && onConfirm(n)} disabled={isPending} style={{
-              height: 64, display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 22, fontWeight: 800, fontFamily: "var(--font-mono)",
-              background: "color-mix(in srgb, var(--fg) 6%, transparent)",
-              border: "1px solid var(--border)", borderRadius: 10,
-              cursor: isPending ? "not-allowed" : "pointer", color: "var(--fg)",
-              transition: "background 120ms", WebkitTapHighlightColor: "transparent",
-              opacity: isPending ? 0.5 : 1,
-            }}>{n}</button>
-          ))}
-        </div>
-        <button onClick={() => !isPending && onConfirm(0)} disabled={isPending} style={{
-          width: "100%", padding: "14px", background: "transparent", border: "none",
-          color: "var(--fg-subtle)", fontSize: 13, cursor: "pointer",
-        }}>
-          Pular (não informar)
-        </button>
+
+        {step === "pessoas" ? (
+          <>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--fg)", margin: "0 0 20px" }}>
+              {label} — Quantas pessoas?
+            </h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 16 }}>
+              {[1,2,3,4,5,6,7,8].map(n => (
+                <button key={n} onClick={() => !isPending && confirmarQtd(n)} disabled={isPending} style={{
+                  height: 64, display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 22, fontWeight: 800, fontFamily: "var(--font-mono)",
+                  background: "color-mix(in srgb, var(--fg) 6%, transparent)",
+                  border: "1px solid var(--border)", borderRadius: 10,
+                  cursor: isPending ? "not-allowed" : "pointer", color: "var(--fg)",
+                  transition: "background 120ms", WebkitTapHighlightColor: "transparent",
+                  opacity: isPending ? 0.5 : 1,
+                }}>{n}</button>
+              ))}
+            </div>
+            <button onClick={() => !isPending && onConfirm(0)} disabled={isPending} style={{
+              width: "100%", padding: "14px", background: "transparent", border: "none",
+              color: "var(--fg-subtle)", fontSize: 13, cursor: "pointer",
+            }}>
+              Pular (não informar)
+            </button>
+          </>
+        ) : (
+          <>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--fg)", margin: "0 0 8px" }}>
+              {label} — 1 pessoa
+            </h2>
+            <p style={{ fontSize: 13, color: "var(--fg-subtle)", margin: "0 0 16px" }}>
+              Qual o nome? (opcional)
+            </p>
+            <input
+              value={nome}
+              onChange={e => setNome(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && !isPending && onConfirm(qtd, nome || undefined)}
+              placeholder="Ex: João, Mesa 3 — Ana..."
+              autoFocus
+              style={{
+                width: "100%", boxSizing: "border-box",
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.14)",
+                borderRadius: 8, padding: "13px 14px",
+                color: "var(--fg)", fontSize: 16, outline: "none", marginBottom: 16,
+              } as React.CSSProperties}
+            />
+            <button
+              onClick={() => !isPending && onConfirm(qtd, nome || undefined)}
+              disabled={isPending}
+              style={{
+                width: "100%", padding: "16px",
+                background: "var(--accent)", border: "none", borderRadius: 10,
+                color: "var(--accent-fg)", fontSize: 15, fontWeight: 700,
+                cursor: isPending ? "not-allowed" : "pointer",
+                WebkitTapHighlightColor: "transparent",
+              }}
+            >
+              {isPending ? "Abrindo..." : "Abrir comanda"}
+            </button>
+            <button onClick={() => setStep("pessoas")} style={{
+              width: "100%", padding: "12px", background: "transparent", border: "none",
+              color: "var(--fg-subtle)", fontSize: 13, cursor: "pointer", marginTop: 4,
+            }}>
+              ← Voltar
+            </button>
+          </>
+        )}
       </div>
     </>
   );
@@ -117,6 +173,7 @@ function MesaComandaSheet({
         <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
           {comandas.map((c, i) => {
             const querPagar = c.status === "aguardando_pagamento";
+            const label = c.nome_cliente ?? c.identificador ?? `Comanda ${i + 1}`;
             return (
               <Link
                 key={c.id}
@@ -135,7 +192,7 @@ function MesaComandaSheet({
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
                     <span style={{ fontSize: 14, fontWeight: 700, color: "var(--fg)" }}>
-                      Comanda {i + 1}
+                      {label}
                     </span>
                     {querPagar && (
                       <span style={{
@@ -365,13 +422,13 @@ export function MesasGrid({ barId, initialMesas, initialBalcao }: MesasGridProps
     return () => { supabase.removeChannel(channel); };
   }, [barId]);
 
-  const handleConfirmarPessoas = (n: number) => {
+  const handleConfirmarPessoas = (n: number, nome?: string) => {
     if (!pendingAbrir) return;
     const { mesaId } = pendingAbrir;
     setPendingAbrir(null);
     setSelectedMesa(null);
     startTransition(async () => {
-      await abrirComanda(mesaId, n > 0 ? n : undefined);
+      await abrirComanda(mesaId, n > 0 ? n : undefined, undefined, nome);
     });
   };
 

@@ -29,11 +29,12 @@ const IconCamera = () => (
 
 export function ScanCartao() {
   const router = useRouter();
-  const [input, setInput]         = useState("");
-  const [scanning, setScanning]   = useState(false);
+  const [input, setInput]           = useState("");
+  const [scanning, setScanning]     = useState(false);
   const [hasScanner, setHasScanner] = useState(false);
-  const [resultado, setResultado] = useState<"nao_encontrado" | null>(null);
-  const [cardId, setCardId]       = useState<string | null>(null);
+  const [resultado, setResultado]   = useState<"nao_encontrado" | null>(null);
+  const [cardId, setCardId]         = useState<string | null>(null);
+  const [nomeCliente, setNomeCliente] = useState("");
   const [isPending, startTransition] = useTransition();
 
   const videoRef  = useRef<HTMLVideoElement>(null);
@@ -73,7 +74,7 @@ export function ScanCartao() {
   const abrirNovaComanda = () => {
     if (!cardId || isPending) return;
     startTransition(async () => {
-      await abrirComanda(null, undefined, cardId);
+      await abrirComanda(null, undefined, cardId, nomeCliente || undefined);
     });
   };
 
@@ -217,14 +218,13 @@ export function ScanCartao() {
         </button>
       </div>
 
-      {/* Banner: não encontrado */}
+      {/* Banner: não encontrado — pede nome e abre */}
       {resultado === "nao_encontrado" && cardId && (
         <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          gap: 12, padding: "13px 16px", marginBottom: 16,
+          padding: "14px 16px", marginBottom: 16,
           background: "rgba(255,255,255,0.04)",
           border: "1px solid rgba(255,255,255,0.10)",
-          borderRadius: 10,
+          borderRadius: 10, display: "flex", flexDirection: "column", gap: 12,
         }}>
           <div>
             <p style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)", margin: 0 }}>
@@ -233,21 +233,34 @@ export function ScanCartao() {
               {" "}sem comanda neste turno
             </p>
             <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: "2px 0 0" }}>
-              Deseja abrir uma nova comanda?
+              Abrir nova comanda para este cartão?
             </p>
           </div>
+          <input
+            value={nomeCliente}
+            onChange={e => setNomeCliente(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && abrirNovaComanda()}
+            placeholder="Nome da pessoa (opcional)"
+            autoFocus
+            style={{
+              background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.14)",
+              borderRadius: 8, padding: "11px 14px",
+              color: "var(--fg)", fontSize: 15, outline: "none", width: "100%",
+              boxSizing: "border-box",
+            } as React.CSSProperties}
+          />
           <button
             onClick={abrirNovaComanda}
             disabled={isPending}
             style={{
-              padding: "10px 18px", flexShrink: 0,
+              width: "100%", padding: "13px",
               background: "var(--accent)", border: "none", borderRadius: 8,
-              color: "var(--accent-fg)", fontSize: 13, fontWeight: 700,
+              color: "var(--accent-fg)", fontSize: 14, fontWeight: 700,
               cursor: isPending ? "not-allowed" : "pointer",
               WebkitTapHighlightColor: "transparent",
             }}
           >
-            {isPending ? "..." : "Abrir"}
+            {isPending ? "Abrindo..." : "Abrir comanda"}
           </button>
         </div>
       )}

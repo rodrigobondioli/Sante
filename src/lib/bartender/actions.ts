@@ -11,6 +11,7 @@ export async function abrirComanda(
   mesaId: string | null,
   totalPessoas?: number,
   identificador?: string,
+  nomeCliente?: string,
 ) {
   const current = await getCurrentBar();
   if (!current) return;
@@ -27,6 +28,7 @@ export async function abrirComanda(
       mesa_id: mesaId,
       total_pessoas: totalPessoas ?? null,
       identificador: identificador ?? null,
+      nome_cliente: nomeCliente?.trim() || null,
     })
     .select("id")
     .single();
