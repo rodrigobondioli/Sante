@@ -136,7 +136,7 @@ export async function fecharComanda(comandaId: string) {
 
   if (error) return { error: "Erro ao fechar comanda." };
 
-  revalidatePath("/caixa");
+  revalidatePath("/dashboard/caixa");
   revalidatePath("/bartender");
   return { ok: true };
 }

@@ -230,7 +230,7 @@ function CartBar({
           to   { transform: translateY(0);    opacity: 1; }
         }
       `}</style>
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 60, animation: "sb-slide-up 0.2s ease-out" }}>
+      <div className="right-0 md:right-[360px]" style={{ position: "fixed", bottom: 0, left: 0, zIndex: 60, animation: "sb-slide-up 0.2s ease-out" }}>
 
         {/* Itens expandidos */}
         {expanded && (
@@ -303,7 +303,7 @@ function CartBar({
               opacity: pending ? 0.7 : 1, transition: "background 0.2s", flexShrink: 0,
             }}
           >
-            {pending ? "Enviando..." : resultado ?? "Confirmar pedido →"}
+            {pending ? "Enviando..." : resultado ?? "Adicionar à comanda →"}
           </button>
         </div>
       </div>

@@ -21,14 +21,13 @@ export async function getComandasPendentes(barId: string, turnoId: string): Prom
   const supabase = await createClient();
 
   const { data: comandas } = await supabase.from("comandas")
-    .select("id, total, aberta_em, fechada_em, mesa_id, mesas(numero, nome)")
+    .select("id, aberta_em, fechada_em, mesa_id, mesas(numero, nome)")
     .eq("bar_id", barId)
     .eq("turno_id", turnoId)
     .eq("status", "aguardando_pagamento")
     .order("fechada_em", { ascending: true }) as {
       data: {
         id: string;
-        total: number;
         aberta_em: string;
         fechada_em: string | null;
         mesa_id: string | null;
@@ -63,14 +62,18 @@ export async function getComandasPendentes(barId: string, turnoId: string): Prom
     itensPorComanda.set(item.comanda_id, lista);
   }
 
-  return comandas.map(c => ({
+  return comandas.map(c => {
+    const itens = itensPorComanda.get(c.id) ?? [];
+    const total = itens.reduce((sum, i) => sum + i.preco_total, 0);
+    return {
     id: c.id,
-    total: c.total,
+    total,
     aberta_em: c.aberta_em,
     fechada_em: c.fechada_em,
     mesa: c.mesas ? (c.mesas.nome ?? `Mesa ${c.mesas.numero}`) : "Balcão",
-    itens: itensPorComanda.get(c.id) ?? [],
-  }));
+    itens,
+  };
+  });
 }
 
 export async function getCaixaInsights(barId: string, turnoId: string): Promise<CaixaInsights> {
