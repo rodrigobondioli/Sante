@@ -161,7 +161,7 @@ function ComandaPagamentoSheet({
       }
     }
     // fallback: copia para clipboard
-    await navigator.clipboard.writeText(texto);
+    await (navigator as Navigator).clipboard.writeText(texto);
     setCopiado(true);
     setTimeout(() => setCopiado(false), 2500);
   };
