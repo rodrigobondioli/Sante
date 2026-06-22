@@ -183,7 +183,7 @@ export default async function DashboardPage() {
           {/* 0. SUPERBAR AI — acesso rápido no topo */}
           <section>
             <span style={sectionLabel}>Superbar AI</span>
-            <AiHeroInput barId={current.bar.id} />
+            <AiHeroInput barId={current.bar.id} alertCount={inteligencia.insightsNaoLidos} />
           </section>
 
           {/* 1. APRENDIZADO (stage 1) ou ATENÇÃO (stage 2) */}
@@ -467,6 +467,8 @@ export default async function DashboardPage() {
     cmvTrend: comparacao.cmv,
     ticketMedioTrend: comparacao.ticketMedio,
     cmvParcial,
+    ticketMedio: kpis.ticketMedio,
+    faturamento: kpis.faturamento,
   });
 
   const pico = calcularPico(pontosHora);
@@ -540,7 +542,7 @@ export default async function DashboardPage() {
         {/* 0. SUPERBAR AI — acesso rápido no topo */}
         <section>
           <span style={sectionLabel}>Superbar AI</span>
-          <AiHeroInput barId={current.bar.id} />
+          <AiHeroInput barId={current.bar.id} alertCount={nAction} />
         </section>
 
         {/* 1. APRENDIZADO (stage 1) ou ATENÇÃO (stage 2) */}
@@ -637,6 +639,11 @@ export default async function DashboardPage() {
                           </p>
                         )}
                         <p style={{ fontSize: 13, color: "var(--fg)", margin: "0 0 3px", lineHeight: 1.5 }}>{item.texto}</p>
+                        {item.impactoReais !== undefined && (
+                          <p style={{ fontSize: 12, fontWeight: 600, color: item.impactoReais < 0 ? "#ef4444" : "var(--ok)", fontFamily: "var(--font-mono)", margin: "0 0 3px" }}>
+                            Impacto estimado: {item.impactoReais < 0 ? `−${currency.format(Math.abs(item.impactoReais))}` : `+${currency.format(item.impactoReais)}`} no turno
+                          </p>
+                        )}
                         {item.sugestao && (
                           <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: 0, lineHeight: 1.5 }}>{item.sugestao}</p>
                         )}
@@ -830,9 +837,9 @@ export default async function DashboardPage() {
             >
               <div style={{ padding: "20px 24px 0" }}>
                 <p style={{ fontSize: "13px", fontWeight: 500, color: "var(--fg)", fontFamily: "var(--font-mono)", marginBottom: "2px" }}>
-                  Mais lucrativos
+                  Oportunidades
                 </p>
-                <p style={{ ...overline, marginBottom: "16px" }}>por margem · turno atual</p>
+                <p style={{ ...overline, marginBottom: "16px" }}>maior margem · turno atual</p>
               </div>
               <table className="w-full text-left">
                 <thead>
@@ -884,6 +891,16 @@ export default async function DashboardPage() {
                   )}
                 </tbody>
               </table>
+              {produtosTop5.length > 0 && produtosTop5[0].margemPercentual !== null && (
+                <div style={{ padding: "10px 16px 14px", borderTop: "1px solid var(--border)" }}>
+                  <p style={{ fontSize: 11, color: "var(--fg-muted)", margin: 0 }}>
+                    {produtosTop5[0].produtoNome} tem a maior margem.{" "}
+                    {produtosTop5[0].categoria === "estrela" || produtosTop5[0].categoria === "vaca"
+                      ? "Já vende bem — treine o time para sugerir ainda mais."
+                      : "Considere destacá-lo no cardápio e no discurso do time."}
+                  </p>
+                </div>
+              )}
               <div className="h-3" />
             </div>
 
@@ -895,39 +912,31 @@ export default async function DashboardPage() {
           <span style={sectionLabel}>Operação</span>
           <div className="grid grid-cols-2 lg:grid-cols-4" style={{ gap: "12px" }}>
 
-            {/* Horário de pico */}
-            <div className="animate-fade-in-up" style={{ ...card, animationDelay: "200ms" }}>
-              <p style={overline}>Pico de vendas</p>
-              {pico ? (
-                <>
-                  <p className="text-[22px] lg:text-[26px]" style={{ fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", marginTop: "4px" }}>
-                    {pico.hora}h–{pico.hora + 1}h
-                  </p>
-                  <p style={{ fontSize: "11px", color: "var(--fg-subtle)", marginTop: "2px" }}>
-                    {pico.drinks} drinks nessa hora
-                  </p>
-                </>
-              ) : (
-                <p style={{ fontSize: "13px", color: "var(--fg-subtle)", marginTop: "8px" }}>Aguardando dados…</p>
-              )}
-            </div>
+            {/* Horário de pico — só aparece quando há dado */}
+            {pico && (
+              <div className="animate-fade-in-up" style={{ ...card, animationDelay: "200ms" }}>
+                <p style={overline}>Pico de vendas</p>
+                <p className="text-[22px] lg:text-[26px]" style={{ fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", marginTop: "4px" }}>
+                  {pico.hora}h–{pico.hora + 1}h
+                </p>
+                <p style={{ fontSize: "11px", color: "var(--fg-subtle)", marginTop: "2px" }}>
+                  {pico.drinks} drinks nessa hora
+                </p>
+              </div>
+            )}
 
-            {/* Mesa top */}
-            <div className="animate-fade-in-up" style={{ ...card, animationDelay: "240ms" }}>
-              <p style={overline}>Mesa top</p>
-              {rankingMesas.length > 0 ? (
-                <>
-                  <p className="text-[22px] lg:text-[26px]" style={{ fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", marginTop: "4px" }}>
-                    {rankingMesas[0].mesaLabel}
-                  </p>
-                  <p style={{ fontSize: "11px", color: "var(--fg-subtle)", marginTop: "2px" }}>
-                    {currency.format(rankingMesas[0].faturamento)} · {rankingMesas[0].comandas} {rankingMesas[0].comandas === 1 ? "comanda" : "comandas"}
-                  </p>
-                </>
-              ) : (
-                <p style={{ fontSize: "13px", color: "var(--fg-subtle)", marginTop: "8px" }}>Sem mesas ativas</p>
-              )}
-            </div>
+            {/* Mesa top — só aparece quando há dado */}
+            {rankingMesas.length > 0 && (
+              <div className="animate-fade-in-up" style={{ ...card, animationDelay: "240ms" }}>
+                <p style={overline}>Mesa top</p>
+                <p className="text-[22px] lg:text-[26px]" style={{ fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", marginTop: "4px" }}>
+                  {rankingMesas[0].mesaLabel}
+                </p>
+                <p style={{ fontSize: "11px", color: "var(--fg-subtle)", marginTop: "2px" }}>
+                  {currency.format(rankingMesas[0].faturamento)} · {rankingMesas[0].comandas} {rankingMesas[0].comandas === 1 ? "comanda" : "comandas"}
+                </p>
+              </div>
+            )}
 
             {/* Mix de pagamento */}
             <div className="animate-fade-in-up" style={{ ...card, animationDelay: "280ms" }}>

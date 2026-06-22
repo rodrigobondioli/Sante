@@ -4,6 +4,7 @@ export interface InsightItem {
   texto: string;
   tipo: "action" | "opportunity" | "info";
   sugestao?: string;
+  impactoReais?: number; // negativo = perda, positivo = ganho (estimativa)
 }
 
 interface GerarInsightParams {
@@ -11,6 +12,9 @@ interface GerarInsightParams {
   cmvTrend: number | null;
   ticketMedioTrend: number | null;
   cmvParcial: boolean;
+  // Para calcular impacto em R$
+  ticketMedio: number;
+  faturamento: number;
 }
 
 export function gerarInsight({
@@ -18,6 +22,8 @@ export function gerarInsight({
   cmvTrend,
   ticketMedioTrend,
   cmvParcial,
+  ticketMedio,
+  faturamento,
 }: GerarInsightParams): InsightItem[] {
   const insights: InsightItem[] = [];
 
@@ -44,19 +50,33 @@ export function gerarInsight({
 
   // CMV subiu vs turno anterior
   if (cmvTrend !== null && cmvTrend >= 5) {
+    // Custo extra estimado = faturamento × (delta CMV / 100)
+    const impacto = faturamento > 0 ? -Math.round(faturamento * (cmvTrend / 100)) : undefined;
     insights.push({
       texto: `CMV subiu ${cmvTrend.toFixed(1)}% em relação ao turno anterior.`,
       tipo: "action",
       sugestao: "Revise o custo dos produtos mais vendidos neste turno.",
+      impactoReais: impacto,
     });
   }
 
   // Ticket médio caiu vs turno anterior
   if (ticketMedioTrend !== null && ticketMedioTrend <= -5) {
+    // Receita não capturada: delta de ticket × total de comandas estimado
+    let impacto: number | undefined;
+    if (ticketMedio > 0 && faturamento > 0) {
+      const fator = 1 + ticketMedioTrend / 100; // ex.: 0.773 quando caiu 22.7%
+      if (fator > 0) {
+        const ticketAnterior = ticketMedio / fator;
+        const totalComandas = Math.round(faturamento / ticketMedio);
+        impacto = -Math.round((ticketAnterior - ticketMedio) * totalComandas);
+      }
+    }
     insights.push({
       texto: `Ticket médio caiu ${Math.abs(ticketMedioTrend).toFixed(1)}% em relação ao turno anterior.`,
       tipo: "action",
       sugestao: "Observe se houve aumento de vendas de itens de menor valor.",
+      impactoReais: impacto,
     });
   }
 

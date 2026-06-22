@@ -224,6 +224,7 @@ export interface InsightOperacional {
   texto: string;
   tipo: "action" | "opportunity" | "info";
   sugestao?: string;
+  impactoReais?: number;
 }
 
 export function gerarInsightsOperacionais({

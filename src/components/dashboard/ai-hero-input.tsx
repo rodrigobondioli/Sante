@@ -16,10 +16,14 @@ function getSaudacao() {
   return 'Boa noite'
 }
 
-export function AiHeroInput({ barId }: { barId: string }) {
+export function AiHeroInput({ barId, alertCount }: { barId: string; alertCount?: number }) {
   const [question, setQuestion] = useState('')
   const [answer, setAnswer] = useState('')
   const [loading, setLoading] = useState(false)
+
+  const greeting = alertCount !== undefined && alertCount > 0
+    ? `${getSaudacao()}. Identificamos ${alertCount} ${alertCount === 1 ? 'ponto que merece' : 'pontos que merecem'} atenção hoje.`
+    : 'O que você quer entender sobre seu bar hoje?'
 
   async function ask(q: string) {
     if (!q.trim()) return
@@ -53,7 +57,7 @@ export function AiHeroInput({ barId }: { barId: string }) {
         {/* Saudação + chips */}
         <div style={{ padding: '16px 16px 12px' }}>
           <p style={{ fontSize: 13, color: 'var(--fg-muted)', margin: '0 0 10px' }}>
-            {getSaudacao()}. Posso ajudar com:
+            {greeting}
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
             {SUGGESTIONS.map(s => (
