@@ -157,6 +157,9 @@ export default async function DashboardPage() {
     const dataFormatada = capitalizarPrimeiraLetra(dataExtenso.format(agora));
     const label = ultimoTurno ? labelTurno(ultimoTurno.abertoEm, ultimoTurno.fechadoEm) : null;
 
+    // Stage 1 → usa comandas reais; stage 2 → 30/30 (já superou o threshold)
+    const comandasScore = inteligencia.stage === 1 ? inteligencia.comandas : 30;
+
     // Meta do mês para o bloco Negócio
     const metaConfiguradaFechado = current.bar.configuracoes?.meta_mensal;
     const metaFechado = metaConfiguradaFechado ?? metaMes.meta;
@@ -193,14 +196,14 @@ export default async function DashboardPage() {
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                 <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>Aguardando dados suficientes</span>
-                <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--fg-muted)" }}>{inteligencia.comandas} / 30</span>
+                <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--fg-muted)" }}>{comandasScore} / 30</span>
               </div>
               <div style={{ background: "var(--border-strong)", borderRadius: 2, height: 3, overflow: "hidden" }}>
-                <div style={{ background: "color-mix(in srgb, var(--accent) 40%, transparent)", borderRadius: 2, height: 3, width: `${Math.min(Math.round((inteligencia.comandas / 30) * 100), 100)}%`, transition: "width 0.6s ease" }} />
+                <div style={{ background: "color-mix(in srgb, var(--accent) 40%, transparent)", borderRadius: 2, height: 3, width: `${Math.min(Math.round((comandasScore / 30) * 100), 100)}%`, transition: "width 0.6s ease" }} />
               </div>
               <p style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 8, marginBottom: 0 }}>
-                {Math.max(0, 30 - inteligencia.comandas) > 0
-                  ? `Disponível após mais ${30 - inteligencia.comandas} ${30 - inteligencia.comandas === 1 ? "comanda registrada" : "comandas registradas"}.`
+                {Math.max(0, 30 - comandasScore) > 0
+                  ? `Disponível após mais ${30 - comandasScore} ${30 - comandasScore === 1 ? "comanda registrada" : "comandas registradas"}.`
                   : "Calculando score inicial…"}
               </p>
             </div>
@@ -449,6 +452,7 @@ export default async function DashboardPage() {
     faturamentoTurno: kpis.faturamento,
   });
   const todosInsights = [...insightsOp, ...insights];
+  const comandasScore = inteligencia.stage === 1 ? inteligencia.comandas : 30;
 
   const metaConfigurada = current.bar.configuracoes?.meta_mensal;
   const meta = metaConfigurada ?? metaMes.meta;
@@ -514,14 +518,14 @@ export default async function DashboardPage() {
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
               <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>Aguardando dados suficientes</span>
-              <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--fg-muted)" }}>{inteligencia.comandas} / 30</span>
+              <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--fg-muted)" }}>{comandasScore} / 30</span>
             </div>
             <div style={{ background: "var(--border-strong)", borderRadius: 2, height: 3, overflow: "hidden" }}>
-              <div style={{ background: "color-mix(in srgb, var(--accent) 40%, transparent)", borderRadius: 2, height: 3, width: `${Math.min(Math.round((inteligencia.comandas / 30) * 100), 100)}%`, transition: "width 0.6s ease" }} />
+              <div style={{ background: "color-mix(in srgb, var(--accent) 40%, transparent)", borderRadius: 2, height: 3, width: `${Math.min(Math.round((comandasScore / 30) * 100), 100)}%`, transition: "width 0.6s ease" }} />
             </div>
             <p style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 8, marginBottom: 0 }}>
-              {Math.max(0, 30 - inteligencia.comandas) > 0
-                ? `Disponível após mais ${30 - inteligencia.comandas} ${30 - inteligencia.comandas === 1 ? "comanda registrada" : "comandas registradas"}.`
+              {Math.max(0, 30 - comandasScore) > 0
+                ? `Disponível após mais ${30 - comandasScore} ${30 - comandasScore === 1 ? "comanda registrada" : "comandas registradas"}.`
                 : "Calculando score inicial…"}
             </p>
           </div>
