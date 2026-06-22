@@ -163,7 +163,7 @@ export async function getAdminBares(): Promise<{
 
   // Bares
   const { data: bares } = await admin
-    .from("bares")
+    .from("bars")
     .select("id, nome, slug, endereco, ativo, created_at")
     .order("created_at", { ascending: false });
 
@@ -390,7 +390,7 @@ export async function getAdminBarDetalhe(
     { data: pagamentos7d },
     { data: comandas7d },
   ] = await Promise.all([
-    admin.from("bares").select("*").eq("id", barId).single(),
+    admin.from("bars").select("*").eq("id", barId).single(),
     admin
       .from("assinaturas")
       .select("id, status, trial_fim, periodo_inicio, periodo_fim, plano_id, planos(nome, preco_mensal)")

@@ -25,7 +25,7 @@ async function assertAdmin() {
 export async function suspenderBar(barId: string) {
   await assertAdmin();
   const admin = createAdminClient();
-  await admin.from("bares").update({ ativo: false }).eq("id", barId);
+  await admin.from("bars").update({ ativo: false }).eq("id", barId);
   revalidatePath("/admin");
   revalidatePath(`/admin/${barId}`);
 }
@@ -35,7 +35,7 @@ export async function suspenderBar(barId: string) {
 export async function reativarBar(barId: string) {
   await assertAdmin();
   const admin = createAdminClient();
-  await admin.from("bares").update({ ativo: true }).eq("id", barId);
+  await admin.from("bars").update({ ativo: true }).eq("id", barId);
   revalidatePath("/admin");
   revalidatePath(`/admin/${barId}`);
 }
