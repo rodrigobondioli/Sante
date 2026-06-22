@@ -80,10 +80,12 @@ export default async function DashboardPage() {
   const turno = await getTurnoAtual(current.bar.id);
 
   if (!turno) {
-    const [passos, ultimoTurno, inteligencia] = await Promise.all([
+    const [passos, ultimoTurno, inteligencia, alertas, metaMes] = await Promise.all([
       getPrimeirosPassos(current.bar.id, current.userId),
       getUltimoTurnoFechado(current.bar.id),
       getInteligenciaStage(current.bar.id),
+      getAlertasEstoque(current.bar.id),
+      getMetaMes(current.bar.id, current.bar.configuracoes?.meta_mensal ?? undefined),
     ]);
 
     // ── Bar novo: nunca teve turno → setup checklist ────────────────────────
@@ -132,7 +134,7 @@ export default async function DashboardPage() {
       );
     }
 
-    // ── Bar com histórico: mostra último turno + inteligência ───────────────
+    // ── Bar com histórico: mostra última noite + inteligência ───────────────
     function labelTurno(abertoEm: string, fechadoEm: string): { dia: string; horas: string } {
       const abertura = new Date(abertoEm);
       const fechamento = new Date(fechadoEm);
@@ -155,6 +157,14 @@ export default async function DashboardPage() {
     const dataFormatada = capitalizarPrimeiraLetra(dataExtenso.format(agora));
     const label = ultimoTurno ? labelTurno(ultimoTurno.abertoEm, ultimoTurno.fechadoEm) : null;
 
+    // Meta do mês para o bloco Negócio
+    const metaConfiguradaFechado = current.bar.configuracoes?.meta_mensal;
+    const metaFechado = metaConfiguradaFechado ?? metaMes.meta;
+    const metaAtualFechado = metaMes.faturamentoAtual;
+    const metaProgressoFechado = metaFechado > 0 ? Math.min(Math.round((metaAtualFechado / metaFechado) * 100), 100) : 0;
+    const metaFaltaFechado = Math.max(metaFechado - metaAtualFechado, 0);
+    const metaAtingidaFechado = metaAtualFechado >= metaFechado && metaFechado > 0;
+
     return (
       <div className="flex flex-col" style={{ overflowX: "hidden", width: "100%" }}>
 
@@ -170,10 +180,10 @@ export default async function DashboardPage() {
 
         <div className="lg:px-8" style={{ paddingTop: "24px", paddingBottom: "48px", display: "flex", flexDirection: "column", gap: "32px" }}>
 
-          {/* Inteligência — mesma lógica do turno aberto */}
+          {/* 1. ATENÇÃO */}
           {inteligencia.stage === 1 ? (
             <section>
-              <span style={sectionLabel}>Inteligência</span>
+              <span style={sectionLabel}>Atenção</span>
               <div style={{ ...card, display: "flex", flexDirection: "column", gap: 14 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{ fontSize: 16 }}>🧠</span>
@@ -195,7 +205,7 @@ export default async function DashboardPage() {
             </section>
           ) : (
             <section>
-              <span style={sectionLabel}>Inteligência</span>
+              <span style={sectionLabel}>Atenção</span>
               <a href="/dashboard/inteligencia" style={{ ...card, display: "flex", alignItems: "center", justifyContent: "space-between", textDecoration: "none", cursor: "pointer" }} className="hover:!border-[var(--border-strong)]">
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <span style={{ fontSize: 16 }}>🧠</span>
@@ -207,8 +217,8 @@ export default async function DashboardPage() {
                       </>
                     ) : (
                       <>
-                        <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>Nenhum alerta importante hoje</p>
-                        <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: "2px 0 0" }}>Tudo dentro do esperado · Ver Inteligência →</p>
+                        <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>Tudo sob controle</p>
+                        <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: "2px 0 0" }}>Nenhum alerta · Ver Inteligência →</p>
                       </>
                     )}
                   </div>
@@ -222,16 +232,10 @@ export default async function DashboardPage() {
             </section>
           )}
 
-          {/* AI Chat */}
-          <section>
-            <span style={sectionLabel}>Superbar AI</span>
-            <AiHeroInput barId={current.bar.id} />
-          </section>
-
-          {/* Último turno */}
+          {/* 2. NEGÓCIO — último turno + meta do mês */}
           {ultimoTurno && label && (
             <section>
-              <span style={sectionLabel}>Último turno</span>
+              <span style={sectionLabel}>Negócio</span>
 
               {/* Data do turno */}
               <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 12 }}>
@@ -279,6 +283,38 @@ export default async function DashboardPage() {
 
               </div>
 
+              {/* Meta do mês */}
+              {metaFechado > 0 && (
+                <div style={{ ...card, marginTop: 12 }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
+                    <div>
+                      <p style={overline}>Meta do mês</p>
+                      <p style={{ fontSize: 20, fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", marginTop: 4 }}>
+                        {currency.format(metaAtualFechado)}
+                        <span style={{ fontSize: 13, fontWeight: 400, color: "var(--fg-subtle)", marginLeft: 6 }}>de {currency.format(metaFechado)}</span>
+                      </p>
+                    </div>
+                    <span style={{ fontSize: 22, fontWeight: 700, fontFamily: "var(--font-mono)", color: metaAtingidaFechado ? "var(--ok)" : "var(--fg-muted)", marginTop: 18 }}>
+                      {metaProgressoFechado}%
+                    </span>
+                  </div>
+                  <div style={{ background: "var(--border-strong)", borderRadius: "2px", height: "3px", overflow: "hidden" }}>
+                    <div style={{ background: metaAtingidaFechado ? "var(--ok)" : "var(--accent)", borderRadius: "2px", height: "3px", width: `${metaProgressoFechado}%`, transition: "width 0.6s ease" }} />
+                  </div>
+                  <p style={{ fontSize: 11, color: metaAtingidaFechado ? "var(--ok)" : "var(--fg-subtle)", marginTop: 6 }}>
+                    {metaAtingidaFechado ? "Meta atingida!" : `falta ${currency.format(metaFaltaFechado)}`}
+                    {!metaConfiguradaFechado && (
+                      <span
+                        title="Calculada automaticamente com base no faturamento do mês anterior + 10%. Configure uma meta manual nas Configurações."
+                        style={{ marginLeft: 6, fontSize: 9, fontWeight: 500, padding: "2px 6px", borderRadius: 2, background: "color-mix(in srgb, var(--fg) 8%, transparent)", color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.06em", cursor: "help", whiteSpace: "nowrap" }}
+                      >
+                        Sugerida
+                      </span>
+                    )}
+                  </p>
+                </div>
+              )}
+
               {/* Link para detalhes */}
               <a href={`/dashboard/turnos/${ultimoTurno.id}`} style={{ display: "inline-block", marginTop: 12, fontSize: 12, color: "var(--fg-subtle)", textDecoration: "none" }}
                 className="hover:!text-[var(--fg-muted)]">
@@ -286,6 +322,59 @@ export default async function DashboardPage() {
               </a>
             </section>
           )}
+
+          {/* 3. OPERAÇÃO — resumo, não tela operacional */}
+          <section>
+            <span style={sectionLabel}>Operação</span>
+            <div className="grid grid-cols-2" style={{ gap: 12 }}>
+
+              {/* Estoque */}
+              <div style={card}>
+                <p style={overline}>Estoque</p>
+                {alertas.length > 0 ? (
+                  <>
+                    <p className="text-[22px] lg:text-[26px]" style={{ fontWeight: 600, color: "var(--warn)", fontFamily: "var(--font-mono)", marginTop: 4 }}>
+                      {alertas.length}
+                    </p>
+                    <p style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 2 }}>
+                      {alertas.length === 1 ? "item crítico" : "itens críticos"}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-[22px] lg:text-[26px]" style={{ fontWeight: 600, color: "var(--ok)", fontFamily: "var(--font-mono)", marginTop: 4 }}>
+                      OK
+                    </p>
+                    <p style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 2 }}>nenhum alerta</p>
+                  </>
+                )}
+                <a href="/dashboard/estoque" style={{ display: "inline-block", marginTop: 8, fontSize: 12, color: "var(--fg-subtle)", textDecoration: "none" }}
+                  className="hover:!text-[var(--fg-muted)]">
+                  Ver estoque →
+                </a>
+              </div>
+
+              {/* Relatórios */}
+              <div style={card}>
+                <p style={overline}>Relatórios</p>
+                <p className="text-[22px] lg:text-[26px]" style={{ fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", marginTop: 4 }}>
+                  →
+                </p>
+                <p style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 2 }}>análise por período</p>
+                <a href="/dashboard/relatorios" style={{ display: "inline-block", marginTop: 8, fontSize: 12, color: "var(--fg-subtle)", textDecoration: "none" }}
+                  className="hover:!text-[var(--fg-muted)]">
+                  Ver relatórios →
+                </a>
+              </div>
+
+            </div>
+          </section>
+
+          {/* 4. SUPERBAR AI */}
+          <section>
+            <span style={sectionLabel}>Superbar AI</span>
+            <AiHeroInput barId={current.bar.id} />
+          </section>
 
           {/* Footer: turno fechado */}
           <p style={{ fontSize: 12, color: "var(--fg-subtle)", textAlign: "center" }}>
@@ -347,7 +436,6 @@ export default async function DashboardPage() {
     cmvParcial,
   });
 
-  // P3 — insights declarativos operacionais
   const pico = calcularPico(pontosHora);
   const insightsOp = gerarInsightsOperacionais({
     pico,
@@ -409,10 +497,10 @@ export default async function DashboardPage() {
         style={{ paddingTop: "24px", paddingBottom: "48px", display: "flex", flexDirection: "column", gap: "32px" }}
       >
 
-        {/* Bloco 0 — INTELIGÊNCIA */}
+        {/* 1. ATENÇÃO */}
         {inteligencia.stage === 1 ? (
           <section>
-            <span style={sectionLabel}>Inteligência</span>
+            <span style={sectionLabel}>Atenção</span>
             <div style={{ ...card, display: "flex", flexDirection: "column", gap: 14 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <span style={{ fontSize: 16 }}>🧠</span>
@@ -423,7 +511,6 @@ export default async function DashboardPage() {
               <p style={{ fontSize: 13, color: "var(--fg-muted)", margin: 0, lineHeight: 1.6 }}>
                 Analisamos padrões de consumo, ticket médio e comportamento de vendas para gerar recomendações confiáveis. Precisamos de pelo menos 30 comandas registradas.
               </p>
-              {/* Barra de progresso */}
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                   <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>Comandas registradas</span>
@@ -445,7 +532,7 @@ export default async function DashboardPage() {
           </section>
         ) : (
           <section>
-            <span style={sectionLabel}>Inteligência</span>
+            <span style={sectionLabel}>Atenção</span>
             <a
               href="/dashboard/inteligencia"
               style={{
@@ -476,10 +563,10 @@ export default async function DashboardPage() {
                   ) : (
                     <>
                       <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>
-                        Nenhum alerta importante hoje
+                        Tudo sob controle
                       </p>
                       <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: "2px 0 0" }}>
-                        Tudo dentro do esperado · Ver Inteligência →
+                        Nenhum alerta · Ver Inteligência →
                       </p>
                     </>
                   )}
@@ -507,13 +594,7 @@ export default async function DashboardPage() {
           </section>
         )}
 
-        {/* Bloco 0b — SUPERBAR AI */}
-        <section>
-          <span style={sectionLabel}>Superbar AI</span>
-          <AiHeroInput barId={current.bar.id} />
-        </section>
-
-        {/* Bloco 1 — AO VIVO */}
+        {/* 2. AO VIVO — só existe quando turno está aberto */}
         <section>
           <span style={sectionLabel}>Ao vivo</span>
           <LiveBar
@@ -525,9 +606,11 @@ export default async function DashboardPage() {
           />
         </section>
 
-        {/* Bloco 2 — TURNO ATUAL */}
+        {/* 3. NEGÓCIO — turno atual + semana */}
         <section>
-          <span style={sectionLabel}>Turno atual</span>
+          <span style={sectionLabel}>Negócio</span>
+
+          {/* KPIs do turno */}
           <div className="grid grid-cols-1 lg:grid-cols-4" style={{ gap: "12px" }}>
 
             {/* CMV */}
@@ -673,9 +756,103 @@ export default async function DashboardPage() {
             </div>
 
           </div>
+
+          {/* Semana — gráfico + top drinks */}
+          <div className="grid lg:grid-cols-5" style={{ gap: "12px", marginTop: "12px" }}>
+
+            {/* Receita — gráfico */}
+            <div
+              className="animate-fade-in-up lg:col-span-3"
+              style={{ ...card, animationDelay: "240ms" }}
+            >
+              <p style={{ ...overline, marginBottom: "16px" }}>Receita — últimos 7 dias</p>
+              <p className="text-[22px] lg:text-[28px]" style={{
+                fontWeight: 600,
+                color: "var(--fg)",
+                fontFamily: "var(--font-mono)",
+                fontVariantNumeric: "tabular-nums",
+              }}>
+                {currency.format(receitaSemana.atual)}
+              </p>
+              <span className="hidden lg:inline-block">
+                <TrendText percent={receitaSemana.percentual} comparativoLabel="vs semana passada" />
+              </span>
+              <div className="mt-3" style={{ maxHeight: "160px", overflow: "hidden" }}>
+                <BarChart data={pontosReceita} height={160} />
+              </div>
+              <span className="lg:hidden block mt-2">
+                <TrendText percent={receitaSemana.percentual} comparativoLabel="vs semana passada" />
+              </span>
+            </div>
+
+            {/* Top drinks — tabela */}
+            <div
+              className="animate-fade-in-up lg:col-span-2"
+              style={{ ...card, padding: 0, animationDelay: "300ms" }}
+            >
+              <div style={{ padding: "20px 24px 0" }}>
+                <p style={{ fontSize: "13px", fontWeight: 500, color: "var(--fg)", fontFamily: "var(--font-mono)", marginBottom: "2px" }}>
+                  Top drinks
+                </p>
+                <p style={{ ...overline, marginBottom: "16px" }}>por margem · turno atual</p>
+              </div>
+              <table className="w-full text-left">
+                <thead>
+                  <tr style={overline}>
+                    <th className="font-medium" style={{ padding: "4px 16px" }}>#</th>
+                    <th className="font-medium" style={{ padding: "4px 8px" }}>Drink</th>
+                    <th className="hidden sm:table-cell font-medium" style={{ padding: "4px 8px" }}>Tag</th>
+                    <th className="hidden sm:table-cell text-right font-medium" style={{ padding: "4px 8px" }}>Qtde</th>
+                    <th className="hidden lg:table-cell text-right font-medium" style={{ padding: "4px 8px" }}>Margem</th>
+                    <th className="text-right font-medium" style={{ padding: "4px 16px" }}>Receita</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {produtosTop5.map((produto, i) => (
+                    <tr
+                      key={produto.produtoId}
+                      style={{ borderBottom: "1px solid var(--border)" }}
+                      className="hover:bg-white/[0.02]"
+                    >
+                      <td style={{ fontSize: "12px", color: "var(--fg-subtle)", padding: "10px 16px", fontFamily: "var(--font-mono)" }}>{i + 1}</td>
+                      <td style={{ fontSize: "13px", color: "var(--fg)", padding: "10px 8px", maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{produto.produtoNome}</td>
+                      <td className="hidden sm:table-cell" style={{ padding: "10px 8px" }}>
+                        <CategoriaBadge categoria={produto.categoria} />
+                      </td>
+                      <td className="hidden sm:table-cell text-right" style={{ fontSize: "12px", color: "var(--fg-muted)", padding: "10px 8px", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums" }}>
+                        {produto.quantidadeVendida}
+                      </td>
+                      <td
+                        className={cn("hidden lg:table-cell text-right", produto.categoria === "problema" ? "text-error" : "")}
+                        style={{
+                          fontSize: "12px", padding: "10px 8px",
+                          color: produto.categoria === "problema" ? undefined : "var(--fg-muted)",
+                          fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums",
+                        }}
+                      >
+                        {produto.margemPercentual !== null ? `${percent.format(produto.margemPercentual)}%` : "—"}
+                      </td>
+                      <td className="text-right" style={{ fontSize: "12px", color: "var(--fg)", padding: "10px 16px", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums" }}>
+                        {currency.format(produto.faturamento)}
+                      </td>
+                    </tr>
+                  ))}
+                  {produtosTop5.length === 0 && (
+                    <tr>
+                      <td colSpan={6} style={{ fontSize: "13px", color: "var(--fg-muted)", padding: "16px 16px" }}>
+                        Nenhuma venda neste turno ainda.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+              <div className="h-3" />
+            </div>
+
+          </div>
         </section>
 
-        {/* Bloco 3 — OPERAÇÃO */}
+        {/* 4. OPERAÇÃO */}
         <section>
           <span style={sectionLabel}>Operação</span>
           <div className="grid grid-cols-2 lg:grid-cols-4" style={{ gap: "12px" }}>
@@ -770,101 +947,10 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        {/* Bloco 4 — HISTÓRICO */}
+        {/* 5. SUPERBAR AI */}
         <section>
-          <span style={sectionLabel}>Histórico</span>
-          <div className="grid lg:grid-cols-5" style={{ gap: "12px" }}>
-
-            {/* Receita — gráfico */}
-            <div
-              className="animate-fade-in-up lg:col-span-3"
-              style={{ ...card, animationDelay: "240ms" }}
-            >
-              <p style={{ ...overline, marginBottom: "16px" }}>Receita — últimos 7 dias</p>
-              <p className="text-[22px] lg:text-[28px]" style={{
-                fontWeight: 600,
-                color: "var(--fg)",
-                fontFamily: "var(--font-mono)",
-                fontVariantNumeric: "tabular-nums",
-              }}>
-                {currency.format(receitaSemana.atual)}
-              </p>
-              <span className="hidden lg:inline-block">
-                <TrendText percent={receitaSemana.percentual} comparativoLabel="vs semana passada" />
-              </span>
-              <div className="mt-3" style={{ maxHeight: "160px", overflow: "hidden" }}>
-                <BarChart data={pontosReceita} height={160} />
-              </div>
-              <span className="lg:hidden block mt-2">
-                <TrendText percent={receitaSemana.percentual} comparativoLabel="vs semana passada" />
-              </span>
-            </div>
-
-            {/* Top drinks — tabela */}
-            <div
-              className="animate-fade-in-up lg:col-span-2"
-              style={{ ...card, padding: 0, animationDelay: "300ms" }}
-            >
-              <div style={{ padding: "20px 24px 0" }}>
-                <p style={{ fontSize: "13px", fontWeight: 500, color: "var(--fg)", fontFamily: "var(--font-mono)", marginBottom: "2px" }}>
-                  Top drinks
-                </p>
-                <p style={{ ...overline, marginBottom: "16px" }}>por margem · turno atual</p>
-              </div>
-              <table className="w-full text-left">
-                <thead>
-                  <tr style={overline}>
-                    <th className="font-medium" style={{ padding: "4px 16px" }}>#</th>
-                    <th className="font-medium" style={{ padding: "4px 8px" }}>Drink</th>
-                    <th className="hidden sm:table-cell font-medium" style={{ padding: "4px 8px" }}>Tag</th>
-                    <th className="hidden sm:table-cell text-right font-medium" style={{ padding: "4px 8px" }}>Qtde</th>
-                    <th className="hidden lg:table-cell text-right font-medium" style={{ padding: "4px 8px" }}>Margem</th>
-                    <th className="text-right font-medium" style={{ padding: "4px 16px" }}>Receita</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {produtosTop5.map((produto, i) => (
-                    <tr
-                      key={produto.produtoId}
-                      style={{ borderBottom: "1px solid var(--border)" }}
-                      className="hover:bg-white/[0.02]"
-                    >
-                      <td style={{ fontSize: "12px", color: "var(--fg-subtle)", padding: "10px 16px", fontFamily: "var(--font-mono)" }}>{i + 1}</td>
-                      <td style={{ fontSize: "13px", color: "var(--fg)", padding: "10px 8px", maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{produto.produtoNome}</td>
-                      <td className="hidden sm:table-cell" style={{ padding: "10px 8px" }}>
-                        <CategoriaBadge categoria={produto.categoria} />
-                      </td>
-                      <td className="hidden sm:table-cell text-right" style={{ fontSize: "12px", color: "var(--fg-muted)", padding: "10px 8px", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums" }}>
-                        {produto.quantidadeVendida}
-                      </td>
-                      <td
-                        className={cn("hidden lg:table-cell text-right", produto.categoria === "problema" ? "text-error" : "")}
-                        style={{
-                          fontSize: "12px", padding: "10px 8px",
-                          color: produto.categoria === "problema" ? undefined : "var(--fg-muted)",
-                          fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums",
-                        }}
-                      >
-                        {produto.margemPercentual !== null ? `${percent.format(produto.margemPercentual)}%` : "—"}
-                      </td>
-                      <td className="text-right" style={{ fontSize: "12px", color: "var(--fg)", padding: "10px 16px", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums" }}>
-                        {currency.format(produto.faturamento)}
-                      </td>
-                    </tr>
-                  ))}
-                  {produtosTop5.length === 0 && (
-                    <tr>
-                      <td colSpan={6} style={{ fontSize: "13px", color: "var(--fg-muted)", padding: "16px 16px" }}>
-                        Nenhuma venda neste turno ainda.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-              <div className="h-3" />
-            </div>
-
-          </div>
+          <span style={sectionLabel}>Superbar AI</span>
+          <AiHeroInput barId={current.bar.id} />
         </section>
 
       </div>
