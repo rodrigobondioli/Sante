@@ -3,7 +3,6 @@ import { TrendText } from "@/components/ui/trend-text";
 import { BarChart } from "@/components/ui/bar-chart";
 import { CategoriaBadge } from "@/components/dashboard/categoria-badge";
 import { AlertasBell } from "@/components/dashboard/alertas-bell";
-import { AiHeroInput } from "@/components/dashboard/ai-hero-input";
 import { LiveBar } from "@/components/dashboard/live-bar";
 import { cn } from "@/lib/utils";
 import {
@@ -17,6 +16,7 @@ import {
   getLiveStats,
   getPrimeirosPassos,
 } from "@/lib/dashboard/queries";
+import { getInteligenciaStage } from "@/lib/inteligencia/queries";
 import { categorizarProdutos, calcularCmv } from "@/lib/dashboard/menu-engineering";
 import { getFaturamentoPorDia, getComparacaoPeriodo } from "@/lib/dashboard/relatorios";
 import { resolvePeriodo } from "@/lib/dashboard/periodo";
@@ -183,7 +183,7 @@ export default async function DashboardPage() {
     );
   }
 
-  const [kpis, alertas, produtosVendidos, metaMes, liveStats, pontosHora, rankingMesas, mixPgto, tempos] = await Promise.all([
+  const [kpis, alertas, produtosVendidos, metaMes, liveStats, pontosHora, rankingMesas, mixPgto, tempos, inteligencia] = await Promise.all([
     getKpisTurno(turno),
     getAlertasEstoque(current.bar.id),
     getProdutosVendidosTurno(current.bar.id, turno.id),
@@ -193,6 +193,7 @@ export default async function DashboardPage() {
     getRankingMesas(current.bar.id, turno.id),
     getMixPagamento(current.bar.id, turno.id),
     getTempoMedioPreparo(current.bar.id, turno.id),
+    getInteligenciaStage(current.bar.id),
   ]);
 
   const comparacao = await getKpisComparacao(
@@ -280,18 +281,114 @@ export default async function DashboardPage() {
         >
           {saudacao(agora.getHours())}, {primeiroNome}
         </h1>
-        <p style={{ fontSize: "13px", color: "var(--fg-subtle)", marginBottom: "24px", textAlign: "center" }}>
+        <p style={{ fontSize: "13px", color: "var(--fg-subtle)", textAlign: "center" }}>
           {dataFormatada} · turno aberto
         </p>
-
-        <AiHeroInput barId={current.bar.id} />
       </div>
 
       {/* Blocos principais */}
       <div
         className="lg:px-8"
-        style={{ paddingTop: "32px", paddingBottom: "48px", display: "flex", flexDirection: "column", gap: "32px" }}
+        style={{ paddingTop: "24px", paddingBottom: "48px", display: "flex", flexDirection: "column", gap: "32px" }}
       >
+
+        {/* Bloco 0 — INTELIGÊNCIA */}
+        {inteligencia.stage === 1 ? (
+          <section>
+            <span style={sectionLabel}>Inteligência</span>
+            <div style={{ ...card, display: "flex", flexDirection: "column", gap: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ fontSize: 16 }}>🧠</span>
+                <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>
+                  Estamos aprendendo sobre seu bar
+                </p>
+              </div>
+              <p style={{ fontSize: 13, color: "var(--fg-muted)", margin: 0, lineHeight: 1.6 }}>
+                Analisamos padrões de consumo, ticket médio e comportamento de vendas para gerar recomendações confiáveis. Precisamos de pelo menos 30 comandas registradas.
+              </p>
+              {/* Barra de progresso */}
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                  <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>Comandas registradas</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-muted)", fontFamily: "var(--font-mono)" }}>
+                    {inteligencia.comandas} / 30
+                  </span>
+                </div>
+                <div style={{ background: "var(--border-strong)", borderRadius: 2, height: 4, overflow: "hidden" }}>
+                  <div style={{
+                    background: "var(--accent)",
+                    borderRadius: 2,
+                    height: 4,
+                    width: `${Math.min(Math.round((inteligencia.comandas / 30) * 100), 100)}%`,
+                    transition: "width 0.6s ease",
+                  }} />
+                </div>
+              </div>
+            </div>
+          </section>
+        ) : (
+          <section>
+            <span style={sectionLabel}>Inteligência</span>
+            <a
+              href="/dashboard/inteligencia"
+              style={{
+                ...card,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                textDecoration: "none",
+                transition: "border-color 150ms",
+                cursor: "pointer",
+              }}
+              className="hover:!border-[var(--border-strong)]"
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <span style={{ fontSize: 16 }}>🧠</span>
+                <div>
+                  {inteligencia.insightsNaoLidos > 0 ? (
+                    <>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>
+                        {inteligencia.insightsNaoLidos === 1
+                          ? "1 item precisa da sua atenção"
+                          : `${inteligencia.insightsNaoLidos} itens precisam da sua atenção`}
+                      </p>
+                      <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: "2px 0 0" }}>
+                        Ver análise completa →
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>
+                        Nenhum alerta importante hoje
+                      </p>
+                      <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: "2px 0 0" }}>
+                        Tudo dentro do esperado · Ver Inteligência →
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+              {inteligencia.insightsNaoLidos > 0 && (
+                <span style={{
+                  background: "#ef4444",
+                  color: "#fff",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  borderRadius: "50%",
+                  minWidth: 22,
+                  height: 22,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "0 4px",
+                  flexShrink: 0,
+                }}>
+                  {inteligencia.insightsNaoLidos > 9 ? "9+" : inteligencia.insightsNaoLidos}
+                </span>
+              )}
+            </a>
+          </section>
+        )}
 
         {/* Bloco 1 — AO VIVO */}
         <section>
@@ -537,9 +634,9 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        {/* Bloco 4 — VISÃO GERAL */}
+        {/* Bloco 4 — HISTÓRICO */}
         <section>
-          <span style={sectionLabel}>Visão geral</span>
+          <span style={sectionLabel}>Histórico</span>
           <div className="grid lg:grid-cols-5" style={{ gap: "12px" }}>
 
             {/* Receita — gráfico */}

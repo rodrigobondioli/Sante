@@ -12,7 +12,7 @@ import type { BarRole } from "@/types/database";
 import { Drawer } from "@/components/ui/drawer";
 
 const links = [
-  { href: "/dashboard", label: "Visão geral", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Hoje", icon: LayoutDashboard },
   { href: "/dashboard/inteligencia", label: "Inteligência", icon: Sparkles, badge: true },
   { href: "/dashboard/relatorios", label: "Relatórios", icon: BarChart3 },
   { href: "/dashboard/turnos", label: "Turnos", icon: History },
