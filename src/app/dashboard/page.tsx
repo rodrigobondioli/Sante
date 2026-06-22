@@ -532,7 +532,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* 1. ATENÇÃO */}
-        {inteligencia.stage >= 2 && (
+        {inteligencia.stage === 2 && (
           <section>
             <span style={sectionLabel}>Atenção</span>
             <a
