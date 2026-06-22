@@ -3,8 +3,9 @@
 import { useState } from 'react'
 
 const SUGGESTIONS = [
-  'Como está meu CMV?',
-  'Top drinks hoje',
+  'O que precisa da minha atenção?',
+  'O que mais vendeu hoje?',
+  'Como está meu estoque?',
   'Resumo do turno',
 ]
 
@@ -34,28 +35,28 @@ export function AiHeroInput({ barId }: { barId: string }) {
   }
 
   return (
-    <div style={{ width: '100%', maxWidth: '720px', margin: '0 auto' }}>
-      {/* Single card — input + chips */}
+    <div style={{ width: '100%' }}>
+      {/* Card compacto */}
       <div style={{
         background: 'var(--bg-elevated)',
         border: '1px solid var(--border)',
         borderRadius: '4px',
         overflow: 'hidden',
       }}>
-        {/* Input row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '22px 24px' }}>
+        {/* Input row — menor */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 16px' }}>
           <input
             value={question}
             onChange={e => setQuestion(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && ask(question)}
-            placeholder="Pergunte ao Superbar..."
+            placeholder="Pergunte sobre seu bar"
             style={{
               flex: 1,
               background: 'none',
               border: 'none',
               outline: 'none',
               color: 'var(--fg)',
-              fontSize: '17px',
+              fontSize: '14px',
             }}
           />
           <button
@@ -65,8 +66,8 @@ export function AiHeroInput({ barId }: { barId: string }) {
               background: 'var(--accent)',
               border: 'none',
               borderRadius: '4px',
-              width: '44px',
-              height: '44px',
+              width: '32px',
+              height: '32px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -76,9 +77,9 @@ export function AiHeroInput({ barId }: { barId: string }) {
             }}
           >
             {loading ? (
-              <span style={{ color: 'var(--accent-fg)', fontSize: '20px' }}>·</span>
+              <span style={{ color: 'var(--accent-fg)', fontSize: '16px' }}>·</span>
             ) : (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-fg)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent-fg)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8"/>
                 <path d="m21 21-4.35-4.35"/>
               </svg>
@@ -87,32 +88,30 @@ export function AiHeroInput({ barId }: { barId: string }) {
         </div>
 
         {/* Divider */}
-        <div style={{ height: '1px', background: 'var(--border)', margin: '0 24px' }} />
+        <div style={{ height: '1px', background: 'var(--border)', margin: '0 16px' }} />
 
         {/* Chips row */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '8px',
-          padding: '14px 24px',
+          gap: '6px',
+          padding: '10px 16px',
           flexWrap: 'wrap',
         }}>
-          <span style={{ fontSize: '12px', color: 'var(--fg-subtle)', flexShrink: 0, marginRight: '4px' }}>
-            Populares:
-          </span>
           {SUGGESTIONS.map(s => (
             <button
               key={s}
               onClick={() => ask(s)}
               style={{
-                background: 'var(--bg-inset)',
+                background: 'transparent',
                 border: '1px solid var(--border)',
                 borderRadius: '4px',
-                padding: '3px 12px',
-                color: 'var(--fg-muted)',
-                fontSize: '12px',
+                padding: '3px 10px',
+                color: 'var(--fg-subtle)',
+                fontSize: '11px',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
+                transition: 'color 150ms, border-color 150ms',
               }}
             >
               {s}
@@ -124,25 +123,20 @@ export function AiHeroInput({ barId }: { barId: string }) {
       {/* Answer */}
       {(answer || loading) && (
         <div style={{
-          marginTop: '12px',
+          marginTop: '8px',
           background: 'var(--bg-elevated)',
           border: '1px solid var(--border)',
           borderRadius: '4px',
-          padding: '14px 20px',
-          fontSize: '14px',
+          padding: '12px 16px',
+          fontSize: '13px',
           color: 'var(--fg)',
           lineHeight: 1.6,
-          textAlign: 'left',
         }}>
           {loading ? (
             <span style={{ color: 'var(--fg-subtle)' }}>Consultando dados do bar...</span>
           ) : answer}
         </div>
       )}
-
-      <p style={{ marginTop: '12px', fontSize: '11px', color: 'var(--fg-subtle)', textAlign: 'center' }}>
-        Powered by Superbar AI
-      </p>
     </div>
   )
 }

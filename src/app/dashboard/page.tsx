@@ -3,6 +3,7 @@ import { TrendText } from "@/components/ui/trend-text";
 import { BarChart } from "@/components/ui/bar-chart";
 import { CategoriaBadge } from "@/components/dashboard/categoria-badge";
 import { AlertasBell } from "@/components/dashboard/alertas-bell";
+import { AiHeroInput } from "@/components/dashboard/ai-hero-input";
 import { LiveBar } from "@/components/dashboard/live-bar";
 import { cn } from "@/lib/utils";
 import {
@@ -389,6 +390,11 @@ export default async function DashboardPage() {
             </a>
           </section>
         )}
+
+        {/* Bloco 0b — PERGUNTE */}
+        <section>
+          <AiHeroInput barId={current.bar.id} />
+        </section>
 
         {/* Bloco 1 — AO VIVO */}
         <section>
