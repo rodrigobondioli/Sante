@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { percentChange } from "@/lib/dashboard/percent-change";
 import { gerarDiasDoPeriodo, inicioDoDia, periodoAnterior, type PeriodoRange } from "@/lib/dashboard/periodo";
 import type { TopDrink } from "@/lib/dashboard/queries";
+import { calcularCmv } from "@/lib/dashboard/menu-engineering";
 
 export interface PontoFaturamento {
   label: string;
@@ -112,6 +113,42 @@ export async function getRankingProdutos(
   return [...porProduto.values()]
     .sort((a, b) => b.quantidadeVendida - a.quantidadeVendida)
     .slice(0, limit);
+}
+
+export interface KpisFinanceirosPeriodo {
+  cmv: number | null;          // % custo sobre receita
+  margemBruta: number | null;  // % (100 - CMV)
+  ticketMedio: number | null;  // R$
+  cmvParcial: boolean;         // true se nem todos os produtos têm custo
+}
+
+export async function getKpisFinanceirosPeriodo(
+  barId: string,
+  periodo: PeriodoRange
+): Promise<KpisFinanceirosPeriodo> {
+  const supabase = await createClient();
+
+  // Ticket médio: receita / comandas pagas no período
+  const { data: pagamentos } = await supabase
+    .from("pagamentos")
+    .select("valor, comanda_id")
+    .eq("bar_id", barId)
+    .eq("status", "confirmado")
+    .gte("processado_em", periodo.inicio.toISOString())
+    .lte("processado_em", periodo.fim.toISOString())
+    .returns<{ valor: number; comanda_id: string }[]>();
+
+  const totalReceita = (pagamentos ?? []).reduce((s, p) => s + Number(p.valor), 0);
+  const totalComandas = new Set((pagamentos ?? []).map(p => p.comanda_id)).size;
+  const ticketMedio = totalComandas > 0 ? totalReceita / totalComandas : null;
+
+  // CMV e margem: produtos vendidos com custo
+  const produtos = await getProdutosVendidosPeriodo(barId, periodo);
+  const cmv = calcularCmv(produtos);
+  const margemBruta = cmv !== null ? Math.round(100 - cmv) : null;
+  const cmvParcial = produtos.some(p => p.custo === null);
+
+  return { cmv, margemBruta, ticketMedio, cmvParcial };
 }
 
 // Mesma agregação de getProdutosVendidosTurno (queries.ts), mas filtrada por
