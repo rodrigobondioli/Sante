@@ -595,7 +595,20 @@ export default async function DashboardPage() {
                 <p style={{ fontSize: "11px", color: "var(--fg-subtle)", marginTop: "2px", marginBottom: "10px" }}>
                   de {currency.format(meta)} · {metaProgresso}%
                   {!metaConfigurada && (
-                    <span style={{ marginLeft: 4, fontStyle: "italic" }}>(auto)</span>
+                    <span
+                      title="Calculada automaticamente com base no faturamento do mês anterior + 10%. Configure uma meta manual nas Configurações."
+                      style={{
+                        marginLeft: 6,
+                        fontSize: 9, fontWeight: 500,
+                        padding: "2px 6px", borderRadius: 2,
+                        background: "color-mix(in srgb, var(--fg) 8%, transparent)",
+                        color: "var(--fg-subtle)",
+                        textTransform: "uppercase", letterSpacing: "0.06em",
+                        cursor: "help", whiteSpace: "nowrap",
+                      }}
+                    >
+                      Sugerida
+                    </span>
                   )}
                 </p>
                 <div style={{ background: "var(--border-strong)", borderRadius: "2px", height: "3px", overflow: "hidden" }}>
