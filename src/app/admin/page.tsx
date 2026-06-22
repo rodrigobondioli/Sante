@@ -1,22 +1,42 @@
 import { getAdminBares } from "@/lib/admin/queries";
-import type { RiskAlert } from "@/lib/admin/queries";
-import type { AssinaturaStatus } from "@/types/database";
+import { AdminBaresTable } from "@/components/admin/admin-bares-table";
+
+// ─── Ícones SVG ───────────────────────────────────────────────────────────────
+
+function IconTrendUp() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+      <polyline points="17 6 23 6 23 12"/>
+    </svg>
+  );
+}
+function IconClock() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 6 12 12 16 14"/>
+    </svg>
+  );
+}
+function IconAlertTriangle() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/>
+      <line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>
+  );
+}
+function IconMoon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+  );
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const STATUS_COLOR: Record<AssinaturaStatus, string> = {
-  trial:        "#3b82f6",
-  ativa:        "var(--ok)",
-  cancelada:    "var(--fg-subtle)",
-  inadimplente: "#ef4444",
-};
-
-const STATUS_LABEL: Record<AssinaturaStatus, string> = {
-  trial:        "Trial",
-  ativa:        "Ativa",
-  cancelada:    "Cancelada",
-  inadimplente: "Inadimpl.",
-};
 
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -24,133 +44,114 @@ const currency = new Intl.NumberFormat("pt-BR", {
   maximumFractionDigits: 0,
 });
 
-function relativeDate(iso: string | null): string {
-  if (!iso) return "—";
-  const diff = Date.now() - new Date(iso).getTime();
-  const days = Math.floor(diff / 86400000);
-  if (days === 0) return "hoje";
-  if (days === 1) return "ontem";
-  if (days < 30) return `${days}d`;
-  return `${Math.floor(days / 30)}m`;
-}
-
-function AlertBadges({ alertas }: { alertas: RiskAlert[] }) {
-  if (!alertas.length) return <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>—</span>;
-  return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-      {alertas.map((a, i) => (
-        <span
-          key={i}
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-            padding: "2px 6px",
-            borderRadius: 2,
-            background: a.level === "red" ? "rgba(239,68,68,0.12)" : "rgba(245,158,11,0.12)",
-            color: a.level === "red" ? "#ef4444" : "#f59e0b",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {a.level === "red" ? "🔴" : "🟡"} {a.label}
-        </span>
-      ))}
-    </div>
-  );
-}
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function AdminPage() {
   const { bares, stats } = await getAdminBares();
 
-  const overline: React.CSSProperties = {
-    fontSize: 9,
-    fontWeight: 700,
-    letterSpacing: "0.1em",
-    textTransform: "uppercase",
-    color: "var(--fg-subtle)",
-    margin: "0 0 4px",
-  };
-
-  const statCard: React.CSSProperties = {
-    background: "var(--bg-elevated)",
-    border: "1px solid var(--border)",
-    borderRadius: 4,
-    padding: "14px 18px",
-  };
-
-  const th: React.CSSProperties = {
-    padding: "8px 12px",
-    fontSize: 9,
-    fontWeight: 700,
-    letterSpacing: "0.1em",
-    textTransform: "uppercase" as const,
-    color: "var(--fg-subtle)",
-    textAlign: "left" as const,
-    borderBottom: "1px solid var(--border)",
-    whiteSpace: "nowrap" as const,
-    background: "var(--bg)",
-  };
-
-  const td: React.CSSProperties = {
-    padding: "11px 12px",
-    borderBottom: "1px solid var(--border)",
-    fontSize: 13,
-    color: "var(--fg)",
-    verticalAlign: "middle",
-  };
-
-  const tdMuted: React.CSSProperties = {
-    ...td,
-    color: "var(--fg-muted)",
-  };
-
-  const tdMono: React.CSSProperties = {
-    ...tdMuted,
-    fontFamily: "var(--font-mono)",
-    textAlign: "right",
-  };
-
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
-      {/* Header */}
-      <div>
-        <h1
-          style={{
-            fontSize: 22,
-            fontWeight: 700,
-            color: "var(--fg)",
-            margin: "0 0 4px",
-            letterSpacing: "-0.02em",
-          }}
+    <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+
+      {/* ── Header ─────────────────────────────────────────────────────── */}
+      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+        <div>
+          <h1
+            style={{
+              fontSize: 26,
+              fontWeight: 700,
+              color: "var(--fg)",
+              margin: "0 0 4px",
+              letterSpacing: "-0.03em",
+            }}
+          >
+            Clientes
+          </h1>
+          <p style={{ fontSize: 13, color: "var(--fg-muted)", margin: 0 }}>
+            {stats.total_bares} bar{stats.total_bares !== 1 ? "es" : ""} na plataforma
+          </p>
+        </div>
+        <time
+          style={{ fontSize: 11, color: "var(--fg-subtle)", fontFamily: "var(--font-mono)" }}
         >
-          Clientes
-        </h1>
-        <p style={{ fontSize: 13, color: "var(--fg-muted)", margin: 0 }}>
-          {stats.total_bares} bar{stats.total_bares !== 1 ? "es" : ""} cadastrado
-          {stats.total_bares !== 1 ? "s" : ""}
-        </p>
+          {new Date().toLocaleDateString("pt-BR", {
+            weekday: "short",
+            day: "2-digit",
+            month: "short",
+          })}
+        </time>
       </div>
 
-      {/* Stats — cockpit top */}
+      {/* ── Stat cards ─────────────────────────────────────────────────── */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
-          gap: 10,
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: 12,
         }}
       >
         {/* MRR */}
-        <div style={{ ...statCard, borderLeft: "3px solid var(--accent)" }}>
-          <p style={overline}>MRR</p>
+        <div
+          style={{
+            background: "var(--bg-elevated)",
+            border: "1px solid var(--border)",
+            borderRadius: 10,
+            padding: "20px 22px",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          {/* glow */}
+          <div
+            style={{
+              position: "absolute",
+              top: -30,
+              right: -30,
+              width: 100,
+              height: 100,
+              borderRadius: "50%",
+              background: "rgba(107,79,232,0.12)",
+              filter: "blur(30px)",
+              pointerEvents: "none",
+            }}
+          />
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 14,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 9,
+                fontWeight: 700,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "var(--fg-subtle)",
+              }}
+            >
+              MRR
+            </span>
+            <span
+              style={{
+                color: "var(--accent-bright)",
+                opacity: 0.7,
+                display: "flex",
+              }}
+            >
+              <IconTrendUp />
+            </span>
+          </div>
           <p
             style={{
-              fontSize: 22,
-              fontWeight: 700,
-              color: "var(--accent)",
+              fontSize: 30,
+              fontWeight: 800,
+              color: "var(--accent-bright)",
               fontFamily: "var(--font-mono)",
-              margin: "0 0 2px",
-              letterSpacing: "-0.02em",
+              margin: "0 0 4px",
+              letterSpacing: "-0.03em",
+              lineHeight: 1,
             }}
           >
             {currency.format(stats.mrr)}
@@ -161,212 +162,174 @@ export default async function AdminPage() {
         </div>
 
         {/* Trial */}
-        <div style={statCard}>
-          <p style={overline}>Trial</p>
+        <div
+          style={{
+            background: "var(--bg-elevated)",
+            border: "1px solid var(--border)",
+            borderRadius: 10,
+            padding: "20px 22px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 14,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 9,
+                fontWeight: 700,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "var(--fg-subtle)",
+              }}
+            >
+              Trial
+            </span>
+            <span style={{ color: "#3b82f6", opacity: 0.7, display: "flex" }}>
+              <IconClock />
+            </span>
+          </div>
           <p
             style={{
-              fontSize: 22,
-              fontWeight: 700,
-              color: "#3b82f6",
+              fontSize: 36,
+              fontWeight: 800,
+              color: stats.bares_trial > 0 ? "#3b82f6" : "var(--fg-muted)",
               fontFamily: "var(--font-mono)",
-              margin: 0,
+              margin: "0 0 4px",
+              letterSpacing: "-0.03em",
+              lineHeight: 1,
             }}
           >
             {stats.bares_trial}
+          </p>
+          <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>
+            em período de teste
           </p>
         </div>
 
         {/* Inadimplentes */}
         <div
           style={{
-            ...statCard,
-            ...(stats.bares_inadimplentes > 0
-              ? { borderLeft: "3px solid #ef4444" }
-              : {}),
+            background: "var(--bg-elevated)",
+            border: stats.bares_inadimplentes > 0
+              ? "1px solid rgba(239,68,68,0.25)"
+              : "1px solid var(--border)",
+            borderRadius: 10,
+            padding: "20px 22px",
           }}
         >
-          <p style={overline}>Inadimplentes</p>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 14,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 9,
+                fontWeight: 700,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "var(--fg-subtle)",
+              }}
+            >
+              Inadimplentes
+            </span>
+            <span
+              style={{
+                color: stats.bares_inadimplentes > 0 ? "#ef4444" : "var(--fg-subtle)",
+                opacity: 0.7,
+                display: "flex",
+              }}
+            >
+              <IconAlertTriangle />
+            </span>
+          </div>
           <p
             style={{
-              fontSize: 22,
-              fontWeight: 700,
+              fontSize: 36,
+              fontWeight: 800,
               color: stats.bares_inadimplentes > 0 ? "#ef4444" : "var(--fg-muted)",
               fontFamily: "var(--font-mono)",
-              margin: 0,
+              margin: "0 0 4px",
+              letterSpacing: "-0.03em",
+              lineHeight: 1,
             }}
           >
             {stats.bares_inadimplentes}
+          </p>
+          <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>
+            {stats.bares_inadimplentes === 0 ? "tudo certo" : "requer atenção"}
           </p>
         </div>
 
         {/* Sem uso 7d */}
         <div
           style={{
-            ...statCard,
-            ...(stats.bares_sem_uso_7d > 0
-              ? { borderLeft: "3px solid #f59e0b" }
-              : {}),
+            background: "var(--bg-elevated)",
+            border: stats.bares_sem_uso_7d > 0
+              ? "1px solid rgba(245,158,11,0.25)"
+              : "1px solid var(--border)",
+            borderRadius: 10,
+            padding: "20px 22px",
           }}
         >
-          <p style={overline}>Sem uso 7d</p>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 14,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 9,
+                fontWeight: 700,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "var(--fg-subtle)",
+              }}
+            >
+              Sem uso 7d
+            </span>
+            <span
+              style={{
+                color: stats.bares_sem_uso_7d > 0 ? "#f59e0b" : "var(--fg-subtle)",
+                opacity: 0.7,
+                display: "flex",
+              }}
+            >
+              <IconMoon />
+            </span>
+          </div>
           <p
             style={{
-              fontSize: 22,
-              fontWeight: 700,
+              fontSize: 36,
+              fontWeight: 800,
               color: stats.bares_sem_uso_7d > 0 ? "#f59e0b" : "var(--fg-muted)",
               fontFamily: "var(--font-mono)",
-              margin: 0,
+              margin: "0 0 4px",
+              letterSpacing: "-0.03em",
+              lineHeight: 1,
             }}
           >
             {stats.bares_sem_uso_7d}
           </p>
+          <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>
+            inativos esta semana
+          </p>
         </div>
       </div>
 
-      {/* Tabela */}
-      {bares.length === 0 ? (
-        <p style={{ fontSize: 14, color: "var(--fg-muted)" }}>
-          Nenhum bar cadastrado ainda.
-        </p>
-      ) : (
-        <div
-          style={{
-            background: "var(--bg-elevated)",
-            border: "1px solid var(--border)",
-            borderRadius: 4,
-            overflow: "auto",
-          }}
-        >
-          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 900 }}>
-            <thead>
-              <tr>
-                <th style={th}>Bar</th>
-                <th style={th}>Plano</th>
-                <th style={th}>Último uso</th>
-                <th style={{ ...th, textAlign: "right" }}>Turnos 7d</th>
-                <th style={{ ...th, textAlign: "right" }}>Faturamento 7d</th>
-                <th style={{ ...th, textAlign: "right" }}>Comandas 7d</th>
-                <th style={{ ...th, textAlign: "right" }}>Custo</th>
-                <th style={th}>Alertas</th>
-                <th style={{ ...th, textAlign: "center" }}>Ação</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bares.map((bar) => {
-                const topAlert = bar.alertas[0];
-                const rowStyle: React.CSSProperties =
-                  topAlert?.level === "red"
-                    ? { background: "rgba(239,68,68,0.03)" }
-                    : {};
-
-                return (
-                  <tr key={bar.id} style={rowStyle}>
-                    {/* Bar */}
-                    <td style={td}>
-                      <a
-                        href={`/admin/${bar.id}`}
-                        style={{
-                          color: "var(--fg)",
-                          textDecoration: "none",
-                          fontWeight: 600,
-                        }}
-                      >
-                        {bar.nome}
-                      </a>
-                      <span
-                        style={{
-                          fontSize: 11,
-                          color: "var(--fg-subtle)",
-                          display: "block",
-                        }}
-                      >
-                        {bar.cidade ?? bar.slug}
-                      </span>
-                    </td>
-
-                    {/* Plano/status */}
-                    <td style={td}>
-                      {bar.assinatura_status ? (
-                        <span
-                          style={{
-                            fontSize: 11,
-                            fontWeight: 700,
-                            color: STATUS_COLOR[bar.assinatura_status],
-                            letterSpacing: "0.06em",
-                          }}
-                        >
-                          {STATUS_LABEL[bar.assinatura_status]}
-                        </span>
-                      ) : (
-                        <span style={{ color: "var(--fg-subtle)", fontSize: 11 }}>—</span>
-                      )}
-                      {bar.plano_nome && (
-                        <span
-                          style={{
-                            fontSize: 10,
-                            color: "var(--fg-subtle)",
-                            display: "block",
-                          }}
-                        >
-                          {bar.plano_nome}
-                        </span>
-                      )}
-                    </td>
-
-                    {/* Último uso */}
-                    <td style={tdMuted}>
-                      {relativeDate(bar.ultimo_turno_em)}
-                    </td>
-
-                    {/* Turnos 7d */}
-                    <td style={tdMono}>{bar.turnos_7d || "—"}</td>
-
-                    {/* Faturamento 7d */}
-                    <td style={tdMono}>
-                      {bar.faturamento_7d > 0
-                        ? currency.format(bar.faturamento_7d)
-                        : "—"}
-                    </td>
-
-                    {/* Comandas 7d */}
-                    <td style={tdMono}>{bar.comandas_7d || "—"}</td>
-
-                    {/* Cobertura custo */}
-                    <td style={{ ...tdMono, color: bar.cobertura_custo_pct < 40 ? "#f59e0b" : "var(--fg-muted)" }}>
-                      {bar.total_produtos > 0
-                        ? `${bar.cobertura_custo_pct}%`
-                        : "—"}
-                    </td>
-
-                    {/* Alertas */}
-                    <td style={td}>
-                      <AlertBadges alertas={bar.alertas} />
-                    </td>
-
-                    {/* Ações */}
-                    <td style={{ ...td, textAlign: "center" }}>
-                      <a
-                        href={`/admin/${bar.id}`}
-                        style={{
-                          fontSize: 11,
-                          color: "var(--accent)",
-                          textDecoration: "none",
-                          fontWeight: 600,
-                          padding: "3px 8px",
-                          border: "1px solid var(--accent)",
-                          borderRadius: 3,
-                        }}
-                      >
-                        Ver
-                      </a>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {/* ── Tabela ─────────────────────────────────────────────────────── */}
+      <AdminBaresTable bares={bares} />
     </div>
   );
 }

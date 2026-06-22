@@ -75,7 +75,7 @@ export default async function AdminLayout({
         </a>
       </header>
 
-      <main style={{ padding: "32px 24px", maxWidth: 1100, margin: "0 auto" }}>
+      <main style={{ padding: "36px 32px", maxWidth: 1400, margin: "0 auto" }}>
         {children}
       </main>
     </div>
