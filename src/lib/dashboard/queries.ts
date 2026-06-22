@@ -7,6 +7,11 @@ export interface CurrentBar {
   bar: Bar;
   role: BarRole;
   userId: string;
+  /** bar_members.id — identidade operacional para atribuição de pedidos, comandas,
+   *  pagamentos e movimentos de estoque. Presente para qualquer membro com conta auth.
+   *  Para staff sem auth (bartender/garçom/caixa), o memberId virá do device via
+   *  seleção local + PIN (Fase 2). */
+  memberId: string;
   userNome: string;
   userEmail: string;
   userAvatarUrl: string | null;
@@ -21,11 +26,11 @@ export async function getCurrentBar(): Promise<CurrentBar | null> {
   // o embed precisa do hint do nome da constraint pra não ficar ambíguo.
   const { data: membership } = await supabase
     .from("bar_members")
-    .select("role, bars(*), profiles!bar_members_user_id_fkey(nome, avatar_url)")
+    .select("id, role, bars(*), profiles!bar_members_user_id_fkey(nome, avatar_url)")
     .eq("user_id", auth.user.id)
     .eq("ativo", true)
     .limit(1)
-    .maybeSingle<{ role: BarRole; bars: Bar; profiles: { nome: string; avatar_url: string | null } | null }>();
+    .maybeSingle<{ id: string; role: BarRole; bars: Bar; profiles: { nome: string; avatar_url: string | null } | null }>();
 
   if (!membership?.bars) return null;
 
@@ -33,6 +38,7 @@ export async function getCurrentBar(): Promise<CurrentBar | null> {
     bar: membership.bars,
     role: membership.role,
     userId: auth.user.id,
+    memberId: membership.id,
     userNome: membership.profiles?.nome ?? auth.user.email ?? "Usuário",
     userEmail: auth.user.email ?? "",
     userAvatarUrl: membership.profiles?.avatar_url ?? null,

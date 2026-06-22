@@ -51,7 +51,8 @@ export async function registrarPagamento(
     taxa_servico_valor: servicoValor,
     metodo,
     status: "confirmado",
-    processado_por: current.userId,
+    processado_por:           current.userId,
+    processado_por_member_id: current.memberId,
     processado_em: new Date().toISOString(),
     referencia: motivo ?? null,
   });

@@ -24,6 +24,7 @@ export async function abrirComanda(
       bar_id: current.bar.id,
       turno_id: turno.id,
       bartender_id: current.userId,
+      aberta_por_member_id: current.memberId,
       mesa_id: mesaId,
       total_pessoas: totalPessoas ?? null,
       identificador: identificador ?? null,
@@ -100,7 +101,8 @@ export async function adicionarItem(
     quantidade:    1,
     preco_unitario: preco,
     preco_total:    preco,
-    adicionado_por: current.userId,
+    adicionado_por:           current.userId,
+    adicionado_por_member_id: current.memberId,
   });
 
   revalidatePath(`/garcom/${comandaId}`);
@@ -114,8 +116,9 @@ export async function removerItem(itemId: string, comandaId: string) {
   await supabase.from("comanda_items")
     .update({
       status: "cancelado",
-      cancelado_por: current.userId,
-      cancelado_em: new Date().toISOString(),
+      cancelado_por:           current.userId,
+      cancelado_por_member_id: current.memberId,
+      cancelado_em:            new Date().toISOString(),
     })
     .eq("id", itemId)
     .eq("status", "ativo");
@@ -203,10 +206,11 @@ export async function criarPedido(
   const { data: pedido, error: pedidoErr } = await supabase
     .from("pedidos")
     .insert({
-      bar_id:     current.bar.id,
-      turno_id:   turno.id,
-      comanda_id: comandaId,
-      status:     "recebido",
+      bar_id:               current.bar.id,
+      turno_id:             turno.id,
+      comanda_id:           comandaId,
+      status:               "recebido",
+      criado_por_member_id: current.memberId,
     })
     .select("id")
     .single<{ id: string }>();
@@ -216,16 +220,17 @@ export async function criarPedido(
   // 2. Insere comanda_items — uma linha por unidade (compatível com removerItem)
   const rows = itens.flatMap(item =>
     Array.from({ length: item.quantidade }, () => ({
-      comanda_id:     comandaId,
-      bar_id:         current.bar.id,
-      pedido_id:      pedido.id,
-      produto_id:     item.produto_id,
-      variante_id:    item.variante_id ?? null,
-      variante_nome:  item.variante_nome ?? null,
-      quantidade:     1,
-      preco_unitario: item.preco,
-      preco_total:    item.preco,
-      adicionado_por: current.userId,
+      comanda_id:               comandaId,
+      bar_id:                   current.bar.id,
+      pedido_id:                pedido.id,
+      produto_id:               item.produto_id,
+      variante_id:              item.variante_id ?? null,
+      variante_nome:            item.variante_nome ?? null,
+      quantidade:               1,
+      preco_unitario:           item.preco,
+      preco_total:              item.preco,
+      adicionado_por:           current.userId,
+      adicionado_por_member_id: current.memberId,
     }))
   );
 
@@ -244,22 +249,50 @@ export async function iniciarPedido(pedidoId: string) {
   const supabase = await createClient();
   await supabase
     .from("pedidos")
-    .update({ status: "preparando", iniciado_em: new Date().toISOString() })
+    .update({
+      status:                  "preparando",
+      iniciado_em:             new Date().toISOString(),
+      iniciado_por_member_id:  current.memberId,
+    })
     .eq("id", pedidoId)
     .eq("bar_id", current.bar.id)
     .eq("status", "recebido");
 }
 
-/** Bartender entrega o pedido — estado final. */
-export async function entregarPedido(pedidoId: string) {
+/** Bartender entrega o pedido — estado final.
+ *
+ * Chama fn_entregar_pedido() que, numa única transação:
+ *   1. Atualiza pedido → entregue
+ *   2. Percorre comanda_items → receitas
+ *   3. Cria ingrediente_movimentos (baixa de estoque)
+ *   4. Decrementa ingredientes.estoque_atual
+ *   5. Retorna alertas de estoque baixo
+ *
+ * Produtos sem receita cadastrada: sem baixa, sem erro.
+ */
+export async function entregarPedido(
+  pedidoId: string,
+): Promise<{ ok: true; alertas: EstoqueAlerta[] } | { error: string }> {
   const current = await getCurrentBar();
-  if (!current) return;
+  if (!current) return { error: "Não autorizado." };
 
   const supabase = await createClient();
-  await supabase
-    .from("pedidos")
-    .update({ status: "entregue", entregue_em: new Date().toISOString() })
-    .eq("id", pedidoId)
-    .eq("bar_id", current.bar.id)
-    .eq("status", "preparando");
+  const { data, error } = await supabase.rpc("fn_entregar_pedido", {
+    p_pedido_id: pedidoId,
+    p_user_id:   current.userId,
+    p_member_id: current.memberId,
+  });
+
+  if (error)       return { error: error.message };
+  if (!data?.ok)   return { error: data?.error ?? "Erro ao entregar pedido." };
+
+  return { ok: true, alertas: data.alertas ?? [] };
+}
+
+/** Ingrediente abaixo do mínimo — retornado por entregarPedido(). */
+export interface EstoqueAlerta {
+  ingrediente_id: string;
+  nome:           string;
+  estoque_atual:  number;
+  estoque_minimo: number;
 }

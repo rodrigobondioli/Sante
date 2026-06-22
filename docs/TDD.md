@@ -194,9 +194,30 @@ Exemplo: `comanda_items.bar_id` — denormalizado intencionalmente.
 
 ### Staff operacional sem auth
 
-Bartenders, garçons e caixas têm `bar_id = NULL` em `bar_members`. Eles são selecionados localmente no device ("Quem é você?"). Isso elimina fricção de senha para staff de turno e foi uma decisão deliberada de produto (Princípio 11).
+Bartenders, garçons e caixas têm `user_id = NULL` em `bar_members`. Eles são selecionados localmente no device ("Quem é você?"). Isso elimina fricção de senha para staff de turno e foi uma decisão deliberada de produto (Princípio 11).
 
 Implicação: `is_bar_member()` retorna `false` para esses usuários. Operações em nome do staff operacional são executadas com o contexto do usuário logado (dono/gerente) ou via `SECURITY DEFINER` functions.
+
+### Atribuição operacional (migration 20260624)
+
+O problema do modelo acima: campos de atribuição como `bartender_id`, `adicionado_por`, `cancelado_por` apontavam para `profiles(id)`, que exige auth. Staff sem auth nunca seria atribuído — dados de "quem vendeu mais" ficariam vazios.
+
+**Solução:** colunas `*_member_id` paralelas apontando para `bar_members(id)` em todas as tabelas operacionais:
+
+```
+comandas.aberta_por_member_id
+comanda_items.adicionado_por_member_id
+comanda_items.cancelado_por_member_id
+pedidos.criado_por_member_id
+pedidos.iniciado_por_member_id
+pedidos.entregue_por_member_id
+pagamentos.processado_por_member_id
+ingrediente_movimentos.criado_por_member_id
+```
+
+`getCurrentBar()` agora retorna `memberId: string` (o `bar_members.id` do usuário autenticado). Todas as server actions preenchem tanto os campos legados (`profiles.id`) quanto os novos (`member_id`). As colunas legadas permanecem para backward compat.
+
+**PIN (Fase 2):** `bar_members.pin TEXT(4)` adicionado. A tela "Quem é você?" vai exibir lista de membros e pedir PIN para confirmar. O device resolve o `bar_members.id` localmente e o passa como parâmetro explícito para as server actions. Isso dará rastreabilidade completa para staff sem auth.
 
 ---
 
@@ -314,5 +335,7 @@ Ordem atual:
 | Trigger vs RPC para baixa de estoque | RPC explícito | Rastreabilidade, controle de erro, testabilidade |
 | `bar_id` denormalizado | Sim, em tabelas operacionais | Performance de RLS e filtro Realtime |
 | Staff sem auth | `user_id = NULL` em `bar_members` | Elimina fricção para operadores de turno |
+| Atribuição por `bar_members.id` | Colunas `*_member_id` paralelas aos campos `profiles.id` legados | Staff sem auth tem `bar_members.id` mas não `profiles.id` — sem isso, dados de "quem vendeu" ficam vazios |
+| PIN de 4 dígitos (Fase 2) | `bar_members.pin TEXT(4)` nullable | UX rápida de identificação no device sem auth real |
 | `unit_cost` snapshot em movimentos | `custo_unitario` imutável no movimento | Histórico de custo real no tempo |
 | Split de UI tokens | `src/lib/ui.ts` | Consistência visual sem improviso |

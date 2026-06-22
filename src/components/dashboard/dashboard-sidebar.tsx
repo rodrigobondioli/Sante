@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, BarChart3, History, UtensilsCrossed,
-  TableProperties, Users, MonitorSmartphone, Wallet, Package,
+  TableProperties, Users, MonitorSmartphone, Wallet, Package, Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { BarRole } from "@/types/database";
@@ -13,6 +13,7 @@ import { Drawer } from "@/components/ui/drawer";
 
 const links = [
   { href: "/dashboard", label: "Visão geral", icon: LayoutDashboard },
+  { href: "/dashboard/inteligencia", label: "Inteligência", icon: Sparkles, badge: true },
   { href: "/dashboard/relatorios", label: "Relatórios", icon: BarChart3 },
   { href: "/dashboard/turnos", label: "Turnos", icon: History },
   { href: "/dashboard/cardapio", label: "Cardápio", icon: UtensilsCrossed },
@@ -26,6 +27,7 @@ interface DashboardSidebarProps {
   barNome: string;
   userNome: string;
   role: BarRole;
+  insightCount?: number;
   onNavigate?: () => void;
   hideHeader?: boolean;
   touchMode?: boolean;
@@ -45,7 +47,7 @@ const footerItems = [
   { label: "Sugestão", type: "sugestao" as const },
 ];
 
-export function DashboardSidebar({ barNome, role, onNavigate, hideHeader, touchMode }: DashboardSidebarProps) {
+export function DashboardSidebar({ barNome, role, insightCount = 0, onNavigate, hideHeader, touchMode }: DashboardSidebarProps) {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerType, setDrawerType] = useState<"suporte" | "sugestao">("suporte");
@@ -123,6 +125,24 @@ export function DashboardSidebar({ barNome, role, onNavigate, hideHeader, touchM
                 style={{ color: active ? "var(--accent-bright)" : "var(--fg-subtle)" }}
               />
               {link.label}
+              {"badge" in link && link.badge && insightCount > 0 && (
+                <span style={{
+                  marginLeft: "auto",
+                  background: "#ef4444",
+                  color: "#fff",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  borderRadius: "50%",
+                  minWidth: 16,
+                  height: 16,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "0 3px",
+                }}>
+                  {insightCount > 9 ? "9+" : insightCount}
+                </span>
+              )}
             </Link>
           );
         })}

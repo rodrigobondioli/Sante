@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentBar, getAlertasEstoque } from "@/lib/dashboard/queries";
+import { countInsightsPendentes } from "@/lib/inteligencia/queries";
 import { DashboardLayoutClient } from "@/components/dashboard/dashboard-layout-client";
 
 export default async function DashboardLayout({
@@ -15,7 +16,10 @@ export default async function DashboardLayout({
   const current = await getCurrentBar();
   if (!current) redirect("/onboarding");
 
-  const alertas = await getAlertasEstoque(current.bar.id);
+  const [alertas, insightCount] = await Promise.all([
+    getAlertasEstoque(current.bar.id),
+    countInsightsPendentes(current.bar.id),
+  ]);
 
   return (
     <DashboardLayoutClient
@@ -28,6 +32,7 @@ export default async function DashboardLayout({
       userEmail={current.userEmail}
       userAvatarUrl={current.userAvatarUrl}
       alertas={alertas}
+      insightCount={insightCount}
       autoPedido={current.bar.configuracoes?.auto_pedido ?? false}
       taxaServicoPct={current.bar.configuracoes?.taxa_servico_pct ?? 10}
     >

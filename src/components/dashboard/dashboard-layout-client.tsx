@@ -29,6 +29,7 @@ interface DashboardLayoutClientProps {
   userEmail: string;
   userAvatarUrl: string | null;
   alertas: AlertaEstoque[];
+  insightCount?: number;
   autoPedido?: boolean;
   taxaServicoPct?: number;
   children: React.ReactNode;
@@ -44,6 +45,7 @@ export function DashboardLayoutClient({
   userEmail,
   userAvatarUrl,
   alertas,
+  insightCount = 0,
   autoPedido = false,
   taxaServicoPct = 10,
   children,
@@ -97,7 +99,7 @@ export function DashboardLayoutClient({
           className="hidden lg:block flex-shrink-0"
           style={{ width: 220, height: "100%", borderRight: "1px solid var(--border)" }}
         >
-          <DashboardSidebar barNome={barNome} userNome={userNome} role={role} />
+          <DashboardSidebar barNome={barNome} userNome={userNome} role={role} insightCount={insightCount} />
         </aside>
 
         {/* Main */}
@@ -203,6 +205,7 @@ export function DashboardLayoutClient({
               barNome={barNome}
               userNome={userNome}
               role={role}
+              insightCount={insightCount}
               onNavigate={() => setDrawerOpen(false)}
               hideHeader
               touchMode

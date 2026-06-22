@@ -370,6 +370,7 @@ Context do usuário atual — bar selecionado, role, IDs.
 getCurrentBar(): Promise<{
   bar: Bar;
   userId: string;
+  memberId: string;   // bar_members.id — identidade operacional para atribuição
   userNome: string;
   userEmail: string;
   role: BarRole;
@@ -428,7 +429,8 @@ Motor de entrega e baixa de estoque. Chamado via `supabase.rpc()`.
 // Chamada
 const { data, error } = await supabase.rpc("fn_entregar_pedido", {
   p_pedido_id: pedidoId,
-  p_user_id: userId,
+  p_user_id:   userId,    // profiles.id — para usuários com auth
+  p_member_id: memberId,  // bar_members.id — para todos (opcional, DEFAULT NULL)
 });
 
 // Retorno de sucesso

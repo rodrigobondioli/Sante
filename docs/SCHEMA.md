@@ -83,16 +83,18 @@ Vínculo entre usuário e bar com papel.
 
 | Coluna | Tipo | Notas |
 |---|---|---|
-| `id` | UUID PK | |
+| `id` | UUID PK | **Identidade operacional** — usado em todos os campos `*_member_id` |
 | `bar_id` | UUID NOT NULL | FK → `bars` |
 | `user_id` | UUID **NULLABLE** | NULL = staff operacional sem auth |
 | `nome` | TEXT | Nome direto (para staff sem auth) |
 | `role` | bar_role | `dono \| gerente \| bar_manager \| bartender \| garcom \| caixa` |
+| `pin` | TEXT(4) NULLABLE | PIN numérico para identificação rápida (Fase 2) |
 | `ativo` | BOOLEAN | |
 | `created_at` | TIMESTAMPTZ | |
 
 > `user_id = NULL` para bartender/garçom/caixa que não precisam de login.  
-> `user_id != NULL` para dono/gerente com conta Supabase Auth.
+> `user_id != NULL` para dono/gerente com conta Supabase Auth.  
+> `bar_members.id` é a **identidade operacional** — apontada por todos os campos `*_member_id` nas tabelas de operação.
 
 ---
 
@@ -163,7 +165,8 @@ Mesas físicas do bar. Agrupador visual — não unidade de cobrança.
 | `bar_id` | UUID NOT NULL | |
 | `turno_id` | UUID NOT NULL | FK → `turnos` |
 | `mesa_id` | UUID | FK → `mesas` (nullable — balcão sem mesa) |
-| `bartender_id` | UUID NOT NULL | FK → `profiles` |
+| `bartender_id` | UUID NOT NULL | FK → `profiles` (legacy — só para usuários com auth) |
+| `aberta_por_member_id` | UUID NULLABLE | FK → `bar_members` — **fonte de verdade para rastreabilidade** |
 | `identificador` | TEXT | Nome, cartão, "Mesa 3 Pessoa 2" |
 | `nome_cliente` | TEXT | Nome do cliente (opcional) |
 | `status` | comanda_status | `aberta \| aguardando_pagamento \| paga \| cancelada` |
@@ -186,8 +189,10 @@ Itens de uma comanda. Tabela mais quente — Realtime habilitado.
 | `preco_unitario` | NUMERIC(10,2) | Snapshot do preço no momento |
 | `preco_total` | NUMERIC(10,2) | |
 | `status` | comanda_item_status | `ativo \| cancelado` |
-| `adicionado_por` | UUID | FK → `profiles` |
-| `cancelado_por` | UUID | FK → `profiles` |
+| `adicionado_por` | UUID | FK → `profiles` (legacy) |
+| `adicionado_por_member_id` | UUID NULLABLE | FK → `bar_members` — **fonte para "quem vendeu mais"** |
+| `cancelado_por` | UUID | FK → `profiles` (legacy) |
+| `cancelado_por_member_id` | UUID NULLABLE | FK → `bar_members` — **fonte para auditoria de cancelamento** |
 | `adicionado_em` / `cancelado_em` | TIMESTAMPTZ | |
 
 #### `pedidos`
@@ -203,6 +208,9 @@ Agrupamento de itens para a fila de produção do bartender.
 | `criado_em` | TIMESTAMPTZ | |
 | `iniciado_em` | TIMESTAMPTZ | Quando bartender inicia preparo |
 | `entregue_em` | TIMESTAMPTZ | Quando bartender entrega |
+| `criado_por_member_id` | UUID NULLABLE | FK → `bar_members` |
+| `iniciado_por_member_id` | UUID NULLABLE | FK → `bar_members` |
+| `entregue_por_member_id` | UUID NULLABLE | FK → `bar_members` — **fonte para tempo de preparo por bartender** |
 
 #### `pagamentos`
 Registro de método de pagamento. Não transaciona — apenas anota.
@@ -216,7 +224,8 @@ Registro de método de pagamento. Não transaciona — apenas anota.
 | `valor` | NUMERIC(10,2) | |
 | `metodo` | pagamento_metodo | `pix \| credito \| debito \| dinheiro \| cortesia` |
 | `status` | pagamento_status | `pendente \| confirmado \| estornado` |
-| `processado_por` | UUID | FK → `profiles` |
+| `processado_por` | UUID | FK → `profiles` (legacy) |
+| `processado_por_member_id` | UUID NULLABLE | FK → `bar_members` — **fonte para auditoria de caixa** |
 | `processado_em` | TIMESTAMPTZ | |
 
 ---
@@ -300,7 +309,8 @@ Audit trail imutável de movimentações de ingredientes.
 | `tipo` | TEXT CHECK | `entrada \| venda \| ajuste` (extensível sem migration) |
 | `quantidade` | NUMERIC(12,3) | Negativo = saída, positivo = entrada |
 | `custo_unitario` | NUMERIC(12,4) | Snapshot imutável do custo no momento |
-| `criado_por` | UUID | FK → `profiles` |
+| `criado_por` | UUID | FK → `profiles` (legacy) |
+| `criado_por_member_id` | UUID NULLABLE | FK → `bar_members` |
 | `motivo` | TEXT | Para ajustes manuais |
 | `criado_em` | TIMESTAMPTZ | |
 
