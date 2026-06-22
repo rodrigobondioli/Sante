@@ -3,6 +3,7 @@ import type { ProdutoCategorizado } from "@/lib/dashboard/menu-engineering";
 export interface InsightItem {
   texto: string;
   tipo: "oportunidade" | "aviso" | "info";
+  sugestao?: string;
 }
 
 interface GerarInsightParams {
@@ -34,8 +35,9 @@ export function gerarInsight({
       .map((p) => p.produtoId);
     if (!top3Ids.includes(maiorMargem.produtoId)) {
       insights.push({
-        texto: `${maiorMargem.produtoNome} tem a maior margem do turno, mas não está entre os 3 mais vendidos — vale incentivar.`,
+        texto: `${maiorMargem.produtoNome} tem a maior margem do turno, mas não está entre os 3 mais vendidos.`,
         tipo: "oportunidade",
+        sugestao: "Considere treinar o time para sugerir esse produto ativamente.",
       });
     }
   }
@@ -43,8 +45,9 @@ export function gerarInsight({
   // CMV subiu vs turno anterior
   if (cmvTrend !== null && cmvTrend >= 5) {
     insights.push({
-      texto: `CMV subiu ${cmvTrend.toFixed(1)}% vs turno anterior — revise o custo dos produtos mais vendidos.`,
+      texto: `CMV subiu ${cmvTrend.toFixed(1)}% em relação ao turno anterior.`,
       tipo: "aviso",
+      sugestao: "Revise o custo dos produtos mais vendidos neste turno.",
     });
   }
 
@@ -53,6 +56,7 @@ export function gerarInsight({
     insights.push({
       texto: `Ticket médio caiu ${Math.abs(ticketMedioTrend).toFixed(1)}% em relação ao turno anterior.`,
       tipo: "aviso",
+      sugestao: "Observe se houve aumento de vendas de itens de menor valor.",
     });
   }
 
@@ -60,13 +64,15 @@ export function gerarInsight({
   const problemas = produtosCategorizado.filter((p) => p.categoria === "problema");
   if (problemas.length === 1) {
     insights.push({
-      texto: `${problemas[0].produtoNome} está sendo vendido com margem negativa — verifique o preço ou custo.`,
+      texto: `${problemas[0].produtoNome} está sendo vendido com margem negativa.`,
       tipo: "aviso",
+      sugestao: "Revise o preço de venda ou o custo de produção desse item.",
     });
   } else if (problemas.length > 1) {
     insights.push({
       texto: `${problemas.length} produtos com margem negativa: ${problemas.map((p) => p.produtoNome).join(", ")}.`,
       tipo: "aviso",
+      sugestao: "Revise preço ou custo de cada um antes do próximo turno.",
     });
   }
 

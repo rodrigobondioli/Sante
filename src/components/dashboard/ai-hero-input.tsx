@@ -9,6 +9,13 @@ const SUGGESTIONS = [
   'Resumo do turno',
 ]
 
+function getSaudacao() {
+  const h = new Date().getHours()
+  if (h < 12) return 'Bom dia'
+  if (h < 18) return 'Boa tarde'
+  return 'Boa noite'
+}
+
 export function AiHeroInput({ barId }: { barId: string }) {
   const [question, setQuestion] = useState('')
   const [answer, setAnswer] = useState('')
@@ -36,27 +43,58 @@ export function AiHeroInput({ barId }: { barId: string }) {
 
   return (
     <div style={{ width: '100%' }}>
-      {/* Card compacto */}
+      {/* Card */}
       <div style={{
         background: 'var(--bg-elevated)',
         border: '1px solid var(--border)',
         borderRadius: '4px',
         overflow: 'hidden',
       }}>
-        {/* Input row — menor */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 16px' }}>
+        {/* Saudação + chips */}
+        <div style={{ padding: '16px 16px 12px' }}>
+          <p style={{ fontSize: 13, color: 'var(--fg-muted)', margin: '0 0 10px' }}>
+            {getSaudacao()}. Posso ajudar com:
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            {SUGGESTIONS.map(s => (
+              <button
+                key={s}
+                onClick={() => ask(s)}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid var(--border)',
+                  borderRadius: '4px',
+                  padding: '4px 10px',
+                  color: 'var(--fg-subtle)',
+                  fontSize: '11px',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  transition: 'color 150ms, border-color 150ms',
+                }}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div style={{ height: '1px', background: 'var(--border)', margin: '0 16px' }} />
+
+        {/* Input row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px' }}>
           <input
             value={question}
             onChange={e => setQuestion(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && ask(question)}
-            placeholder="O que você quer saber?"
+            placeholder="Ou digite sua pergunta…"
             style={{
               flex: 1,
               background: 'none',
               border: 'none',
               outline: 'none',
               color: 'var(--fg)',
-              fontSize: '14px',
+              fontSize: '13px',
             }}
           />
           <button
@@ -66,8 +104,8 @@ export function AiHeroInput({ barId }: { barId: string }) {
               background: 'var(--accent)',
               border: 'none',
               borderRadius: '4px',
-              width: '32px',
-              height: '32px',
+              width: '30px',
+              height: '30px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -79,44 +117,12 @@ export function AiHeroInput({ barId }: { barId: string }) {
             {loading ? (
               <span style={{ color: 'var(--accent-fg)', fontSize: '16px' }}>·</span>
             ) : (
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent-fg)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-fg)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8"/>
                 <path d="m21 21-4.35-4.35"/>
               </svg>
             )}
           </button>
-        </div>
-
-        {/* Divider */}
-        <div style={{ height: '1px', background: 'var(--border)', margin: '0 16px' }} />
-
-        {/* Chips row */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          padding: '10px 16px',
-          flexWrap: 'wrap',
-        }}>
-          {SUGGESTIONS.map(s => (
-            <button
-              key={s}
-              onClick={() => ask(s)}
-              style={{
-                background: 'transparent',
-                border: '1px solid var(--border)',
-                borderRadius: '4px',
-                padding: '3px 10px',
-                color: 'var(--fg-subtle)',
-                fontSize: '11px',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                transition: 'color 150ms, border-color 150ms',
-              }}
-            >
-              {s}
-            </button>
-          ))}
         </div>
       </div>
 

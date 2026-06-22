@@ -599,10 +599,15 @@ export default async function DashboardPage() {
                   <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: inteligencia.insightsNaoLidos > 0 ? 16 : 0 }}>
                     {todosInsights.map((item, i) => (
                       <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                        <span style={{ fontSize: 15, fontWeight: 700, flexShrink: 0, lineHeight: 1.4, color: item.tipo === "aviso" ? "var(--warn)" : "var(--ok)" }}>
-                          {item.tipo === "aviso" ? "↓" : "↑"}
+                        <span style={{ fontSize: 14, fontWeight: 700, flexShrink: 0, lineHeight: 1.5, color: item.tipo === "aviso" ? "var(--warn)" : item.tipo === "info" ? "var(--fg-muted)" : "var(--ok)" }}>
+                          {item.tipo === "aviso" ? "↓" : item.tipo === "info" ? "→" : "↑"}
                         </span>
-                        <p style={{ fontSize: 13, color: "var(--fg)", margin: 0, lineHeight: 1.5 }}>{item.texto}</p>
+                        <div>
+                          <p style={{ fontSize: 13, color: "var(--fg)", margin: "0 0 3px", lineHeight: 1.5 }}>{item.texto}</p>
+                          {item.sugestao && (
+                            <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: 0, lineHeight: 1.5 }}>{item.sugestao}</p>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -791,7 +796,7 @@ export default async function DashboardPage() {
             >
               <div style={{ padding: "20px 24px 0" }}>
                 <p style={{ fontSize: "13px", fontWeight: 500, color: "var(--fg)", fontFamily: "var(--font-mono)", marginBottom: "2px" }}>
-                  Top drinks
+                  Mais lucrativos
                 </p>
                 <p style={{ ...overline, marginBottom: "16px" }}>por margem · turno atual</p>
               </div>

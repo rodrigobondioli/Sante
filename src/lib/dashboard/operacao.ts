@@ -223,6 +223,7 @@ export async function getTempoMedioPreparo(
 export interface InsightOperacional {
   texto: string;
   tipo: "info" | "oportunidade" | "aviso";
+  sugestao?: string;
 }
 
 export function gerarInsightsOperacionais({
@@ -266,14 +267,16 @@ export function gerarInsightsOperacionais({
     insights.push({
       texto: `${labelMetodo(mix[0].metodo)} representa ${mix[0].percentual}% dos pagamentos desta noite.`,
       tipo: "info",
+      sugestao: "Confirme que as taxas de transação estão dentro do esperado.",
     });
   }
 
   // Tempo médio de preparo alto
   if (tempos.mediaMinutos !== null && tempos.mediaMinutos >= 8) {
     insights.push({
-      texto: `Preparo médio em ${tempos.mediaMinutos}min — acima do ideal. Bar pode estar sobrecarregado.`,
+      texto: `Preparo médio em ${tempos.mediaMinutos}min — acima do ideal.`,
       tipo: "aviso",
+      sugestao: "Bar pode estar sobrecarregado. Verifique a distribuição de tarefas.",
     });
   }
 
