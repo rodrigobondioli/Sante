@@ -19,11 +19,13 @@ export default async function CaixaPage() {
         <div style={{
           background: "color-mix(in srgb, var(--fg) 4%, transparent)",
           border: "1px solid var(--border)",
-          borderRadius: 8, padding: 32, maxWidth: 440, textAlign: "center",
+          borderRadius: 10, padding: 36, maxWidth: 400, textAlign: "center",
         }}>
-          <p style={{ fontSize: 28, margin: "0 0 16px" }}>🔒</p>
-          <p style={{ fontSize: 16, fontWeight: 600, color: "var(--fg)", margin: "0 0 8px" }}>Turno não iniciado</p>
-          <p style={{ fontSize: 13, color: "var(--fg-subtle)", margin: "0 0 24px" }}>
+          <p style={{ fontSize: 32, margin: "0 0 12px" }}>🔒</p>
+          <p style={{ fontSize: 16, fontWeight: 700, color: "var(--fg)", margin: "0 0 8px" }}>
+            Turno não iniciado
+          </p>
+          <p style={{ fontSize: 13, color: "var(--fg-subtle)", margin: "0 0 24px", lineHeight: 1.5 }}>
             Abra o turno para liberar a caixa.
           </p>
           <TurnoControles turnoAtual={null} />
@@ -35,65 +37,58 @@ export default async function CaixaPage() {
   const comandas = await getComandasPendentes(current.bar.id, turno.id);
 
   return (
-    <div style={{ padding: "24px 20px", maxWidth: 720, margin: "0 auto" }}>
-      {/* Header */}
-      <div style={{
-        marginBottom: 28,
-        display: "flex", alignItems: "flex-start", justifyContent: "space-between",
-        flexWrap: "wrap", gap: 12,
-      }}>
-        <div>
-          <p style={{
-            fontSize: 11, fontWeight: 500, color: "var(--fg-subtle)",
-            textTransform: "uppercase", letterSpacing: "0.08em", margin: 0,
-          }}>
-            Turno aberto
-          </p>
-          <h1 style={{
-            fontSize: 22, fontWeight: 600, color: "var(--fg)",
-            margin: "6px 0 0", fontFamily: "var(--font-mono)",
-          }}>
-            Caixa
-          </h1>
-          <p style={{ fontSize: 14, color: "var(--fg-muted)", margin: "4px 0 0" }}>
-            Comandas aguardando pagamento
-          </p>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <TurnoControles turnoAtual={turno} />
-          <div style={{
-            background: "var(--ok-bg)",
-            border: "1px solid color-mix(in srgb, var(--ok) 25%, transparent)",
-            borderRadius: 8, padding: "10px 16px", textAlign: "right",
-          }}>
-            <p style={{ fontSize: 11, color: "var(--ok)", margin: 0, textTransform: "uppercase", letterSpacing: "0.08em" }}>
-              Pendentes
-            </p>
-            <p style={{
-              fontSize: 28, fontWeight: 700, color: "var(--fg)",
-              margin: "4px 0 0", fontFamily: "var(--font-mono)",
+    /* Container scrollável — OperadorShell/main tem overflow:hidden */
+    <div style={{ height: "100%", overflowY: "auto" }}>
+      <div style={{ maxWidth: 640, margin: "0 auto", padding: "20px 16px 40px" }}>
+
+        {/* Barra de status — turno + contagem */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          marginBottom: 24, gap: 12,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{
+              display: "inline-flex", alignItems: "center",
+              fontSize: 11, fontWeight: 700, letterSpacing: "0.06em",
+              textTransform: "uppercase", padding: "4px 10px", borderRadius: 4,
+              background: "color-mix(in srgb, var(--ok) 12%, transparent)",
+              color: "var(--ok)",
+              border: "1px solid color-mix(in srgb, var(--ok) 25%, transparent)",
             }}>
-              {comandas.length}
+              ● Turno aberto
+            </span>
+            {comandas.length > 0 && (
+              <span style={{
+                fontSize: 13, fontWeight: 700,
+                color: "var(--warn)",
+                fontFamily: "var(--font-mono)",
+              }}>
+                {comandas.length} pendente{comandas.length > 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
+          <TurnoControles turnoAtual={turno} />
+        </div>
+
+        {/* Lista de comandas */}
+        {comandas.length === 0 ? (
+          <div style={{
+            background: "color-mix(in srgb, var(--fg) 3%, transparent)",
+            borderRadius: 10, border: "1px solid var(--border)",
+            padding: "56px 32px", textAlign: "center",
+          }}>
+            <div style={{ fontSize: 36, marginBottom: 12 }}>✓</div>
+            <p style={{ fontSize: 15, fontWeight: 600, color: "var(--fg)", margin: 0 }}>
+              Caixa limpo
+            </p>
+            <p style={{ fontSize: 13, color: "var(--fg-subtle)", margin: "6px 0 0" }}>
+              Nenhuma comanda aguardando pagamento.
             </p>
           </div>
-        </div>
+        ) : (
+          <CaixaComandas comandas={comandas} taxaServicoPct={taxaServicoPct} />
+        )}
       </div>
-
-      {comandas.length === 0 ? (
-        <div style={{
-          background: "color-mix(in srgb, var(--fg) 3%, transparent)",
-          borderRadius: 8, border: "1px solid var(--border)",
-          padding: "64px 32px", textAlign: "center",
-        }}>
-          <div style={{ fontSize: 40, marginBottom: 16, color: "var(--ok)" }}>✓</div>
-          <p style={{ fontSize: 16, fontWeight: 600, color: "var(--fg)", margin: 0 }}>Caixa limpo!</p>
-          <p style={{ fontSize: 13, color: "var(--fg-subtle)", margin: "8px 0 0" }}>
-            Nenhuma comanda aguardando pagamento.
-          </p>
-        </div>
-      ) : (
-        <CaixaComandas comandas={comandas} taxaServicoPct={taxaServicoPct} />
-      )}
     </div>
   );
 }
