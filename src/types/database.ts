@@ -397,6 +397,23 @@ export interface Database {
         Args: { p_bar_id: string; p_patch: string };
         Returns: undefined;
       };
+      fn_entregar_pedido: {
+        Args: {
+          p_pedido_id: string;
+          p_user_id: string;
+          p_member_id?: string | null;
+        };
+        Returns: {
+          ok: boolean;
+          alertas?: Array<{
+            ingrediente_id: string;
+            nome: string;
+            estoque_atual: number;
+            estoque_minimo: number;
+          }>;
+          error?: string;
+        };
+      };
     };
   };
 }
