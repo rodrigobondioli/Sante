@@ -252,6 +252,39 @@ Topo fixo simples (não pill flutuante): logo à esquerda, busca/ações ao cent
 ### 8.7 Tabelas
 Densas e limpas. Cabeçalho em overline (`--fg-subtle`). Linhas divididas por hairline `--border`. Hover de linha: `color-mix(in srgb, var(--fg) 3%, transparent)`. Valores monetários sempre em mono.
 
+### 8.8 Bento grid (dashboard / admin)
+
+Dashboard e admin podem usar **bento grid** — células de tamanhos variados em vez de grade uniforme. O objetivo é criar hierarquia visual entre métricas: a métrica-chave ocupa mais espaço, as de contexto são menores.
+
+**Regras:**
+- Grid com `display: grid` e `grid-template-columns` customizado por contexto.
+- A célula destaque (`card-featured`) ocupa 2 linhas ou 2 colunas com `grid-row: span 2` ou `grid-column: span 2`.
+- Raio dos cards de dashboard/admin: `--radius-lg` (8px). Botões e inputs continuam em `--radius-md` (4px).
+- **Sem pill, sem sombra colorida.** A hierarquia vem de tamanho e tipografia, não de cor de fundo diferente.
+- Exceção permitida: a célula destaque pode ter um glow difuso e muito sutil no canto com `color-mix(in srgb, var(--accent-bright) 12%, transparent)` + `filter: blur(36px)`. Apenas uma célula por bento.
+
+```css
+/* Exemplo de bento 3 colunas / 2 linhas (admin) */
+.bento {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 10px;
+}
+.bento .card-featured { grid-row: span 2; } /* coluna da esquerda, altura dupla */
+.bento .card-wide     { grid-column: span 2; } /* segunda linha, colunas 2-3 */
+
+/* Card padrão de dashboard */
+.card-dash {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg); /* 8px — não radius-md */
+  padding: 20px 22px;
+}
+```
+
+**Quando não usar bento:** telas de operação (Bartender, Caixa) sempre usam layout linear simples — nenhum bento ali.
+
 ---
 
 ## 9. Regras por surface
@@ -274,7 +307,9 @@ Densas e limpas. Cabeçalho em overline (`--fg-subtle`). Linhas divididas por ha
 - Igual ao Bartender, toque 56px+. Valores em mono. Estado de mesa/comanda em semânticas. Teclado numérico em `btn-op`.
 
 ### Admin
-- P&B + cinza + `#260078`. Tabelas densas. Sidebar com seções em overline.
+- P&B + cinza + `--accent-bright` em ícone ativo da sidebar. Tabelas densas. Sidebar 220px com seções em overline.
+- Métricas de topo em **bento grid** (§ 8.8): MRR como card-featured (dupla altura), demais cards menores.
+- Cores semânticas (`--ok`/`--warn`/`--danger`) são **permitidas no admin** para indicar saúde dos clientes — sem exagero decorativo.
 
 ---
 
