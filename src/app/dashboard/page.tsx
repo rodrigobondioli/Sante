@@ -183,7 +183,7 @@ export default async function DashboardPage() {
           {/* 0. SUPERBAR AI — acesso rápido no topo */}
           <section>
             <span style={sectionLabel}>Superbar AI</span>
-            <AiHeroInput barId={current.bar.id} alertCount={inteligencia.insightsNaoLidos} />
+            <AiHeroInput barId={current.bar.id} alertCount={inteligencia.stage === 2 ? inteligencia.insightsNaoLidos : 0} />
           </section>
 
           {/* 1. APRENDIZADO (stage 1) ou ATENÇÃO (stage 2) */}
