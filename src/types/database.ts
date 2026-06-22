@@ -337,6 +337,19 @@ export interface Chamada {
   atendida_em: string | null;
 }
 
+export interface Insight {
+  id: string;
+  bar_id: string;
+  tipo: string;
+  titulo: string;
+  descricao: string;
+  impacto_valor: number | null;
+  dado_referencia: Record<string, unknown>;
+  dedupe_key: string;
+  lido: boolean;
+  criado_em: string;
+}
+
 type TableDef<Row, Insert = Partial<Row>, Update = Partial<Row>> = {
   Row: Row & Record<string, unknown>;
   Insert: Insert & Record<string, unknown>;
@@ -367,6 +380,7 @@ export interface Database {
       estoque_movimentos: TableDef<EstoqueMovimento>;
       chamadas: TableDef<Chamada>;
       pedidos: TableDef<Pedido>;
+      insights: TableDef<Insight>;
       pedidos_cliente: {
         Row: PedidoCliente & Record<string, unknown>;
         Insert: {
