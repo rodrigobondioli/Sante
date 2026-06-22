@@ -157,9 +157,6 @@ export default async function DashboardPage() {
     const dataFormatada = capitalizarPrimeiraLetra(dataExtenso.format(agora));
     const label = ultimoTurno ? labelTurno(ultimoTurno.abertoEm, ultimoTurno.fechadoEm) : null;
 
-    // Stage 1 → usa comandas reais; stage 2 → 30/30 (já superou o threshold)
-    const comandasScore = inteligencia.stage === 1 ? inteligencia.comandas : 30;
-
     // Meta do mês para o bloco Negócio
     const metaConfiguradaFechado = current.bar.configuracoes?.meta_mensal;
     const metaFechado = metaConfiguradaFechado ?? metaMes.meta;
@@ -189,87 +186,71 @@ export default async function DashboardPage() {
             <AiHeroInput barId={current.bar.id} />
           </section>
 
-          {/* 1. SAÚDE + ATENÇÃO — 2 colunas quando stage 2 */}
-          {inteligencia.stage === 2 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2" style={{ gap: "12px" }}>
-              {/* Saúde do Bar */}
-              <div style={{ ...card }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)" }}>Saúde do Bar</span>
-                  <span style={{ fontSize: 10, fontWeight: 500, color: "var(--fg-subtle)", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>Em calibração</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 14 }}>
-                  <span style={{ fontSize: 44, fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--fg-subtle)", lineHeight: 1 }}>—</span>
-                  <span style={{ fontSize: 20, color: "var(--fg-subtle)", fontFamily: "var(--font-mono)" }}>/100</span>
+          {/* 1. APRENDIZADO (stage 1) ou ATENÇÃO (stage 2) */}
+          {inteligencia.stage === 1 ? (
+            <div style={{ ...card }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)", marginBottom: 16 }}>
+                Superbar está aprendendo sobre seu bar
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 16 }}>
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                    <span style={{ fontSize: 12, color: inteligencia.comandas >= 30 ? "var(--ok)" : "var(--fg-subtle)" }}>
+                      {inteligencia.comandas >= 30 ? "✓" : "○"} 30 comandas
+                    </span>
+                    <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--fg-muted)" }}>{inteligencia.comandas} / 30</span>
+                  </div>
+                  <div style={{ background: "var(--border-strong)", borderRadius: 2, height: 2, overflow: "hidden" }}>
+                    <div style={{ background: inteligencia.comandas >= 30 ? "var(--ok)" : "color-mix(in srgb, var(--accent) 50%, transparent)", borderRadius: 2, height: 2, width: `${Math.min(Math.round((inteligencia.comandas / 30) * 100), 100)}%`, transition: "width 0.6s ease" }} />
+                  </div>
                 </div>
                 <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                    <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>Aguardando dados suficientes</span>
-                    <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--fg-muted)" }}>{comandasScore} / 30</span>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                    <span style={{ fontSize: 12, color: inteligencia.diasAtivo >= 7 ? "var(--ok)" : "var(--fg-subtle)" }}>
+                      {inteligencia.diasAtivo >= 7 ? "✓" : "○"} 7 dias de operação
+                    </span>
+                    <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--fg-muted)" }}>{inteligencia.diasAtivo} / 7</span>
                   </div>
-                  <div style={{ background: "var(--border-strong)", borderRadius: 2, height: 3, overflow: "hidden" }}>
-                    <div style={{ background: "color-mix(in srgb, var(--accent) 40%, transparent)", borderRadius: 2, height: 3, width: `${Math.min(Math.round((comandasScore / 30) * 100), 100)}%`, transition: "width 0.6s ease" }} />
+                  <div style={{ background: "var(--border-strong)", borderRadius: 2, height: 2, overflow: "hidden" }}>
+                    <div style={{ background: inteligencia.diasAtivo >= 7 ? "var(--ok)" : "color-mix(in srgb, var(--accent) 50%, transparent)", borderRadius: 2, height: 2, width: `${Math.min(Math.round((inteligencia.diasAtivo / 7) * 100), 100)}%`, transition: "width 0.6s ease" }} />
                   </div>
-                  <p style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 8, marginBottom: 0 }}>
-                    {Math.max(0, 30 - comandasScore) > 0
-                      ? `Disponível após mais ${30 - comandasScore} ${30 - comandasScore === 1 ? "comanda registrada" : "comandas registradas"}.`
-                      : "Calculando score inicial…"}
-                  </p>
                 </div>
               </div>
-              {/* Atenção */}
-              <a href="/dashboard/inteligencia" style={{ ...card, display: "flex", flexDirection: "column", justifyContent: "space-between", textDecoration: "none", cursor: "pointer" }} className="hover:!border-[var(--border-strong)]">
-                <p style={{ ...overline, marginBottom: 12 }}>Atenção</p>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flex: 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <span style={{ fontSize: 16 }}>🧠</span>
-                    <div>
-                      {inteligencia.insightsNaoLidos > 0 ? (
-                        <>
-                          <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>{inteligencia.insightsNaoLidos === 1 ? "1 item precisa da sua atenção" : `${inteligencia.insightsNaoLidos} itens precisam da sua atenção`}</p>
-                          <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: "2px 0 0" }}>Ver análise completa →</p>
-                        </>
-                      ) : (
-                        <>
-                          <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>Tudo sob controle</p>
-                          <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: "2px 0 0" }}>Nenhum alerta · Ver Inteligência →</p>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  {inteligencia.insightsNaoLidos > 0 && (
-                    <span style={{ background: "#ef4444", color: "#fff", fontSize: 11, fontWeight: 700, borderRadius: "50%", minWidth: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px", flexShrink: 0 }}>
-                      {inteligencia.insightsNaoLidos > 9 ? "9+" : inteligencia.insightsNaoLidos}
-                    </span>
-                  )}
-                </div>
-              </a>
+              <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>
+                {inteligencia.diasAtivo < 7
+                  ? `Faltam ${7 - inteligencia.diasAtivo} ${7 - inteligencia.diasAtivo === 1 ? "dia" : "dias"} para gerar análises automáticas.`
+                  : inteligencia.comandas < 30
+                  ? `Faltam ${30 - inteligencia.comandas} comandas para gerar análises automáticas.`
+                  : "Calculando análises…"}
+              </p>
             </div>
           ) : (
-            <div style={{ ...card }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)" }}>Saúde do Bar</span>
-                <span style={{ fontSize: 10, fontWeight: 500, color: "var(--fg-subtle)", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>Em calibração</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 14 }}>
-                <span style={{ fontSize: 44, fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--fg-subtle)", lineHeight: 1 }}>—</span>
-                <span style={{ fontSize: 20, color: "var(--fg-subtle)", fontFamily: "var(--font-mono)" }}>/100</span>
-              </div>
-              <div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                  <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>Aguardando dados suficientes</span>
-                  <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--fg-muted)" }}>{comandasScore} / 30</span>
+            <section>
+              <span style={sectionLabel}>Atenção</span>
+              <a href="/dashboard/inteligencia" style={{ ...card, display: "flex", alignItems: "center", justifyContent: "space-between", textDecoration: "none", cursor: "pointer" }} className="hover:!border-[var(--border-strong)]">
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <span style={{ fontSize: 16 }}>🧠</span>
+                  <div>
+                    {inteligencia.insightsNaoLidos > 0 ? (
+                      <>
+                        <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>{inteligencia.insightsNaoLidos === 1 ? "1 item precisa da sua atenção" : `${inteligencia.insightsNaoLidos} itens precisam da sua atenção`}</p>
+                        <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: "2px 0 0" }}>Ver análise completa →</p>
+                      </>
+                    ) : (
+                      <>
+                        <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>Tudo sob controle</p>
+                        <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: "2px 0 0" }}>Nenhum alerta · Ver Inteligência →</p>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <div style={{ background: "var(--border-strong)", borderRadius: 2, height: 3, overflow: "hidden" }}>
-                  <div style={{ background: "color-mix(in srgb, var(--accent) 40%, transparent)", borderRadius: 2, height: 3, width: `${Math.min(Math.round((comandasScore / 30) * 100), 100)}%`, transition: "width 0.6s ease" }} />
-                </div>
-                <p style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 8, marginBottom: 0 }}>
-                  {Math.max(0, 30 - comandasScore) > 0
-                    ? `Disponível após mais ${30 - comandasScore} ${30 - comandasScore === 1 ? "comanda registrada" : "comandas registradas"}.`
-                    : "Calculando score inicial…"}
-                </p>
-              </div>
-            </div>
+                {inteligencia.insightsNaoLidos > 0 && (
+                  <span style={{ background: "#ef4444", color: "#fff", fontSize: 11, fontWeight: 700, borderRadius: "50%", minWidth: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px", flexShrink: 0 }}>
+                    {inteligencia.insightsNaoLidos > 9 ? "9+" : inteligencia.insightsNaoLidos}
+                  </span>
+                )}
+              </a>
+            </section>
           )}
 
           {/* 2. NEGÓCIO — último turno + meta do mês */}
@@ -479,8 +460,6 @@ export default async function DashboardPage() {
     faturamentoTurno: kpis.faturamento,
   });
   const todosInsights = [...insightsOp, ...insights];
-  const comandasScore = inteligencia.stage === 1 ? inteligencia.comandas : 30;
-
   const metaConfigurada = current.bar.configuracoes?.meta_mensal;
   const meta = metaConfigurada ?? metaMes.meta;
   const metaAtual = metaMes.faturamentoAtual;
@@ -538,93 +517,71 @@ export default async function DashboardPage() {
           <AiHeroInput barId={current.bar.id} />
         </section>
 
-        {/* 1. SAÚDE + ATENÇÃO — 2 colunas quando stage 2 */}
-        {inteligencia.stage === 2 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2" style={{ gap: "12px" }}>
-            {/* Saúde do Bar */}
-            <div style={{ ...card }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)" }}>Saúde do Bar</span>
-                <span style={{ fontSize: 10, fontWeight: 500, color: "var(--fg-subtle)", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>Em calibração</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 14 }}>
-                <span style={{ fontSize: 44, fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--fg-subtle)", lineHeight: 1 }}>—</span>
-                <span style={{ fontSize: 20, color: "var(--fg-subtle)", fontFamily: "var(--font-mono)" }}>/100</span>
+        {/* 1. APRENDIZADO (stage 1) ou ATENÇÃO (stage 2) */}
+        {inteligencia.stage === 1 ? (
+          <div style={{ ...card }}>
+            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)", marginBottom: 16 }}>
+              Superbar está aprendendo sobre seu bar
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 16 }}>
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                  <span style={{ fontSize: 12, color: inteligencia.comandas >= 30 ? "var(--ok)" : "var(--fg-subtle)" }}>
+                    {inteligencia.comandas >= 30 ? "✓" : "○"} 30 comandas
+                  </span>
+                  <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--fg-muted)" }}>{inteligencia.comandas} / 30</span>
+                </div>
+                <div style={{ background: "var(--border-strong)", borderRadius: 2, height: 2, overflow: "hidden" }}>
+                  <div style={{ background: inteligencia.comandas >= 30 ? "var(--ok)" : "color-mix(in srgb, var(--accent) 50%, transparent)", borderRadius: 2, height: 2, width: `${Math.min(Math.round((inteligencia.comandas / 30) * 100), 100)}%`, transition: "width 0.6s ease" }} />
+                </div>
               </div>
               <div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                  <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>Aguardando dados suficientes</span>
-                  <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--fg-muted)" }}>{comandasScore} / 30</span>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                  <span style={{ fontSize: 12, color: inteligencia.diasAtivo >= 7 ? "var(--ok)" : "var(--fg-subtle)" }}>
+                    {inteligencia.diasAtivo >= 7 ? "✓" : "○"} 7 dias de operação
+                  </span>
+                  <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--fg-muted)" }}>{inteligencia.diasAtivo} / 7</span>
                 </div>
-                <div style={{ background: "var(--border-strong)", borderRadius: 2, height: 3, overflow: "hidden" }}>
-                  <div style={{ background: "color-mix(in srgb, var(--accent) 40%, transparent)", borderRadius: 2, height: 3, width: `${Math.min(Math.round((comandasScore / 30) * 100), 100)}%`, transition: "width 0.6s ease" }} />
+                <div style={{ background: "var(--border-strong)", borderRadius: 2, height: 2, overflow: "hidden" }}>
+                  <div style={{ background: inteligencia.diasAtivo >= 7 ? "var(--ok)" : "color-mix(in srgb, var(--accent) 50%, transparent)", borderRadius: 2, height: 2, width: `${Math.min(Math.round((inteligencia.diasAtivo / 7) * 100), 100)}%`, transition: "width 0.6s ease" }} />
                 </div>
-                <p style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 8, marginBottom: 0 }}>
-                  {Math.max(0, 30 - comandasScore) > 0
-                    ? `Disponível após mais ${30 - comandasScore} ${30 - comandasScore === 1 ? "comanda registrada" : "comandas registradas"}.`
-                    : "Calculando score inicial…"}
-                </p>
               </div>
             </div>
-            {/* Atenção */}
-            <a href="/dashboard/inteligencia" style={{ ...card, display: "flex", flexDirection: "column", justifyContent: "space-between", textDecoration: "none", cursor: "pointer", transition: "border-color 150ms" }} className="hover:!border-[var(--border-strong)]">
-              <p style={{ ...overline, marginBottom: 12 }}>Atenção</p>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flex: 1 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <span style={{ fontSize: 16 }}>🧠</span>
-                  <div>
-                    {inteligencia.insightsNaoLidos > 0 ? (
-                      <>
-                        <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>
-                          {inteligencia.insightsNaoLidos === 1
-                            ? "1 item precisa da sua atenção"
-                            : `${inteligencia.insightsNaoLidos} itens precisam da sua atenção`}
-                        </p>
-                        <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: "2px 0 0" }}>Ver análise completa →</p>
-                      </>
-                    ) : (
-                      <>
-                        <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>Tudo sob controle</p>
-                        <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: "2px 0 0" }}>Nenhum alerta · Ver Inteligência →</p>
-                      </>
-                    )}
-                  </div>
+            <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>
+              {inteligencia.diasAtivo < 7
+                ? `Faltam ${7 - inteligencia.diasAtivo} ${7 - inteligencia.diasAtivo === 1 ? "dia" : "dias"} para gerar análises automáticas.`
+                : inteligencia.comandas < 30
+                ? `Faltam ${30 - inteligencia.comandas} comandas para gerar análises automáticas.`
+                : "Calculando análises…"}
+            </p>
+          </div>
+        ) : (
+          <section>
+            <span style={sectionLabel}>Atenção</span>
+            <a href="/dashboard/inteligencia" style={{ ...card, display: "flex", alignItems: "center", justifyContent: "space-between", textDecoration: "none", cursor: "pointer" }} className="hover:!border-[var(--border-strong)]">
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <span style={{ fontSize: 16 }}>🧠</span>
+                <div>
+                  {inteligencia.insightsNaoLidos > 0 ? (
+                    <>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>{inteligencia.insightsNaoLidos === 1 ? "1 item precisa da sua atenção" : `${inteligencia.insightsNaoLidos} itens precisam da sua atenção`}</p>
+                      <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: "2px 0 0" }}>Ver análise completa →</p>
+                    </>
+                  ) : (
+                    <>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>Tudo sob controle</p>
+                      <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: "2px 0 0" }}>Nenhum alerta · Ver Inteligência →</p>
+                    </>
+                  )}
                 </div>
-                {inteligencia.insightsNaoLidos > 0 && (
-                  <span style={{ background: "#ef4444", color: "#fff", fontSize: 11, fontWeight: 700, borderRadius: "50%", minWidth: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px",
-                  flexShrink: 0,
-                }}>
+              </div>
+              {inteligencia.insightsNaoLidos > 0 && (
+                <span style={{ background: "#ef4444", color: "#fff", fontSize: 11, fontWeight: 700, borderRadius: "50%", minWidth: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px", flexShrink: 0 }}>
                   {inteligencia.insightsNaoLidos > 9 ? "9+" : inteligencia.insightsNaoLidos}
                 </span>
               )}
-              </div>
             </a>
-          </div>
-        ) : (
-          <div style={{ ...card }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)" }}>Saúde do Bar</span>
-              <span style={{ fontSize: 10, fontWeight: 500, color: "var(--fg-subtle)", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>Em calibração</span>
-            </div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 14 }}>
-              <span style={{ fontSize: 44, fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--fg-subtle)", lineHeight: 1 }}>—</span>
-              <span style={{ fontSize: 20, color: "var(--fg-subtle)", fontFamily: "var(--font-mono)" }}>/100</span>
-            </div>
-            <div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>Aguardando dados suficientes</span>
-                <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--fg-muted)" }}>{comandasScore} / 30</span>
-              </div>
-              <div style={{ background: "var(--border-strong)", borderRadius: 2, height: 3, overflow: "hidden" }}>
-                <div style={{ background: "color-mix(in srgb, var(--accent) 40%, transparent)", borderRadius: 2, height: 3, width: `${Math.min(Math.round((comandasScore / 30) * 100), 100)}%`, transition: "width 0.6s ease" }} />
-              </div>
-              <p style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 8, marginBottom: 0 }}>
-                {Math.max(0, 30 - comandasScore) > 0
-                  ? `Disponível após mais ${30 - comandasScore} ${30 - comandasScore === 1 ? "comanda registrada" : "comandas registradas"}.`
-                  : "Calculando score inicial…"}
-              </p>
-            </div>
-          </div>
+          </section>
         )}
 
         {/* 2. AO VIVO — só existe quando turno está aberto */}
