@@ -43,14 +43,20 @@ export async function reativarMembro(membroId: string) {
   revalidatePath("/dashboard/equipe");
 }
 
-export async function removerMembro(membroId: string) {
-  const current = await assertDono();
-  const supabase = await createClient();
-  await supabase.from("bar_members")
-    .delete()
-    .eq("id", membroId)
-    .eq("bar_id", current.bar.id);
-  revalidatePath("/dashboard/equipe");
+export async function removerMembro(membroId: string): Promise<{ ok: true } | { error: string }> {
+  try {
+    const current = await assertDono();
+    const supabase = await createClient();
+    const { error } = await supabase.from("bar_members")
+      .delete()
+      .eq("id", membroId)
+      .eq("bar_id", current.bar.id);
+    if (error) return { error: error.message };
+    revalidatePath("/dashboard/equipe");
+    return { ok: true };
+  } catch (e: unknown) {
+    return { error: e instanceof Error ? e.message : "Erro ao remover membro." };
+  }
 }
 
 export type AdicionarState = {

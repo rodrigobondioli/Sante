@@ -88,12 +88,12 @@ function MembroRow({
     if (removing) return;
     if (!window.confirm(`Remover ${m.nome} da equipe permanentemente?`)) return;
     setRemoving(true);
-    try {
-      await removerMembro(m.id);
-      toast(`${m.nome} removido.`, "ok");
-    } catch {
-      toast("Erro ao remover membro.", "error");
+    const result = await removerMembro(m.id);
+    if ("error" in result) {
+      toast(result.error, "error");
       setRemoving(false);
+    } else {
+      toast(`${m.nome} removido.`, "ok");
     }
   }
 
