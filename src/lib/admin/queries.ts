@@ -45,6 +45,7 @@ export interface BarResumo {
   cobertura_custo_pct: number; // 0-100
   // Scores
   healthScore: HealthScore;
+  healthScoreNumerico: number; // 0-100
   implantacaoScore: ImplantacaoScore;
   alertas: RiskAlert[];
 }
@@ -101,6 +102,7 @@ export interface BarDetalhe {
   cobertura_custo_pct: number;
   // Scores
   healthScore: HealthScore;
+  healthScoreNumerico: number; // 0-100
   implantacaoScore: ImplantacaoScore;
   alertas: RiskAlert[];
   // Equipe
@@ -111,6 +113,52 @@ export interface BarDetalhe {
     ativo: boolean;
     created_at: string;
   }[];
+}
+
+// ─── Score numérico 0-100 ─────────────────────────────────────────────────────
+// Uso (40pts) + Implantação (30pts) + Cobrança (30pts)
+
+function computeScoreNumerico({
+  assinatura_status,
+  trial_fim,
+  dias_sem_uso,
+  total_turnos,
+  cobertura_custo_pct,
+  total_membros,
+}: {
+  assinatura_status: AssinaturaStatus | null;
+  trial_fim: string | null;
+  dias_sem_uso: number | null;
+  total_turnos: number;
+  cobertura_custo_pct: number;
+  total_membros: number;
+}): number {
+  let score = 0;
+
+  // Uso (40pts)
+  if (total_turnos > 0 && dias_sem_uso !== null) {
+    if (dias_sem_uso === 0)       score += 40;
+    else if (dias_sem_uso < 3)   score += 28;
+    else if (dias_sem_uso < 7)   score += 12;
+    // ≥7d: 0pts
+  }
+
+  // Implantação (30pts): custo 0-20pts + membros 0-10pts
+  score += Math.round(cobertura_custo_pct * 0.2); // 0-20
+  if (total_membros >= 2)       score += 10;
+  else if (total_membros === 1) score += 5;
+
+  // Cobrança (30pts)
+  if (assinatura_status === "ativa") {
+    score += 30;
+  } else if (assinatura_status === "trial" && trial_fim) {
+    const d = Math.ceil((new Date(trial_fim).getTime() - Date.now()) / 86400000);
+    if (d > 3)       score += 15;
+    else if (d > 0)  score += 8;
+    // expirado: 0
+  }
+
+  return Math.min(100, score);
 }
 
 // ─── Score de saúde ───────────────────────────────────────────────────────────
@@ -321,9 +369,11 @@ export async function getAdminBares(): Promise<{
     const coberturaPct = prod.total > 0 ? Math.round((prod.comCusto / prod.total) * 100) : 0;
     const totalTurnos  = t?.total ?? 0;
 
-    const healthScore      = computeHealth({ assinatura_status: ass?.status ?? null, trial_fim: ass?.trial_fim ?? null, dias_sem_uso: diasSemUso, total_turnos: totalTurnos, cobertura_custo_pct: coberturaPct, ativo: b.ativo });
-    const implantacaoScore = computeImplantacao({ total_turnos: totalTurnos, cobertura_custo_pct: coberturaPct, total_membros: membros });
-    const alertas          = computeAlertas({ assinatura_status: ass?.status ?? null, trial_fim: ass?.trial_fim ?? null, dias_sem_uso: diasSemUso, total_turnos: totalTurnos, cobertura_custo_pct: coberturaPct, ativo: b.ativo });
+    const scoreArgs = { assinatura_status: ass?.status ?? null, trial_fim: ass?.trial_fim ?? null, dias_sem_uso: diasSemUso, total_turnos: totalTurnos, cobertura_custo_pct: coberturaPct, ativo: b.ativo };
+    const healthScore         = computeHealth(scoreArgs);
+    const healthScoreNumerico = computeScoreNumerico({ ...scoreArgs, total_membros: membros });
+    const implantacaoScore    = computeImplantacao({ total_turnos: totalTurnos, cobertura_custo_pct: coberturaPct, total_membros: membros });
+    const alertas             = computeAlertas(scoreArgs);
 
     return {
       id: b.id, nome: b.nome, slug: b.slug,
@@ -335,7 +385,7 @@ export async function getAdminBares(): Promise<{
       turnos_7d: t?.total7d ?? 0, comandas_7d: cmd7dMap.get(b.id) ?? 0, faturamento_7d: fat7dMap.get(b.id) ?? 0,
       total_turnos: totalTurnos, total_membros: membros,
       total_produtos: prod.total, cobertura_custo_pct: coberturaPct,
-      healthScore, implantacaoScore, alertas,
+      healthScore, healthScoreNumerico, implantacaoScore, alertas,
     };
   });
 
@@ -406,9 +456,11 @@ export async function getAdminBarDetalhe(barId: string): Promise<BarDetalhe | nu
   const assTyped  = ass as AssRow | null;
   const planoData = assTyped?.planos as { nome: string; preco_mensal: number } | null | undefined;
 
-  const healthScore      = computeHealth({ assinatura_status: assTyped?.status ?? null, trial_fim: assTyped?.trial_fim ?? null, dias_sem_uso: diasSemUso, total_turnos: totalTurnos, cobertura_custo_pct: coberturaPct, ativo: bar.ativo });
-  const implantacaoScore = computeImplantacao({ total_turnos: totalTurnos, cobertura_custo_pct: coberturaPct, total_membros: memAtivos });
-  const alertas          = computeAlertas({ assinatura_status: assTyped?.status ?? null, trial_fim: assTyped?.trial_fim ?? null, dias_sem_uso: diasSemUso, total_turnos: totalTurnos, cobertura_custo_pct: coberturaPct, ativo: bar.ativo });
+  const detailScoreArgs = { assinatura_status: assTyped?.status ?? null, trial_fim: assTyped?.trial_fim ?? null, dias_sem_uso: diasSemUso, total_turnos: totalTurnos, cobertura_custo_pct: coberturaPct, ativo: bar.ativo };
+  const healthScore         = computeHealth(detailScoreArgs);
+  const healthScoreNumerico = computeScoreNumerico({ ...detailScoreArgs, total_membros: memAtivos });
+  const implantacaoScore    = computeImplantacao({ total_turnos: totalTurnos, cobertura_custo_pct: coberturaPct, total_membros: memAtivos });
+  const alertas             = computeAlertas(detailScoreArgs);
 
   return {
     id: bar.id, nome: bar.nome, slug: bar.slug,
@@ -425,7 +477,7 @@ export async function getAdminBarDetalhe(barId: string): Promise<BarDetalhe | nu
     turnos_7d: turnos7d?.length ?? 0, comandas_7d: comandas7d?.length ?? 0, faturamento_7d: fat7d,
     total_turnos: totalTurnos, total_comandas: comandas?.length ?? 0, total_pagamentos: pagamentos?.length ?? 0,
     total_produtos: totalProd, total_produtos_com_custo: comCusto, cobertura_custo_pct: coberturaPct,
-    healthScore, implantacaoScore, alertas,
+    healthScore, healthScoreNumerico, implantacaoScore, alertas,
     membros: (membros ?? []).map((m) => ({ id: m.id, nome: m.nome, role: m.role, ativo: m.ativo, created_at: m.created_at })),
   };
 }
