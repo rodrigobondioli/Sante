@@ -478,6 +478,14 @@ export default async function DashboardPage() {
     faturamentoTurno: kpis.faturamento,
   });
   const todosInsights = [...insightsOp, ...insights];
+  const insightsSorted = [
+    ...todosInsights.filter(i => i.tipo === "action"),
+    ...todosInsights.filter(i => i.tipo === "opportunity"),
+    ...todosInsights.filter(i => i.tipo === "info"),
+  ];
+  const nAction = todosInsights.filter(i => i.tipo === "action").length;
+  const nOpportunity = todosInsights.filter(i => i.tipo === "opportunity").length;
+  const nInfo = todosInsights.filter(i => i.tipo === "info").length;
   const metaConfigurada = current.bar.configuracoes?.meta_mensal;
   const meta = metaConfigurada ?? metaMes.meta;
   const metaAtual = metaMes.faturamentoAtual;
@@ -588,35 +596,61 @@ export default async function DashboardPage() {
                 </div>
               </div>
             ) : (
-              // Expandido — insights presentes
+              // Expandido — insights presentes com classificação
               <div style={{
                 ...card,
-                borderColor: todosInsights.some(i => i.tipo === "aviso")
-                  ? "color-mix(in srgb, var(--warn) 40%, var(--border))"
+                borderColor: todosInsights.some(i => i.tipo === "action")
+                  ? "color-mix(in srgb, #ef4444 25%, var(--border))"
                   : "var(--border)",
               }}>
-                {todosInsights.length > 0 && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: inteligencia.insightsNaoLidos > 0 ? 16 : 0 }}>
-                    {todosInsights.map((item, i) => (
-                      <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                        <span style={{ fontSize: 14, fontWeight: 700, flexShrink: 0, lineHeight: 1.5, color: item.tipo === "aviso" ? "var(--warn)" : item.tipo === "info" ? "var(--fg-muted)" : "var(--ok)" }}>
-                          {item.tipo === "aviso" ? "↓" : item.tipo === "info" ? "→" : "↑"}
-                        </span>
-                        <div>
-                          <p style={{ fontSize: 13, color: "var(--fg)", margin: "0 0 3px", lineHeight: 1.5 }}>{item.texto}</p>
-                          {item.sugestao && (
-                            <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: 0, lineHeight: 1.5 }}>{item.sugestao}</p>
-                          )}
-                        </div>
+                {/* Agregador: visão rápida antes de ler */}
+                <div style={{ display: "flex", gap: 14, marginBottom: 14, flexWrap: "wrap" }}>
+                  {nAction > 0 && (
+                    <span style={{ fontSize: 11, fontWeight: 700, color: "#ef4444" }}>
+                      🔴 {nAction} {nAction === 1 ? "ação necessária" : "ações necessárias"}
+                    </span>
+                  )}
+                  {nOpportunity > 0 && (
+                    <span style={{ fontSize: 11, fontWeight: 700, color: "var(--ok)" }}>
+                      🟢 {nOpportunity} {nOpportunity === 1 ? "oportunidade" : "oportunidades"}
+                    </span>
+                  )}
+                  {nInfo > 0 && (
+                    <span style={{ fontSize: 11, fontWeight: 700, color: "#3b82f6" }}>
+                      🔵 {nInfo} {nInfo === 1 ? "informação" : "informações"}
+                    </span>
+                  )}
+                </div>
+                <div style={{ height: 1, background: "var(--border)", marginBottom: 16 }} />
+
+                {/* Insights agrupados por severidade */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: inteligencia.insightsNaoLidos > 0 ? 16 : 0 }}>
+                  {insightsSorted.map((item, i) => {
+                    const isFirstOfType = i === 0 || insightsSorted[i - 1].tipo !== item.tipo;
+                    const severityColor = item.tipo === "action" ? "#ef4444" : item.tipo === "opportunity" ? "var(--ok)" : "#3b82f6";
+                    const severityLabel = item.tipo === "action" ? "🔴 AÇÃO NECESSÁRIA" : item.tipo === "opportunity" ? "🟢 OPORTUNIDADE" : "🔵 INFORMAÇÃO";
+                    return (
+                      <div key={i}>
+                        {isFirstOfType && (
+                          <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: severityColor, margin: "0 0 6px" }}>
+                            {severityLabel}
+                          </p>
+                        )}
+                        <p style={{ fontSize: 13, color: "var(--fg)", margin: "0 0 3px", lineHeight: 1.5 }}>{item.texto}</p>
+                        {item.sugestao && (
+                          <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: 0, lineHeight: 1.5 }}>{item.sugestao}</p>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                )}
+                    );
+                  })}
+                </div>
+
                 {inteligencia.insightsNaoLidos > 0 && (
                   <a href="/dashboard/inteligencia" style={{
                     display: "flex", alignItems: "center", gap: 8, textDecoration: "none",
-                    paddingTop: todosInsights.length > 0 ? 12 : 0,
-                    borderTop: todosInsights.length > 0 ? "1px solid var(--border)" : "none",
+                    paddingTop: insightsSorted.length > 0 ? 14 : 0,
+                    marginTop: insightsSorted.length > 0 ? 2 : 0,
+                    borderTop: insightsSorted.length > 0 ? "1px solid var(--border)" : "none",
                   }}>
                     <span style={{ background: "#ef4444", color: "#fff", fontSize: 11, fontWeight: 700, borderRadius: "50%", minWidth: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       {inteligencia.insightsNaoLidos > 9 ? "9+" : inteligencia.insightsNaoLidos}

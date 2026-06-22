@@ -222,7 +222,7 @@ export async function getTempoMedioPreparo(
 
 export interface InsightOperacional {
   texto: string;
-  tipo: "info" | "oportunidade" | "aviso";
+  tipo: "action" | "opportunity" | "info";
   sugestao?: string;
 }
 
@@ -257,7 +257,7 @@ export function gerarInsightsOperacionais({
     if (pct >= 20) {
       insights.push({
         texto: `${top.mesaLabel} concentrou ${pct}% da receita do turno — a mesa mais rentável do momento.`,
-        tipo: "oportunidade",
+        tipo: "opportunity",
       });
     }
   }
@@ -275,7 +275,7 @@ export function gerarInsightsOperacionais({
   if (tempos.mediaMinutos !== null && tempos.mediaMinutos >= 8) {
     insights.push({
       texto: `Preparo médio em ${tempos.mediaMinutos}min — acima do ideal.`,
-      tipo: "aviso",
+      tipo: "action",
       sugestao: "Bar pode estar sobrecarregado. Verifique a distribuição de tarefas.",
     });
   }
@@ -284,7 +284,7 @@ export function gerarInsightsOperacionais({
   if (tempos.mediaMinutos !== null && tempos.mediaMinutos <= 3 && tempos.totalEntregues >= 5) {
     insights.push({
       texto: `Preparo em ${tempos.mediaMinutos}min. Bar em ritmo ótimo esta noite.`,
-      tipo: "oportunidade",
+      tipo: "opportunity",
     });
   }
 

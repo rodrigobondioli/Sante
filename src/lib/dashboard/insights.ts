@@ -2,7 +2,7 @@ import type { ProdutoCategorizado } from "@/lib/dashboard/menu-engineering";
 
 export interface InsightItem {
   texto: string;
-  tipo: "oportunidade" | "aviso" | "info";
+  tipo: "action" | "opportunity" | "info";
   sugestao?: string;
 }
 
@@ -36,7 +36,7 @@ export function gerarInsight({
     if (!top3Ids.includes(maiorMargem.produtoId)) {
       insights.push({
         texto: `${maiorMargem.produtoNome} tem a maior margem do turno, mas não está entre os 3 mais vendidos.`,
-        tipo: "oportunidade",
+        tipo: "opportunity",
         sugestao: "Considere treinar o time para sugerir esse produto ativamente.",
       });
     }
@@ -46,7 +46,7 @@ export function gerarInsight({
   if (cmvTrend !== null && cmvTrend >= 5) {
     insights.push({
       texto: `CMV subiu ${cmvTrend.toFixed(1)}% em relação ao turno anterior.`,
-      tipo: "aviso",
+      tipo: "action",
       sugestao: "Revise o custo dos produtos mais vendidos neste turno.",
     });
   }
@@ -55,7 +55,7 @@ export function gerarInsight({
   if (ticketMedioTrend !== null && ticketMedioTrend <= -5) {
     insights.push({
       texto: `Ticket médio caiu ${Math.abs(ticketMedioTrend).toFixed(1)}% em relação ao turno anterior.`,
-      tipo: "aviso",
+      tipo: "action",
       sugestao: "Observe se houve aumento de vendas de itens de menor valor.",
     });
   }
@@ -65,13 +65,13 @@ export function gerarInsight({
   if (problemas.length === 1) {
     insights.push({
       texto: `${problemas[0].produtoNome} está sendo vendido com margem negativa.`,
-      tipo: "aviso",
+      tipo: "action",
       sugestao: "Revise o preço de venda ou o custo de produção desse item.",
     });
   } else if (problemas.length > 1) {
     insights.push({
       texto: `${problemas.length} produtos com margem negativa: ${problemas.map((p) => p.produtoNome).join(", ")}.`,
-      tipo: "aviso",
+      tipo: "action",
       sugestao: "Revise preço ou custo de cada um antes do próximo turno.",
     });
   }
