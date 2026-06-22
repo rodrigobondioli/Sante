@@ -3,9 +3,9 @@
 import { useState } from 'react'
 
 const SUGGESTIONS = [
+  'Como está meu CMV?',
   'O que precisa da minha atenção?',
-  'O que mais vendeu hoje?',
-  'Como está meu estoque?',
+  'Qual produto mais vendeu hoje?',
   'Resumo do turno',
 ]
 
@@ -49,7 +49,7 @@ export function AiHeroInput({ barId }: { barId: string }) {
             value={question}
             onChange={e => setQuestion(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && ask(question)}
-            placeholder="Pergunte sobre seu bar"
+            placeholder="O que você quer saber?"
             style={{
               flex: 1,
               background: 'none',

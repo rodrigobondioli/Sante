@@ -227,29 +227,29 @@ export default async function DashboardPage() {
           ) : (
             <section>
               <span style={sectionLabel}>Atenção</span>
-              <a href="/dashboard/inteligencia" style={{ ...card, display: "flex", alignItems: "center", justifyContent: "space-between", textDecoration: "none", cursor: "pointer" }} className="hover:!border-[var(--border-strong)]">
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <span style={{ fontSize: 16 }}>🧠</span>
+              {inteligencia.insightsNaoLidos === 0 ? (
+                <div style={{ ...card, display: "flex", alignItems: "flex-start", gap: 12 }}>
+                  <span style={{ fontSize: 13, color: "var(--ok)", fontWeight: 700, flexShrink: 0, lineHeight: 1.6 }}>✓</span>
                   <div>
-                    {inteligencia.insightsNaoLidos > 0 ? (
-                      <>
-                        <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>{inteligencia.insightsNaoLidos === 1 ? "1 item precisa da sua atenção" : `${inteligencia.insightsNaoLidos} itens precisam da sua atenção`}</p>
-                        <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: "2px 0 0" }}>Ver análise completa →</p>
-                      </>
-                    ) : (
-                      <>
-                        <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>Tudo sob controle</p>
-                        <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: "2px 0 0" }}>Nenhum alerta · Ver Inteligência →</p>
-                      </>
-                    )}
+                    <p style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)", margin: "0 0 6px" }}>Tudo sob controle</p>
+                    <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>
+                      Monitorando CMV · Ticket médio · Estoque · Produtos · Equipe
+                    </p>
                   </div>
                 </div>
-                {inteligencia.insightsNaoLidos > 0 && (
+              ) : (
+                <a href="/dashboard/inteligencia" style={{ ...card, display: "flex", alignItems: "center", justifyContent: "space-between", textDecoration: "none" }}>
+                  <div>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>
+                      {inteligencia.insightsNaoLidos === 1 ? "1 análise disponível" : `${inteligencia.insightsNaoLidos} análises disponíveis`}
+                    </p>
+                    <p style={{ fontSize: 11, color: "var(--fg-muted)", margin: "3px 0 0" }}>Ver Inteligência →</p>
+                  </div>
                   <span style={{ background: "#ef4444", color: "#fff", fontSize: 11, fontWeight: 700, borderRadius: "50%", minWidth: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px", flexShrink: 0 }}>
                     {inteligencia.insightsNaoLidos > 9 ? "9+" : inteligencia.insightsNaoLidos}
                   </span>
-                )}
-              </a>
+                </a>
+              )}
             </section>
           )}
 
@@ -444,6 +444,24 @@ export default async function DashboardPage() {
   const coberturaReceita = calcularCoberturaReceita(produtosVendidos);
   const cmvParcial = coberturaReceita.status !== "confiavel";
 
+  // Veredictos semânticos — "estou melhor ou pior?"
+  const cmvVeredito = coberturaReceita.status === "indisponivel" || cmvAtual === null
+    ? null
+    : cmvAtual < 30 ? "Margem excelente"
+    : cmvAtual < 36 ? "Margem saudável"
+    : cmvAtual < 42 ? "Custo elevado"
+    : "CMV crítico"
+  const cmvCorVeredito: string = cmvVeredito === "Margem excelente" || cmvVeredito === "Margem saudável"
+    ? "var(--ok)"
+    : cmvVeredito === "Custo elevado" ? "var(--warn)"
+    : cmvVeredito === "CMV crítico" ? "#ef4444"
+    : "var(--fg-muted)"
+  const ticketDelta = comparacao?.ticketMedio ?? null
+  const ticketVeredito = ticketDelta !== null && Math.abs(ticketDelta) > 5
+    ? ticketDelta > 0 ? "Ticket crescendo" : "Ticket caindo"
+    : null
+  const ticketCorVeredito: string = ticketVeredito === "Ticket caindo" ? "var(--warn)" : "var(--ok)"
+
   const insights: InsightItem[] = gerarInsight({
     produtosCategorizado: produtosCategorizados,
     cmvTrend: comparacao.cmv,
@@ -558,29 +576,53 @@ export default async function DashboardPage() {
         ) : (
           <section>
             <span style={sectionLabel}>Atenção</span>
-            <a href="/dashboard/inteligencia" style={{ ...card, display: "flex", alignItems: "center", justifyContent: "space-between", textDecoration: "none", cursor: "pointer" }} className="hover:!border-[var(--border-strong)]">
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ fontSize: 16 }}>🧠</span>
+            {todosInsights.length === 0 && inteligencia.insightsNaoLidos === 0 ? (
+              // Compact — tudo sob controle
+              <div style={{ ...card, display: "flex", alignItems: "flex-start", gap: 12 }}>
+                <span style={{ fontSize: 13, color: "var(--ok)", fontWeight: 700, flexShrink: 0, lineHeight: 1.6 }}>✓</span>
                 <div>
-                  {inteligencia.insightsNaoLidos > 0 ? (
-                    <>
-                      <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>{inteligencia.insightsNaoLidos === 1 ? "1 item precisa da sua atenção" : `${inteligencia.insightsNaoLidos} itens precisam da sua atenção`}</p>
-                      <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: "2px 0 0" }}>Ver análise completa →</p>
-                    </>
-                  ) : (
-                    <>
-                      <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>Tudo sob controle</p>
-                      <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: "2px 0 0" }}>Nenhum alerta · Ver Inteligência →</p>
-                    </>
-                  )}
+                  <p style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)", margin: "0 0 6px" }}>Tudo sob controle</p>
+                  <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>
+                    Monitorando CMV · Ticket médio · Estoque · Produtos · Equipe
+                  </p>
                 </div>
               </div>
-              {inteligencia.insightsNaoLidos > 0 && (
-                <span style={{ background: "#ef4444", color: "#fff", fontSize: 11, fontWeight: 700, borderRadius: "50%", minWidth: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px", flexShrink: 0 }}>
-                  {inteligencia.insightsNaoLidos > 9 ? "9+" : inteligencia.insightsNaoLidos}
-                </span>
-              )}
-            </a>
+            ) : (
+              // Expandido — insights presentes
+              <div style={{
+                ...card,
+                borderColor: todosInsights.some(i => i.tipo === "aviso")
+                  ? "color-mix(in srgb, var(--warn) 40%, var(--border))"
+                  : "var(--border)",
+              }}>
+                {todosInsights.length > 0 && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: inteligencia.insightsNaoLidos > 0 ? 16 : 0 }}>
+                    {todosInsights.map((item, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                        <span style={{ fontSize: 15, fontWeight: 700, flexShrink: 0, lineHeight: 1.4, color: item.tipo === "aviso" ? "var(--warn)" : "var(--ok)" }}>
+                          {item.tipo === "aviso" ? "↓" : "↑"}
+                        </span>
+                        <p style={{ fontSize: 13, color: "var(--fg)", margin: 0, lineHeight: 1.5 }}>{item.texto}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {inteligencia.insightsNaoLidos > 0 && (
+                  <a href="/dashboard/inteligencia" style={{
+                    display: "flex", alignItems: "center", gap: 8, textDecoration: "none",
+                    paddingTop: todosInsights.length > 0 ? 12 : 0,
+                    borderTop: todosInsights.length > 0 ? "1px solid var(--border)" : "none",
+                  }}>
+                    <span style={{ background: "#ef4444", color: "#fff", fontSize: 11, fontWeight: 700, borderRadius: "50%", minWidth: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      {inteligencia.insightsNaoLidos > 9 ? "9+" : inteligencia.insightsNaoLidos}
+                    </span>
+                    <span style={{ fontSize: 12, color: "var(--fg-muted)" }}>
+                      {inteligencia.insightsNaoLidos === 1 ? "1 análise detalhada disponível" : `${inteligencia.insightsNaoLidos} análises detalhadas disponíveis`} →
+                    </span>
+                  </a>
+                )}
+              </div>
+            )}
           </section>
         )}
 
@@ -601,66 +643,58 @@ export default async function DashboardPage() {
           <span style={sectionLabel}>Negócio</span>
 
           {/* KPIs do turno */}
-          <div className="grid grid-cols-1 lg:grid-cols-4" style={{ gap: "12px" }}>
+          <div className="grid grid-cols-1 lg:grid-cols-3" style={{ gap: "12px" }}>
 
             {/* CMV */}
             <div
-              className="animate-fade-in-up flex items-center justify-between lg:block"
+              className="animate-fade-in-up"
               style={{ ...card, animationDelay: "0ms" }}
             >
-              <div className="flex flex-col lg:block">
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+              {coberturaReceita.status === "indisponivel" ? (
+                <>
                   <p style={overline}>CMV</p>
-                  {coberturaReceita.status === "estimado" && (
-                    <span style={{
-                      fontSize: "9px", fontWeight: 500,
-                      padding: "2px 5px", borderRadius: "2px",
-                      background: "color-mix(in srgb, var(--warn) 12%, transparent)",
-                      color: "var(--warn)",
-                      textTransform: "uppercase" as const, letterSpacing: "0.05em",
-                      whiteSpace: "nowrap",
-                    }}>estimado</span>
-                  )}
-                </div>
-                <p
-                  className="text-[22px] lg:text-[26px]"
-                  style={{ fontWeight: 600, color: coberturaReceita.status === "indisponivel" ? "var(--fg-subtle)" : "var(--fg)", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", marginTop: "4px" }}
-                >
-                  {coberturaReceita.status === "indisponivel" ? "—" : `${percent.format(cmvAtual ?? 0)}%`}
-                </p>
-                <p style={{ fontSize: "11px", color: "var(--fg-subtle)", marginTop: "2px" }}>
-                  {coberturaReceita.status === "indisponivel"
-                    ? `${coberturaReceita.cobertura}% da receita com custo`
-                    : coberturaReceita.status === "estimado"
-                    ? `${coberturaReceita.cobertura}% da receita coberta`
-                    : "custo sobre receita"}
-                </p>
-              </div>
-              <div className="lg:mt-1 flex-shrink-0 ml-4 lg:ml-0">
-                {coberturaReceita.status !== "indisponivel"
-                  ? <TrendText percent={comparacao.cmv} invert={true} />
-                  : <a href="/dashboard/cardapio" style={{ fontSize: "11px", color: "var(--accent)", textDecoration: "none" }}>Configurar →</a>
-                }
-              </div>
+                  <p className="text-[22px] lg:text-[26px]" style={{ fontWeight: 600, color: "var(--fg-subtle)", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", marginTop: 4 }}>—</p>
+                  <p style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 2, marginBottom: 4 }}>{coberturaReceita.cobertura}% da receita com custo</p>
+                  <a href="/dashboard/cardapio" style={{ fontSize: 11, color: "var(--accent)", textDecoration: "none" }}>Configurar →</a>
+                </>
+              ) : (
+                <>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: cmvCorVeredito, margin: "0 0 4px", display: "flex", alignItems: "center", gap: 6 }}>
+                    {cmvVeredito}
+                    {coberturaReceita.status === "estimado" && (
+                      <span style={{ fontSize: 9, fontWeight: 500, padding: "2px 5px", borderRadius: 2, background: "color-mix(in srgb, var(--warn) 12%, transparent)", color: "var(--warn)", textTransform: "uppercase", letterSpacing: "0.05em" }}>estimado</span>
+                    )}
+                  </p>
+                  <p className="text-[22px] lg:text-[26px]" style={{ fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", margin: "0 0 3px" }}>
+                    {percent.format(cmvAtual ?? 0)}%
+                  </p>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>CMV do turno</span>
+                    <TrendText percent={comparacao.cmv} invert={true} />
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Ticket médio */}
             <div
-              className="animate-fade-in-up flex items-center justify-between lg:block"
+              className="animate-fade-in-up"
               style={{ ...card, animationDelay: "60ms" }}
             >
-              <div className="flex flex-col lg:block">
-                <p style={overline}>Ticket médio</p>
-                <p
-                  className="text-[22px] lg:text-[26px]"
-                  style={{ fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", marginTop: "4px" }}
-                >
-                  {currency.format(kpis.ticketMedio)}
+              {ticketVeredito ? (
+                <p style={{ fontSize: 12, fontWeight: 600, color: ticketCorVeredito, margin: "0 0 4px" }}>
+                  {ticketVeredito}
                 </p>
-              </div>
-              <div className="lg:mt-1 flex-shrink-0 ml-4 lg:ml-0">
-                <TrendText percent={comparacao.ticketMedio} invert={false} />
-              </div>
+              ) : (
+                <p style={{ ...overline, marginBottom: 4 }}>Ticket médio</p>
+              )}
+              <p
+                className="text-[22px] lg:text-[26px]"
+                style={{ fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", margin: "0 0 3px" }}
+              >
+                {currency.format(kpis.ticketMedio)}
+              </p>
+              <TrendText percent={comparacao.ticketMedio} invert={false} />
             </div>
 
             {/* Meta do mês */}
@@ -719,40 +753,6 @@ export default async function DashboardPage() {
               </div>
             </div>
 
-            {/* Insights */}
-            <div
-              className="animate-fade-in-up"
-              style={{ ...card, animationDelay: "180ms" }}
-            >
-              <p style={{ ...overline, marginBottom: "10px" }}>Insights</p>
-              {todosInsights.length === 0 ? (
-                <p style={{ fontSize: "12px", color: "var(--fg-muted)", lineHeight: 1.5 }}>
-                  Nenhum alerta no momento.
-                </p>
-              ) : (
-                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "8px" }}>
-                  {todosInsights.map((item, i) => (
-                    <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: "7px" }}>
-                      <span
-                        aria-hidden
-                        style={{
-                          flexShrink: 0,
-                          fontSize: "13px",
-                          fontWeight: 700,
-                          lineHeight: 1.45,
-                          color: item.tipo === "oportunidade" ? "var(--ok)" : item.tipo === "aviso" ? "var(--warn)" : "var(--fg-subtle)",
-                        }}
-                      >
-                        {item.tipo === "oportunidade" ? "↑" : item.tipo === "aviso" ? "·" : "–"}
-                      </span>
-                      <p style={{ fontSize: "12px", color: "var(--fg-muted)", lineHeight: 1.5, margin: 0 }}>
-                        {item.texto}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
 
           </div>
 
