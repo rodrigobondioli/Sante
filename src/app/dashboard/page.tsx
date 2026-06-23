@@ -605,7 +605,6 @@ export default async function DashboardPage() {
                   return (
                     <div key={i} style={{
                       background: "var(--bg-elevated)",
-                      borderLeft: `${item.tipo === "info" ? "2px" : "3px"} solid ${severityColor}`,
                       borderRadius: "4px",
                       padding: item.tipo === "info" ? "12px 16px" : "16px 20px",
                     }}>
