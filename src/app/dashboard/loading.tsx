@@ -16,7 +16,7 @@ export default function DashboardLoading() {
         }
       `}</style>
 
-      <div style={{ padding: "32px 40px", maxWidth: 1200 }}>
+      <div className="py-6 lg:px-8 lg:py-10" style={{ maxWidth: 1200 }}>
         {/* Header */}
         <div style={{ marginBottom: 32 }}>
           <div style={{ ...pulse, height: 14, width: 120, marginBottom: 10 }} />
@@ -24,7 +24,7 @@ export default function DashboardLoading() {
         </div>
 
         {/* KPI cards row */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 24 }}>
+        <div className="grid grid-cols-1 sm:grid-cols-3" style={{ gap: 16, marginBottom: 24 }}>
           {[1, 2, 3].map(i => (
             <div key={i} style={{
               background: "color-mix(in srgb, var(--fg) 4%, transparent)",
@@ -47,7 +47,7 @@ export default function DashboardLoading() {
         </div>
 
         {/* Two-column row */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 16 }}>
           {[1, 2].map(i => (
             <div key={i} style={{
               background: "color-mix(in srgb, var(--fg) 4%, transparent)",

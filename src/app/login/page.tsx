@@ -57,13 +57,15 @@ export default function LoginPage({
           </p>
 
           {/* Card */}
-          <div style={{
-            width: "100%", maxWidth: "420px",
-            background: "var(--bg-elevated)",
-            border: "1px solid var(--border)",
-            borderRadius: "4px",
-            padding: "40px",
-          }}>
+          <div
+            className="p-6 sm:p-10"
+            style={{
+              width: "100%", maxWidth: "420px",
+              background: "var(--bg-elevated)",
+              border: "1px solid var(--border)",
+              borderRadius: "4px",
+            }}
+          >
             <form
               action={signIn}
               style={{ display: "flex", flexDirection: "column", gap: 16 }}

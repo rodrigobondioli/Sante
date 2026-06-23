@@ -250,13 +250,13 @@ export default function OnboardingPage() {
 
             <form
               onSubmit={handleCriarBar}
+              className="p-5 sm:p-8"
               style={{
                 width: "100%",
                 maxWidth: "440px",
                 background: "var(--bg-elevated)",
                 border: "1px solid var(--border)",
                 borderRadius: "4px",
-                padding: "32px",
                 display: "flex",
                 flexDirection: "column",
                 gap: "20px",
@@ -356,13 +356,13 @@ export default function OnboardingPage() {
             </div>
 
             <div
+              className="p-5 sm:p-8"
               style={{
                 width: "100%",
                 maxWidth: "480px",
                 background: "var(--bg-elevated)",
                 border: "1px solid var(--border)",
                 borderRadius: "4px",
-                padding: "32px",
                 display: "flex",
                 flexDirection: "column",
                 gap: "20px",
@@ -541,15 +541,14 @@ export default function OnboardingPage() {
             >
               {/* Header da tabela */}
               <div
+                className="grid grid-cols-[1fr_80px_65px_24px] sm:grid-cols-[1fr_120px_90px_90px_32px]"
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 120px 90px 90px 32px",
                   gap: 0,
                   padding: "10px 16px",
                   borderBottom: "1px solid var(--border)",
                 }}
               >
-                {["Nome", "Categoria", "Preço", "Custo", ""].map((h) => (
+                {(["Nome", "Categoria", "Preço"] as const).map((h) => (
                   <span
                     key={h}
                     style={{
@@ -563,6 +562,19 @@ export default function OnboardingPage() {
                     {h}
                   </span>
                 ))}
+                <span
+                  className="hidden sm:block"
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 500,
+                    color: "var(--fg-subtle)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.1em",
+                  }}
+                >
+                  Custo
+                </span>
+                <span />
               </div>
 
               {/* Linhas */}
@@ -572,9 +584,8 @@ export default function OnboardingPage() {
                   return (
                     <div
                       key={i}
+                      className="grid grid-cols-[1fr_80px_65px_24px] sm:grid-cols-[1fr_120px_90px_90px_32px]"
                       style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 120px 90px 90px 32px",
                         gap: 0,
                         padding: "10px 16px",
                         borderBottom:
@@ -622,6 +633,7 @@ export default function OnboardingPage() {
                         {p.preco_venda !== null ? currency.format(p.preco_venda) : "—"}
                       </span>
                       <span
+                        className="hidden sm:block"
                         style={{
                           fontSize: 12,
                           color: "var(--fg-subtle)",

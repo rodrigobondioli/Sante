@@ -795,50 +795,60 @@ export default async function DashboardPage() {
 
             {/* Oportunidade principal */}
             <div
-              className="animate-fade-in-up lg:col-span-2"
+              className="animate-fade-in-up lg:col-span-2 flex flex-col sm:flex-row"
               style={{ ...card, animationDelay: "300ms" }}
             >
               {produtosTop5.length === 0 || produtosTop5[0].margemPercentual === null ? (
-                <>
+                <div>
                   <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--ok)", margin: "0 0 10px" }}>
-                    🎯 OPORTUNIDADE PRINCIPAL
+                    Oportunidade principal
                   </p>
                   <p style={{ fontSize: 13, color: "var(--fg-muted)" }}>Nenhuma venda com dado de margem ainda.</p>
-                </>
+                </div>
               ) : (
                 <>
-                  <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--ok)", margin: "0 0 10px" }}>
-                    🎯 OPORTUNIDADE PRINCIPAL
-                  </p>
-                  <p style={{ fontSize: 20, fontWeight: 700, color: "var(--fg)", fontFamily: "var(--font-mono)", margin: "0 0 6px", letterSpacing: "-0.01em" }}>
-                    {produtosTop5[0].produtoNome}
-                  </p>
-                  <div style={{ display: "flex", gap: 14, marginBottom: 12, flexWrap: "wrap" }}>
-                    <span style={{ fontSize: 12, color: "var(--ok)", fontFamily: "var(--font-mono)", fontWeight: 600 }}>
-                      {percent.format(produtosTop5[0].margemPercentual ?? 0)}% margem
-                    </span>
-                    <span style={{ fontSize: 12, color: "var(--fg-muted)", fontFamily: "var(--font-mono)" }}>
-                      {currency.format(produtosTop5[0].faturamento)} vendido
-                    </span>
-                    <span style={{ fontSize: 12, color: "var(--fg-muted)", fontFamily: "var(--font-mono)" }}>
-                      {produtosTop5[0].quantidadeVendida}× pedido
-                    </span>
+                  {/* Coluna principal — herói */}
+                  <div
+                    className={produtosTop5.length > 1 ? "sm:pr-8" : ""}
+                    style={{ flex: "1 1 0", minWidth: 0 }}
+                  >
+                    <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--ok)", margin: "0 0 14px" }}>
+                      Oportunidade principal
+                    </p>
+                    <p style={{ fontSize: 32, fontWeight: 800, color: "var(--fg)", fontFamily: "var(--font-mono)", margin: "0 0 16px", letterSpacing: "-0.03em", lineHeight: 1 }}>
+                      {produtosTop5[0].produtoNome}
+                    </p>
+                    <div style={{ display: "flex", gap: 20, marginBottom: 20, alignItems: "baseline" }}>
+                      <span style={{ fontSize: 22, color: "var(--ok)", fontFamily: "var(--font-mono)", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1 }}>
+                        {percent.format(produtosTop5[0].margemPercentual ?? 0)}%
+                      </span>
+                      <span style={{ fontSize: 11, color: "var(--fg-subtle)", fontFamily: "var(--font-mono)" }}>
+                        {currency.format(produtosTop5[0].faturamento)} vendido · {produtosTop5[0].quantidadeVendida}× pedido
+                      </span>
+                    </div>
+                    <p style={{ fontSize: 13, color: "var(--fg-muted)", lineHeight: 1.65, margin: 0 }}>
+                      {produtosTop5[0].categoria === "star" || produtosTop5[0].categoria === "cash_cow"
+                        ? "Já vende bem. Treine a equipe para sugerir ainda mais."
+                        : "Alta margem com potencial. Destaque no cardápio e no discurso da equipe."}
+                    </p>
                   </div>
-                  <p style={{ fontSize: 13, color: "var(--fg-muted)", lineHeight: 1.6, marginBottom: produtosTop5.length > 1 ? 14 : 0 }}>
-                    {produtosTop5[0].categoria === "star" || produtosTop5[0].categoria === "cash_cow"
-                      ? "Já vende bem. Treine a equipe para sugerir ainda mais."
-                      : "Alta margem com potencial. Considere destacar no cardápio e no discurso da equipe."}
-                  </p>
+
+                  {/* Coluna secundária — outros */}
                   {produtosTop5.length > 1 && (
-                    <div style={{ borderTop: "1px solid var(--border)", paddingTop: 12 }}>
-                      <p style={{ ...overline, marginBottom: 8 }}>Outros com boa margem</p>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    <div
+                      className="flex-shrink-0 sm:w-[200px] mt-5 pt-5 sm:mt-0 sm:pt-0 border-t sm:border-t-0 sm:border-l sm:pl-7"
+                      style={{ borderColor: "var(--border)" }}
+                    >
+                      <p style={{ ...overline, marginBottom: 14 }}>Também vale</p>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                         {produtosTop5.slice(1).filter(p => p.margemPercentual !== null).map(p => (
-                          <div key={p.produtoId} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <span style={{ fontSize: 12, color: "var(--fg-muted)" }}>{p.produtoNome}</span>
-                            <span style={{ fontSize: 11, color: "var(--fg-subtle)", fontFamily: "var(--font-mono)" }}>
+                          <div key={p.produtoId}>
+                            <p style={{ fontSize: 12, fontWeight: 500, color: "var(--fg-muted)", margin: "0 0 1px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                              {p.produtoNome}
+                            </p>
+                            <p style={{ fontSize: 11, color: "var(--fg-subtle)", fontFamily: "var(--font-mono)", margin: 0 }}>
                               {percent.format(p.margemPercentual ?? 0)}% · {currency.format(p.faturamento)}
-                            </span>
+                            </p>
                           </div>
                         ))}
                       </div>
