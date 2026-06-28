@@ -111,8 +111,6 @@ export function ParallaxScene() {
           border-radius: 100px;
           font-family: var(--font-display);
           font-weight: 800;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
           white-space: nowrap;
           padding: 10px 22px;
           font-size: 1rem;

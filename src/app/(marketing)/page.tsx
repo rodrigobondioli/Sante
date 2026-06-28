@@ -278,13 +278,13 @@ export default async function Home() {
               lineHeight: 1.5,
             }}
           >
-            SUPERBAR — Uma plataforma que roda a operação do seu bar em tempo real e transforma cada dado em decisão.
+            Superbar — Uma plataforma que roda a operação do seu bar em tempo real e transforma cada dado em decisão.
           </span>
           <span
             style={{
               fontFamily: "var(--font-roboto-mono)",
               fontSize: "0.75rem",
-              color: "rgba(255,255,255,0.6)",
+              color: "#ffffff",
               flexShrink: 0,
             }}
           >

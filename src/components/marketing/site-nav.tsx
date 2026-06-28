@@ -16,7 +16,7 @@ export function SiteNav() {
         </Link>
         <span
           className="text-white"
-          style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 14 }}
+          style={{ fontFamily: "var(--font-sans)", fontWeight: 400, fontSize: 12 }}
         >
           Superbar Intelligence
         </span>

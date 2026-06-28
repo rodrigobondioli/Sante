@@ -23,12 +23,10 @@ export function ContactSection() {
 
         <h2
           style={{
-            fontFamily: "var(--font-display)",
+            fontFamily: "var(--font-sans)",
             fontSize: "clamp(1.75rem, 3vw, 2.5rem)",
-            fontWeight: 400,
+            fontWeight: 600,
             color: "#ffffff",
-            textTransform: "uppercase",
-            letterSpacing: "0.08em",
             lineHeight: 1.2,
             margin: 0,
           }}

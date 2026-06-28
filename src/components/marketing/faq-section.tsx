@@ -47,12 +47,10 @@ function FaqItem({ faq, initialOpen = false }: { faq: (typeof FAQS)[0]; initialO
           <span
             className="text-balance"
             style={{
-              fontFamily: "var(--font-display)",
+              fontFamily: "var(--font-sans)",
               fontSize: "clamp(1rem, 2.5vw, 1.25rem)",
               fontWeight: 400,
               color: YELLOW,
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
               lineHeight: 1.1,
             }}
           >
@@ -119,12 +117,10 @@ export function FaqSection() {
             <h2
               className="text-balance"
               style={{
-                fontFamily: "var(--font-display)",
+                fontFamily: "var(--font-sans)",
                 fontSize: "clamp(1.5rem, 4vw, 2.5rem)",
-                fontWeight: 400,
+                fontWeight: 600,
                 color: "#ffffff",
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
                 lineHeight: 1.1,
                 marginBottom: "1rem",
               }}

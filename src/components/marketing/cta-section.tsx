@@ -36,8 +36,6 @@ export function CtaSection() {
             fontWeight: 400,
             fontSize: "clamp(1.25rem, 3.5vw, 3.25rem)",
             color: "#ffffff",
-            textTransform: "uppercase",
-            letterSpacing: "0.08em",
             lineHeight: 1.05,
           }}
         >
@@ -50,8 +48,7 @@ export function CtaSection() {
             fontWeight: 400,
             fontSize: "clamp(3rem, 10vw, 9rem)",
             color: "#ffffff",
-            textTransform: "uppercase",
-            letterSpacing: "0.02em",
+            letterSpacing: "-0.02em",
             lineHeight: 0.9,
             marginBottom: "1.5rem",
           }}
