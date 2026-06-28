@@ -85,7 +85,7 @@ export default function CadastroPage() {
             alignItems: "center",
             justifyContent: "center",
             flex: 1,
-            padding: "80px 16px 64px",
+            padding: "120px 16px 48px",
           }}
         >
           <h1
