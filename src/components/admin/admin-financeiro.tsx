@@ -150,6 +150,85 @@ export function AdminFinanceiro({ bares, stats }: { bares: BarResumo[]; stats: A
           ))}
         </div>
       </div>
+
+      {/* CMV da plataforma */}
+      {stats.cmv_plataforma_receita > 0 && (
+        <div>
+          <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-subtle)", margin: "0 0 12px" }}>
+            CMV rastreado — plataforma
+          </p>
+          <div style={{
+            background: "var(--bg-elevated)",
+            borderRadius: 8,
+            padding: "20px 24px",
+            display: "flex",
+            gap: 40,
+            flexWrap: "wrap",
+            alignItems: "flex-start",
+          }}>
+            {/* CMV% geral */}
+            <div>
+              <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-subtle)", margin: "0 0 8px" }}>CMV médio</p>
+              <p style={{
+                fontSize: 34, fontWeight: 800, fontFamily: "var(--font-mono)", margin: "0 0 4px",
+                letterSpacing: "-0.04em", lineHeight: 1,
+                color: stats.cmv_plataforma_pct !== null
+                  ? stats.cmv_plataforma_pct <= 30 ? "#22c55e"
+                  : stats.cmv_plataforma_pct <= 38 ? "#f59e0b"
+                  : "#ef4444"
+                  : "var(--fg-muted)",
+              }}>
+                {stats.cmv_plataforma_pct !== null ? `${stats.cmv_plataforma_pct.toFixed(1)}%` : "—"}
+              </p>
+              <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>custo ÷ receita monitorada</p>
+            </div>
+
+            {/* Receita monitorada */}
+            <div>
+              <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-subtle)", margin: "0 0 8px" }}>Receita monitorada</p>
+              <p style={{ fontSize: 22, fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--fg)", margin: "0 0 4px", letterSpacing: "-0.03em" }}>
+                {currency.format(stats.cmv_plataforma_receita)}
+              </p>
+              <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>itens com custo cadastrado</p>
+            </div>
+
+            {/* Custo total */}
+            <div>
+              <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-subtle)", margin: "0 0 8px" }}>Custo rastreado</p>
+              <p style={{ fontSize: 22, fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--fg-muted)", margin: "0 0 4px", letterSpacing: "-0.03em" }}>
+                {currency.format(stats.cmv_plataforma_custo)}
+              </p>
+              <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>custo real dos itens vendidos</p>
+            </div>
+
+            {/* CMV por bar */}
+            {bares.filter(b => b.cmv_pct !== null).length > 0 && (
+              <div style={{ flex: 1, minWidth: 200 }}>
+                <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-subtle)", margin: "0 0 10px" }}>Por bar</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {bares.filter(b => b.cmv_pct !== null).map(b => (
+                    <div key={b.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ fontSize: 12, color: "var(--fg-muted)", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{b.nome}</span>
+                      <span style={{
+                        fontSize: 12, fontWeight: 700, fontFamily: "var(--font-mono)",
+                        color: b.cmv_pct! <= 30 ? "#22c55e" : b.cmv_pct! <= 38 ? "#f59e0b" : "#ef4444",
+                      }}>
+                        {b.cmv_pct!.toFixed(1)}%
+                      </span>
+                      <span style={{ fontSize: 10, color: "var(--fg-subtle)", width: 60, textAlign: "right" }}>
+                        {b.cmv_cobertura_receita_pct}% cob.
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <p style={{ fontSize: 11, color: "var(--fg-subtle)", fontStyle: "italic", margin: "8px 0 0" }}>
+            CMV calculado sobre itens com custo de produto cadastrado. Cobertura = % da receita que tem custo rastreado.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

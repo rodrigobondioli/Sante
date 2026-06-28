@@ -28,22 +28,26 @@ export function AdminSidebar({ alertCount = 0 }: AdminSidebarProps) {
         height: "100dvh",
         display: "flex",
         flexDirection: "column",
-        background: "var(--bg)",
+        background: "var(--bg-elevated)",
         borderRight: "1px solid var(--border)",
         flexShrink: 0,
         overflow: "hidden",
       }}
     >
       {/* Header */}
-      <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10 }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: "var(--fg)", fontFamily: "var(--font-mono)", letterSpacing: "-0.01em" }}>
-          SUPERBAR
-        </span>
+      <div style={{ padding: "18px 20px 16px", borderBottom: "1px solid var(--border)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/favicon.svg" alt="SUPERBAR" style={{ width: 28, height: 28, borderRadius: 7, flexShrink: 0, display: "block" }} />
+          <span style={{ fontSize: 13, fontWeight: 700, color: "var(--fg)", letterSpacing: "-0.01em" }}>SUPERBAR</span>
+        </div>
         <span style={{
-          fontSize: 9, fontWeight: 600, padding: "2px 6px", borderRadius: 2,
+          display: "inline-block",
+          fontSize: 10, fontWeight: 600,
+          padding: "2px 10px", borderRadius: 20,
           background: "color-mix(in srgb, var(--accent-bright) 14%, transparent)",
           color: "var(--accent-bright)",
-          letterSpacing: "0.08em", textTransform: "uppercase",
+          letterSpacing: "0.04em", textTransform: "uppercase",
         }}>
           Admin
         </span>

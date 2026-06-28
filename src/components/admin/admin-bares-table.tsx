@@ -174,13 +174,14 @@ export function AdminBaresTable({ bares }: { bares: BarResumo[] }) {
 
       {/* Tabela */}
       <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 820 }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 960 }}>
           <thead>
             <tr>
               <th style={{ ...thStyle, paddingLeft: 20 }}>Bar</th>
               <th style={thStyle}>Saúde</th>
               <th style={thStyle}>Último uso</th>
               <th style={thStyle}>Atividade 7d</th>
+              <th style={{ ...thStyle, textAlign: "right" }}>CMV</th>
               <th style={{ ...thStyle, textAlign: "right", paddingRight: 20 }}>Plano</th>
             </tr>
           </thead>
@@ -262,6 +263,25 @@ export function AdminBaresTable({ bares }: { bares: BarResumo[] }) {
                   {/* Atividade 7d */}
                   <td style={{ padding: "14px 16px", borderBottom: "1px solid var(--border)" }}>
                     <Activity7d turnos={bar.turnos_7d} comandas={bar.comandas_7d} faturamento={bar.faturamento_7d} />
+                  </td>
+
+                  {/* CMV */}
+                  <td style={{ padding: "14px 16px", borderBottom: "1px solid var(--border)", textAlign: "right" }}>
+                    {bar.cmv_pct !== null ? (
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 1 }}>
+                        <span style={{
+                          fontSize: 14, fontWeight: 700, fontFamily: "var(--font-mono)", letterSpacing: "-0.02em",
+                          color: bar.cmv_pct <= 30 ? "#22c55e" : bar.cmv_pct <= 38 ? "#f59e0b" : "#ef4444",
+                        }}>
+                          {bar.cmv_pct.toFixed(1)}%
+                        </span>
+                        <span style={{ fontSize: 10, color: "var(--fg-subtle)" }}>
+                          {bar.cmv_cobertura_receita_pct}% cobertura
+                        </span>
+                      </div>
+                    ) : (
+                      <span style={{ fontSize: 12, color: "var(--fg-subtle)" }}>sem custo</span>
+                    )}
                   </td>
 
                   {/* Plano */}

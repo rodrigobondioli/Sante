@@ -42,7 +42,13 @@ export interface BarResumo {
   total_turnos: number;
   total_membros: number;
   total_produtos: number;
-  cobertura_custo_pct: number; // 0-100
+  cobertura_custo_pct: number; // 0-100 (% de produtos com custo cadastrado)
+  // CMV real (calculado via comanda_items × produtos.custo)
+  cmv_custo_total: number;          // soma dos custos reais dos itens vendidos
+  cmv_receita_total: number;        // receita dos itens que têm custo cadastrado
+  cmv_receita_all: number;          // receita total de todos os itens não cancelados
+  cmv_pct: number | null;           // cmv_custo_total / cmv_receita_total × 100 (null se sem dado)
+  cmv_cobertura_receita_pct: number; // cmv_receita_total / cmv_receita_all × 100
   // Scores
   healthScore: HealthScore;
   healthScoreNumerico: number; // 0-100
@@ -64,6 +70,10 @@ export interface AdminStats {
   // Outros
   bares_sem_uso_7d: number;
   bares_inadimplentes: number;
+  // CMV plataforma
+  cmv_plataforma_custo: number;    // soma de custo real de todos os bares
+  cmv_plataforma_receita: number;  // receita coberta por produtos com custo
+  cmv_plataforma_pct: number | null; // CMV médio ponderado da plataforma
 }
 
 export interface BarDetalhe {
@@ -284,6 +294,7 @@ export async function getAdminBares(): Promise<{
         bares_saudaveis: 0, bares_atencao: 0, bares_risco: 0,
         implantacao_completo: 0, implantacao_parcial: 0, implantacao_abandonado: 0,
         bares_sem_uso_7d: 0, bares_inadimplentes: 0,
+        cmv_plataforma_custo: 0, cmv_plataforma_receita: 0, cmv_plataforma_pct: null,
       },
     };
   }
@@ -297,6 +308,7 @@ export async function getAdminBares(): Promise<{
     { data: produtos },
     { data: pagamentos7d },
     { data: comandas7d },
+    { data: cmvItems },
   ] = await Promise.all([
     admin.from("assinaturas")
       .select("bar_id, status, trial_fim, planos(nome, preco_mensal)")
@@ -322,6 +334,11 @@ export async function getAdminBares(): Promise<{
       .select("bar_id, id")
       .in("bar_id", barIds)
       .gte("criado_em", ago7d),
+    // CMV real: itens vendidos × custo do produto
+    admin.from("comanda_items")
+      .select("bar_id, quantidade, preco_total, produtos(custo)")
+      .in("bar_id", barIds)
+      .neq("status", "cancelado"),
   ]);
 
   // ── Indexar por bar ──────────────────────────────────────────────────────
@@ -354,6 +371,27 @@ export async function getAdminBares(): Promise<{
   const cmd7dMap = new Map<string, number>();
   for (const c of comandas7d ?? []) cmd7dMap.set(c.bar_id, (cmd7dMap.get(c.bar_id) ?? 0) + 1);
 
+  // ── CMV por bar ───────────────────────────────────────────────────────────
+  // custo_total = Σ(quantidade × produto.custo) apenas onde produto.custo > 0
+  // receita_com_custo = Σ(preco_total) desses mesmos itens
+  // receita_all = Σ(preco_total) de todos os itens não cancelados
+
+  type CmvRow = { bar_id: string; quantidade: number; preco_total: number; produtos: { custo: number | null } | null };
+  interface CmvAgg { custo: number; receita_com_custo: number; receita_all: number }
+
+  const cmvMap = new Map<string, CmvAgg>();
+  for (const row of (cmvItems as CmvRow[] | null) ?? []) {
+    const cur = cmvMap.get(row.bar_id) ?? { custo: 0, receita_com_custo: 0, receita_all: 0 };
+    const receitaItem = Number(row.preco_total ?? 0);
+    cur.receita_all += receitaItem;
+    const custo = row.produtos?.custo != null ? Number(row.produtos.custo) : null;
+    if (custo !== null && custo > 0) {
+      cur.custo += custo * Number(row.quantidade ?? 1);
+      cur.receita_com_custo += receitaItem;
+    }
+    cmvMap.set(row.bar_id, cur);
+  }
+
   // ── Montar lista ──────────────────────────────────────────────────────────
 
   const result: BarResumo[] = bares.map((b) => {
@@ -375,6 +413,14 @@ export async function getAdminBares(): Promise<{
     const implantacaoScore    = computeImplantacao({ total_turnos: totalTurnos, cobertura_custo_pct: coberturaPct, total_membros: membros });
     const alertas             = computeAlertas(scoreArgs);
 
+    const cmv = cmvMap.get(b.id) ?? { custo: 0, receita_com_custo: 0, receita_all: 0 };
+    const cmv_pct = cmv.receita_com_custo > 0
+      ? Math.round((cmv.custo / cmv.receita_com_custo) * 1000) / 10
+      : null;
+    const cmv_cobertura_receita_pct = cmv.receita_all > 0
+      ? Math.round((cmv.receita_com_custo / cmv.receita_all) * 100)
+      : 0;
+
     return {
       id: b.id, nome: b.nome, slug: b.slug,
       cidade: end?.cidade ?? null, estado: end?.estado ?? null,
@@ -385,6 +431,11 @@ export async function getAdminBares(): Promise<{
       turnos_7d: t?.total7d ?? 0, comandas_7d: cmd7dMap.get(b.id) ?? 0, faturamento_7d: fat7dMap.get(b.id) ?? 0,
       total_turnos: totalTurnos, total_membros: membros,
       total_produtos: prod.total, cobertura_custo_pct: coberturaPct,
+      cmv_custo_total: cmv.custo,
+      cmv_receita_total: cmv.receita_com_custo,
+      cmv_receita_all: cmv.receita_all,
+      cmv_pct,
+      cmv_cobertura_receita_pct,
       healthScore, healthScoreNumerico, implantacaoScore, alertas,
     };
   });
@@ -392,6 +443,12 @@ export async function getAdminBares(): Promise<{
   // ── Stats globais ─────────────────────────────────────────────────────────
 
   const mrr = result.reduce((acc, b) => acc + (b.assinatura_status === "ativa" && b.plano_preco ? b.plano_preco : 0), 0);
+
+  const cmvPlataformaCusto   = result.reduce((acc, b) => acc + b.cmv_custo_total, 0);
+  const cmvPlataformaReceita = result.reduce((acc, b) => acc + b.cmv_receita_total, 0);
+  const cmvPlataformaPct     = cmvPlataformaReceita > 0
+    ? Math.round((cmvPlataformaCusto / cmvPlataformaReceita) * 1000) / 10
+    : null;
 
   return {
     bares: result,
@@ -406,6 +463,9 @@ export async function getAdminBares(): Promise<{
       implantacao_abandonado:  result.filter((b) => b.implantacaoScore === "abandonado").length,
       bares_sem_uso_7d:        result.filter((b) => b.ativo && (b.dias_sem_uso === null || b.dias_sem_uso >= 7)).length,
       bares_inadimplentes:     result.filter((b) => b.assinatura_status === "inadimplente").length,
+      cmv_plataforma_custo:    cmvPlataformaCusto,
+      cmv_plataforma_receita:  cmvPlataformaReceita,
+      cmv_plataforma_pct:      cmvPlataformaPct,
     },
   };
 }

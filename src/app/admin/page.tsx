@@ -152,6 +152,68 @@ export default async function AdminPage() {
           )}
         </div>
 
+        {/* CMV plataforma — linha 3, ocupa as 3 colunas */}
+        {stats.cmv_plataforma_receita > 0 && (
+          <div style={{
+            ...card,
+            gridColumn: "1 / -1",
+            display: "flex",
+            alignItems: "center",
+            gap: 0,
+            padding: "20px 28px",
+          }}>
+            {/* CMV% */}
+            <div style={{ flex: "0 0 auto", minWidth: 140 }}>
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-subtle)", display: "block", marginBottom: 8 }}>
+                CMV médio plataforma
+              </span>
+              <p style={{
+                fontSize: 38, fontWeight: 800, fontFamily: "var(--font-mono)", margin: "0 0 4px",
+                letterSpacing: "-0.04em", lineHeight: 1,
+                color: stats.cmv_plataforma_pct !== null
+                  ? stats.cmv_plataforma_pct <= 30 ? "#22c55e" : stats.cmv_plataforma_pct <= 38 ? "#f59e0b" : "#ef4444"
+                  : "var(--fg-muted)",
+              }}>
+                {stats.cmv_plataforma_pct !== null ? `${stats.cmv_plataforma_pct.toFixed(1)}%` : "—"}
+              </p>
+              <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>custo ÷ receita monitorada</p>
+            </div>
+
+            {/* Divisor */}
+            <div style={{ width: 1, height: 56, background: "var(--border)", margin: "0 32px", flexShrink: 0 }} />
+
+            {/* Receita coberta */}
+            <div style={{ flex: "0 0 auto" }}>
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-subtle)", display: "block", marginBottom: 8 }}>
+                Receita monitorada
+              </span>
+              <p style={{ fontSize: 22, fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--fg)", margin: "0 0 2px", letterSpacing: "-0.03em" }}>
+                {currency.format(stats.cmv_plataforma_receita)}
+              </p>
+              <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>de itens com custo cadastrado</p>
+            </div>
+
+            {/* Divisor */}
+            <div style={{ width: 1, height: 56, background: "var(--border)", margin: "0 32px", flexShrink: 0 }} />
+
+            {/* Custo total */}
+            <div style={{ flex: "0 0 auto" }}>
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-subtle)", display: "block", marginBottom: 8 }}>
+                Custo rastreado
+              </span>
+              <p style={{ fontSize: 22, fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--fg-muted)", margin: "0 0 2px", letterSpacing: "-0.03em" }}>
+                {currency.format(stats.cmv_plataforma_custo)}
+              </p>
+              <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>custo real dos produtos vendidos</p>
+            </div>
+
+            {/* Nota de honestidade */}
+            <p style={{ marginLeft: "auto", fontSize: 11, color: "var(--fg-subtle)", fontStyle: "italic", maxWidth: 220, textAlign: "right", lineHeight: 1.5 }}>
+              Calculado sobre itens com custo cadastrado. Quanto maior a cobertura, mais preciso.
+            </p>
+          </div>
+        )}
+
       </div>
 
       {/* ── Atenção ────────────────────────────────────────────────────── */}
