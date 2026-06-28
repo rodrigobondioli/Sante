@@ -23,6 +23,28 @@ export const metadata: Metadata = {
     icon: "/favicon.svg",
     apple: "/icon-192.png",
   },
+  openGraph: {
+    title: "SUPERBAR — Seu Bar Mais Inteligente",
+    description: "Plataforma de gestão inteligente para bares. Operação em tempo real, CMV, margem e decisões — tudo num painel feito exclusivamente para bar.",
+    url: "https://superbar.com.br",
+    siteName: "Superbar",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Superbar — Seu bar ficou super inteligente.",
+      },
+    ],
+    locale: "pt_BR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SUPERBAR — Seu Bar Mais Inteligente",
+    description: "Plataforma de gestão inteligente para bares. Operação em tempo real, CMV, margem e decisões — tudo num painel feito exclusivamente para bar.",
+    images: ["/og-image.png"],
+  },
 };
 
 export const viewport: Viewport = {
