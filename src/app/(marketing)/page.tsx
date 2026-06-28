@@ -41,7 +41,7 @@ export default async function Home() {
 
       {/* ─── HERO ─────────────────────────────────────────────────────────── */}
       <section
-        className="relative flex min-h-[calc(100dvh-96px)] w-full flex-col items-center justify-center px-4 text-center md:min-h-dvh md:px-8 lg:px-14"
+        className="relative flex min-h-dvh w-full flex-col items-center justify-center px-4 text-center md:px-8 lg:px-14"
         style={{ background: "linear-gradient(to bottom, #0A0A0B 0%, #111113 100%)" }}
       >
         {/* Badge */}

@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export function SiteNav() {
   return (
-    <nav className="relative md:fixed md:left-0 md:right-0 md:top-0 md:z-50">
+    <nav className="absolute left-0 right-0 top-0 z-50 md:fixed">
       <div className="flex items-start justify-between px-4 md:px-8 lg:px-14" style={{ paddingTop: 32, paddingBottom: 20 }}>
         <Link href="/">
           <Image
