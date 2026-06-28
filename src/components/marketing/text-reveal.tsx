@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 
 const WORDS =
-  "Imagine seu bar como uma coqueteleira. Você coloca tudo dentro. Insumo, Equipe, Tempo, e Energia. Trabalha a semana inteira para encher o bar. Serve. Repete. Mas existe um vazamento que você não vê. Enquanto o bar enche, o lucro vaza. Você sabe quanto entrou. Não sabe quanto sobrou."
+  "Imagine seu bar como uma coqueteleira. Você coloca tudo dentro. Insumo, equipe, tempo, e energia. Trabalha a semana inteira para encher o bar. Serve. Repete. Mas existe um vazamento que você não vê. Enquanto o bar enche, o lucro vaza. Você sabe quanto entrou. Não sabe quanto sobrou."
     .split(" ");
 
 const FEATHER = 10;
