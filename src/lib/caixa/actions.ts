@@ -64,7 +64,35 @@ export async function registrarPagamento(
     p_valor: totalPago,
   });
 
+  // Atualiza agregados do cliente (se comanda tiver cliente vinculado)
+  const { data: cmdCliente } = await supabase
+    .from("comandas")
+    .select("cliente_id")
+    .eq("id", comandaId)
+    .single<{ cliente_id: string | null }>();
+
+  if (cmdCliente?.cliente_id) {
+    const cid = cmdCliente.cliente_id;
+    const { data: cli } = await supabase
+      .from("clientes")
+      .select("total_visitas, total_gasto")
+      .eq("id", cid)
+      .single<{ total_visitas: number; total_gasto: number }>();
+
+    if (cli) {
+      const novoTotal    = (cli.total_gasto ?? 0) + totalComanda;
+      const novasVisitas = (cli.total_visitas ?? 0) + 1;
+      await supabase.from("clientes").update({
+        total_visitas: novasVisitas,
+        total_gasto:   novoTotal,
+        ticket_medio:  Math.round((novoTotal / novasVisitas) * 100) / 100,
+        ultima_visita: new Date().toISOString(),
+      }).eq("id", cid);
+    }
+  }
+
   revalidatePath("/caixa");
   revalidatePath("/dashboard/caixa");
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/clientes");
 }

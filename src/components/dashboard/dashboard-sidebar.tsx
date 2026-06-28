@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, BarChart3, History, UtensilsCrossed,
   TableProperties, Users, MonitorSmartphone, Wallet, Package, Sparkles,
-  HeadphonesIcon, Lightbulb,
+  HeadphonesIcon, Lightbulb, Contact,
 } from "lucide-react";
 import type { BarRole, Bar } from "@/types/database";
 import { Drawer } from "@/components/ui/drawer";
@@ -21,6 +21,7 @@ const links = [
   { href: "/dashboard/cardapio",           label: "Cardápio",         icon: UtensilsCrossed },
   { href: "/dashboard/mesas",              label: "Mesas",            icon: TableProperties },
   { href: "/dashboard/estoque",            label: "Estoque",          icon: Package },
+  { href: "/dashboard/clientes",           label: "Clientes",         icon: Contact },
   { href: "/dashboard/equipe",             label: "Equipe",           icon: Users },
   { href: "/caixa",                        label: "Caixa",            icon: Wallet },
 ];

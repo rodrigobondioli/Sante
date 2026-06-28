@@ -20,6 +20,31 @@ export async function abrirComanda(
   if (!turno) return { error: "Erro ao iniciar turno." };
 
   const supabase = await createClient();
+
+  // Auto-link cliente pelo identificador QR/NFC
+  let clienteId: string | null = null;
+  if (identificador?.trim()) {
+    const token = identificador.trim();
+    const { data: clienteExistente } = await supabase
+      .from("clientes")
+      .select("id")
+      .eq("bar_id", current.bar.id)
+      .eq("identificador", token)
+      .maybeSingle<{ id: string }>();
+
+    if (clienteExistente) {
+      clienteId = clienteExistente.id;
+    } else if (nomeCliente?.trim()) {
+      // Cria cliente automaticamente na primeira vez que o cartão aparece
+      const { data: novoCliente } = await supabase
+        .from("clientes")
+        .insert({ bar_id: current.bar.id, identificador: token, nome: nomeCliente.trim() })
+        .select("id")
+        .single<{ id: string }>();
+      clienteId = novoCliente?.id ?? null;
+    }
+  }
+
   const { data: novaComanda, error: dbError } = await supabase.from("comandas")
     .insert({
       bar_id: current.bar.id,
@@ -30,6 +55,7 @@ export async function abrirComanda(
       total_pessoas: totalPessoas ?? null,
       identificador: identificador ?? null,
       nome_cliente: nomeCliente?.trim() || null,
+      cliente_id: clienteId,
     })
     .select("id")
     .single();

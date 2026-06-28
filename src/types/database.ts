@@ -223,12 +223,32 @@ export interface Comanda {
   bartender_id: string;
   identificador: string | null;  // nº do cartão de comanda
   nome_cliente: string | null;   // nome da pessoa (opcional)
+  cliente_id: string | null;     // FK → clientes.id (auto-linked via identificador)
   status: ComandaStatus;
   total: number;
   total_pessoas: number | null;
   aberta_em: string;
   fechada_em: string | null;
   created_at: string;
+}
+
+// ─── Clientes ─────────────────────────────────────────────────────────────────
+export interface Cliente {
+  id: string;
+  bar_id: string;
+  identificador: string | null;   // token QR/NFC
+  nome: string;
+  telefone: string | null;
+  email: string | null;
+  data_nascimento: string | null; // ISO date YYYY-MM-DD
+  time_coracao: string | null;
+  notas: string | null;
+  total_visitas: number;
+  ultima_visita: string | null;
+  total_gasto: number;
+  ticket_medio: number | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ComandaItem {
@@ -381,6 +401,7 @@ export interface Database {
       chamadas: TableDef<Chamada>;
       pedidos: TableDef<Pedido>;
       insights: TableDef<Insight>;
+      clientes: TableDef<Cliente>;
       pedidos_cliente: {
         Row: PedidoCliente & Record<string, unknown>;
         Insert: {
