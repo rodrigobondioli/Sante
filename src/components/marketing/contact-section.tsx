@@ -10,7 +10,7 @@ export function ContactSection() {
   return (
     <section
       className="flex items-center justify-center py-20 md:min-h-[80vh] md:py-0"
-      style={{ background: "#1133FF" }}
+      style={{ background: "#111113" }}
     >
       <div className="flex flex-col items-center gap-8 px-4 text-center">
         <Image
@@ -40,7 +40,7 @@ export function ContactSection() {
           onClick={open}
           className="inline-flex cursor-pointer items-center gap-3 rounded-full px-8 py-4 text-sm font-bold transition hover:opacity-90"
           style={{
-            background: "#1133FF",
+            background: "#F59E0B",
             color: "#000000",
             fontFamily: "var(--font-roboto-mono)",
             border: "none",

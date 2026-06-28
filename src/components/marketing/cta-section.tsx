@@ -12,19 +12,19 @@ export function CtaSection() {
   return (
     <section
       className="relative flex items-center justify-center overflow-hidden py-28 md:min-h-[80vh] md:py-0"
-      style={{ background: "#110039" }}
+      style={{ background: "#0A0A0B" }}
     >
       {/* Serrilhado topo */}
       <div className="absolute left-0 right-0 top-0" style={{ lineHeight: 0 }}>
         <svg viewBox="0 0 1440 20" preserveAspectRatio="none" className="w-full" style={{ height: 20, display: "block" }}>
-          <path d={TOP} fill="#1133FF" />
+          <path d={TOP} fill="#111113" />
         </svg>
       </div>
 
       {/* Serrilhado base */}
       <div className="absolute bottom-0 left-0 right-0" style={{ lineHeight: 0 }}>
         <svg viewBox="0 0 1440 20" preserveAspectRatio="none" className="w-full" style={{ height: 20, display: "block" }}>
-          <path d={BOT} fill="#1133FF" />
+          <path d={BOT} fill="#111113" />
         </svg>
       </div>
 
@@ -74,7 +74,7 @@ export function CtaSection() {
           onClick={open}
           className="inline-flex cursor-pointer items-center gap-3 rounded-full px-8 py-4 text-sm font-bold transition hover:opacity-90"
           style={{
-            background: "#1133FF",
+            background: "#F59E0B",
             color: "#000000",
             fontFamily: "var(--font-roboto-mono)",
             border: "none",

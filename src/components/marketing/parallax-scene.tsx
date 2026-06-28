@@ -9,12 +9,12 @@ type Item  = Img | Badge;
 
 const ITEMS: Item[] = [
   { id: "badge-orange", type: "badge",
-    text: "Diminuímos o CMV", bg: "#FF6600", fg: "#ffffff",
+    text: "Diminuímos o CMV", bg: "#F59E0B", fg: "#000000",
     left: "50%", top: "30%", speedY: 90, speedX: -35, rot: -12, z: 3, centerX: true,
     float: "float-badge-a", delay: "0s" },
 
   { id: "badge-yellow", type: "badge",
-    text: "Aumentamos a Margem", bg: "#FFD600", fg: "#0B0025",
+    text: "Aumentamos a Margem", bg: "#2C2C2E", fg: "#F59E0B",
     left: "50%", top: "54%", speedY: 110, speedX: 28, rot: 8, z: 2, centerX: true,
     float: "float-badge-b", delay: "0.6s" },
 
@@ -72,7 +72,7 @@ export function ParallaxScene() {
     <section
       ref={sectionRef}
       className="relative overflow-hidden"
-      style={{ height: "100vh", background: "#1133FF" }}
+      style={{ height: "100vh", background: "#111113" }}
     >
       <style>{`
         /* ── Float keyframes ──────────────────────────────── */

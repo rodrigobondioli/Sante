@@ -166,6 +166,43 @@ Breakpoints:
 
 ---
 
+## Landing page (marketing)
+
+A landing page (`/`) usa o **mesmo sistema de design** que o dashboard. Não existem duas paletas — existe uma paleta, aplicada em dois contextos.
+
+### Hierarquia de fundos na landing
+
+| Área                                        | Cor                          |
+|--------------------------------------------|------------------------------|
+| Fundo geral do site                        | `#111113`                    |
+| Hero (gradient topo → fundo)               | `#0A0A0B` → `#111113`       |
+| Seção "Seu bar ficou super INTELIGENTE"    | `#0A0A0B`                   |
+| Cards de dores / processo mobile           | `#1C1C1E`                   |
+| Cards processo desktop (profundidade)      | `#1C1C1E` / `#232325` / `#2A2A2C` |
+| Footer                                     | `#111113`                    |
+
+### Cards na landing
+
+Todo card usa borda: `border: "1px solid #2C2C2E"`.
+
+Os 3 cards do Processo criam profundidade com tons progressivos: `#1C1C1E` → `#232325` → `#2A2A2C`. Divider interno: `rgba(255,255,255,0.1)`.
+
+### Accent na landing
+
+Idêntico ao dashboard: `#F59E0B`. Aplicado em títulos de cards de dores, check icons, CTAs primários, FAQ, badges da parallax.
+
+### Badges da parallax scene
+
+Dois badges visualmente distintos:
+- Badge 1 "Diminuímos o CMV": `bg #F59E0B`, `fg #000000`
+- Badge 2 "Aumentamos a Margem": `bg #2C2C2E`, `fg #F59E0B`
+
+### Regra absoluta
+
+Nunca crie "a paleta da landing" separada "da paleta do dashboard". Uma paleta, dois contextos. Qualquer valor novo que não caiba nos tokens existentes deve ser documentado aqui — nunca improvisado inline.
+
+---
+
 ## Referências
 
 - Inspiração técnica: Linear, Vercel, Stripe Dashboard

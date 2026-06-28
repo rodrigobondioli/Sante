@@ -37,12 +37,12 @@ export default async function Home() {
   if (host.startsWith("app.")) redirect("/login");
 
   return (
-    <div className="min-h-screen" style={{ background: "#1133FF", color: "#FFFFFF" }}>
+    <div className="min-h-screen" style={{ background: "#111113", color: "#FFFFFF" }}>
 
       {/* ─── HERO ─────────────────────────────────────────────────────────── */}
       <section
         className="relative flex min-h-[calc(100dvh-96px)] w-full flex-col items-center justify-center px-4 text-center md:min-h-dvh md:px-8 lg:px-14"
-        style={{ background: "linear-gradient(to bottom, #0B0025 0%, #1133FF 100%)" }}
+        style={{ background: "linear-gradient(to bottom, #0A0A0B 0%, #111113 100%)" }}
       >
         {/* Badge */}
         <div
@@ -128,10 +128,10 @@ export default async function Home() {
             {/* Left cards */}
             <div className="flex flex-col gap-4 lg:gap-5">
               {doresLeft.map((item) => (
-                <div key={item.title} className="rounded-2xl p-5 md:p-7" style={{ background: "#110039" }}>
+                <div key={item.title} className="rounded-2xl p-5 md:p-7" style={{ background: "#1C1C1E", border: "1px solid #2C2C2E" }}>
                   <p
                     className="mb-3 uppercase text-balance md:mb-4"
-                    style={{ color: "#1133FF", fontFamily: "var(--font-display)", fontWeight: 400, fontSize: "1rem", letterSpacing: "0.08em" }}
+                    style={{ color: "#F59E0B", fontFamily: "var(--font-display)", fontWeight: 400, fontSize: "1rem", letterSpacing: "0.08em" }}
                   >
                     {item.title}
                   </p>
@@ -159,10 +159,10 @@ export default async function Home() {
             {/* Right cards */}
             <div className="flex flex-col gap-4 lg:gap-5">
               {doresRight.map((item) => (
-                <div key={item.title} className="rounded-2xl p-5 md:p-7" style={{ background: "#110039" }}>
+                <div key={item.title} className="rounded-2xl p-5 md:p-7" style={{ background: "#1C1C1E", border: "1px solid #2C2C2E" }}>
                   <p
                     className="mb-3 uppercase text-balance md:mb-4"
-                    style={{ color: "#1133FF", fontFamily: "var(--font-display)", fontWeight: 400, fontSize: "1rem", letterSpacing: "0.08em" }}
+                    style={{ color: "#F59E0B", fontFamily: "var(--font-display)", fontWeight: 400, fontSize: "1rem", letterSpacing: "0.08em" }}
                   >
                     {item.title}
                   </p>
@@ -221,7 +221,7 @@ export default async function Home() {
                   >
                     <Check
                       className="h-4 w-4 flex-shrink-0 md:h-5 md:w-5"
-                      style={{ color: "#1133FF" }}
+                      style={{ color: "#F59E0B" }}
                       strokeWidth={2.5}
                     />
                     <span
@@ -264,7 +264,7 @@ export default async function Home() {
       <ContactSection />
 
       {/* ─── FOOTER ────────────────────────────────────────────────────────── */}
-      <footer style={{ borderTop: "1px solid rgba(255,255,255,0.1)", background: "#1133FF" }}>
+      <footer style={{ borderTop: "1px solid rgba(255,255,255,0.1)", background: "#111113" }}>
         <div
           className="flex flex-col gap-3 px-4 py-6 md:flex-row md:items-center md:justify-between md:px-8 md:py-6 lg:px-14"
         >

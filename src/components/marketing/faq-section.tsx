@@ -2,8 +2,8 @@
 import { useState } from "react";
 import Image from "next/image";
 
-const YELLOW = "#FFD600";
-const BG = "#1133FF";
+const YELLOW = "#F59E0B";
+const BG = "#111113";
 
 const FAQS = [
   {

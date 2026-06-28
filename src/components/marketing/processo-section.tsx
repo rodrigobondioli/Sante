@@ -20,9 +20,9 @@ const STEPS = [
 ];
 
 const N    = STEPS.length;
-const BG   = "#1133FF";
-const DARK = "#1133FF";
-const CARD_COLORS = ["#FF6600", "#1133FF", "#FFD601"];
+const BG   = "#111113";
+const DARK = "#FAFAFA";
+const CARD_COLORS = ["#1C1C1E", "#232325", "#2A2A2C"];
 
 const TITLE_STYLE: React.CSSProperties = {
   fontFamily: "var(--font-display)",
@@ -97,9 +97,10 @@ export function ProcessoSection() {
             <div
               key={step.num}
               style={{
-                background: "#FF6600",
+                background: "#1C1C1E",
                 borderRadius: 20,
                 padding: "28px 24px",
+                border: "1px solid #2C2C2E",
                 boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
               }}
             >
@@ -118,7 +119,7 @@ export function ProcessoSection() {
               >
                 {step.num} {step.title}
               </p>
-              <div style={{ height: 1, background: "rgba(26,1,84,0.2)", marginBottom: 16 }} />
+              <div style={{ height: 1, background: "rgba(255,255,255,0.1)", marginBottom: 16 }} />
               <p
                 className="text-pretty"
                 style={{
@@ -170,10 +171,11 @@ export function ProcessoSection() {
                     position: "absolute",
                     inset: 0,
                     background: CARD_COLORS[i],
+                    border: "1px solid #2C2C2E",
                     borderRadius: "24px",
                     opacity: 0,
                     willChange: "transform, opacity",
-                    boxShadow: "0 12px 40px rgba(0,0,0,0.35)",
+                    boxShadow: "0 12px 40px rgba(0,0,0,0.5)",
                     transformOrigin: "top center",
                   }}
                 >
@@ -192,7 +194,7 @@ export function ProcessoSection() {
                   >
                     {step.num} {step.title}
                   </p>
-                  <div style={{ height: 1, background: "rgba(26,1,84,0.2)", marginBottom: "12px" }} />
+                  <div style={{ height: 1, background: "rgba(255,255,255,0.1)", marginBottom: "12px" }} />
                   <p
                     className="text-pretty"
                     style={{

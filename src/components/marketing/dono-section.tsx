@@ -4,7 +4,7 @@ export function DonoSection() {
   return (
     <section
       className="flex flex-col justify-center py-10 md:py-[120px]"
-      style={{ background: "#1133FF" }}
+      style={{ background: "#111113" }}
     >
       <div className="mx-auto max-w-[1440px] px-4 md:px-8 lg:px-14">
 
