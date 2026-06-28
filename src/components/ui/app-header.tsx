@@ -19,7 +19,7 @@ export function AppHeader({
       height: "calc(52px + env(safe-area-inset-top))",
       flexShrink: 0,
       borderBottom: "none",
-      background: "var(--bg-elevated)",
+      background: "var(--bg)",
     }}>
       {/* Esquerda: logo + nome do bar + badge */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, overflow: "hidden" }}>
@@ -39,11 +39,10 @@ export function AppHeader({
         </span>
 
         <span style={{
-          fontSize: 10, fontWeight: 700,
-          padding: "3px 9px", borderRadius: 4,
-          background: "color-mix(in srgb, var(--accent) 30%, transparent)",
-          color: "var(--accent-bright)",
-          letterSpacing: "0.06em", textTransform: "uppercase",
+          fontSize: 10, fontWeight: 600,
+          padding: "2px 8px", borderRadius: 20,
+          background: "color-mix(in srgb, var(--accent) 14%, transparent)",
+          color: "var(--accent)",
           flexShrink: 0,
         }}>
           {roleLabel}

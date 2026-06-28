@@ -262,8 +262,8 @@ function MembroRow({
         </div>
       ) : (
         <span style={{
-          fontSize: 11, fontWeight: 600, padding: "4px 12px", borderRadius: 4,
-          background: "color-mix(in srgb, var(--fg) 8%, transparent)", color: ROLE_COLORS[m.role], display: "inline-block",
+          fontSize: 10, fontWeight: 600, padding: "2px 10px", borderRadius: 20,
+          background: "color-mix(in srgb, var(--accent) 14%, transparent)", color: "var(--accent)", display: "inline-block",
         }}>
           {ROLE_LABELS[m.role]}
         </span>
