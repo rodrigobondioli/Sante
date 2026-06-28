@@ -24,17 +24,17 @@ interface LiveBarProps {
 }
 
 function Delta({ pct }: { pct: number | null | undefined }) {
-  if (pct == null) return <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>sem dados</span>;
+  if (pct == null) return <span style={{ fontSize: 11, color: "var(--fg-subtle)", fontWeight: 400 }}>—</span>;
   const pos = pct >= 0;
   const color = pos ? "var(--ok)" : "var(--danger)";
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 3, fontSize: 11, fontWeight: 600, color }}>
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11 }}>
       <svg width="6" height="6" viewBox="0 0 6 6" style={{ flexShrink: 0 }}>
         {pos
           ? <path d="M3 0.5L5.8 5.5H0.2L3 0.5Z" fill={color} />
           : <path d="M3 5.5L0.2 0.5H5.8L3 5.5Z" fill={color} />}
       </svg>
-      <span style={{ fontVariantNumeric: "tabular-nums" }}>{Math.abs(pct).toFixed(1)}%</span>
+      <span style={{ fontVariantNumeric: "tabular-nums", fontWeight: 700, color }}>{Math.abs(pct).toFixed(1)}%</span>
       <span style={{ fontWeight: 400, color: "var(--fg-subtle)" }}>vs ontem</span>
     </span>
   );
@@ -97,7 +97,7 @@ export function LiveBar({
         background: "var(--bg-card)",
         border: "1px solid var(--border)",
         borderRadius: 16,
-        padding: "24px 28px",
+        padding: "22px 28px 24px",
         display: "flex",
         alignItems: "stretch",
       }}>
@@ -106,20 +106,20 @@ export function LiveBar({
         <div style={{ flex: 1, minWidth: 0 }}>
 
           {/* Status row */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
             <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
               <span
                 className="animate-live-pulse"
-                style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--ok)", display: "block", flexShrink: 0 }}
+                style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--ok)", display: "block", flexShrink: 0 }}
               />
-              <span style={{ fontSize: 10, fontWeight: 700, color: "var(--ok)", letterSpacing: "0.09em", textTransform: "uppercase" }}>Ao Vivo</span>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "var(--ok)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Ao Vivo</span>
             </span>
-            <span style={{ fontSize: 11, color: "var(--border-strong)" }}>·</span>
-            <span style={{ fontSize: 12, color: "var(--fg-subtle)" }}>Turno aberto</span>
+            <span style={{ color: "var(--fg-subtle)", fontSize: 10 }}>·</span>
+            <span style={{ fontSize: 11, color: "var(--fg-subtle)", fontWeight: 400 }}>Turno aberto</span>
             {dataFormatada && (
               <>
-                <span style={{ fontSize: 11, color: "var(--border-strong)" }}>·</span>
-                <span style={{ fontSize: 12, color: "var(--fg-subtle)" }}>{dataFormatada}</span>
+                <span style={{ color: "var(--fg-subtle)", fontSize: 10 }}>·</span>
+                <span style={{ fontSize: 11, color: "var(--fg-subtle)", fontWeight: 400 }}>{dataFormatada}</span>
               </>
             )}
           </div>
@@ -128,20 +128,31 @@ export function LiveBar({
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 0 }}>
             {[
               { label: "Faturamento", value: currency.format(data.faturamento), sub: <Delta pct={comparacaoFaturamento} />, color: "var(--fg)" },
-              { label: "Ticket Médio", value: data.pessoas > 0 ? currency.format(ticketMedio) : "—", sub: <Delta pct={comparacaoTicket} />, color: "var(--fg)", divider: true },
-              { label: "Margem", value: margemValor, sub: <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>{margemSub}</span>, color: margemColor, divider: true },
+              { label: "Ticket Médio", value: data.pessoas > 0 ? currency.format(ticketMedio) : "—", sub: <Delta pct={comparacaoTicket} />, color: "var(--fg)" },
+              { label: "Margem", value: margemValor, sub: <span style={{ fontSize: 11, color: "var(--fg-subtle)", fontWeight: 400 }}>{margemSub}</span>, color: margemColor },
             ].map((kpi, i) => (
               <div key={i} style={{
                 paddingLeft: i > 0 ? 28 : 0,
                 paddingRight: i < 2 ? 28 : 0,
                 borderLeft: i > 0 ? "1px solid var(--border)" : "none",
               }}>
-                <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--fg-subtle)", margin: "0 0 10px" }}>
+                {/* Label */}
+                <p style={{
+                  fontSize: 10, fontWeight: 500, textTransform: "uppercase",
+                  letterSpacing: "0.1em", color: "var(--fg-subtle)",
+                  margin: "0 0 8px",
+                }}>
                   {kpi.label}
                 </p>
-                <p style={{ fontSize: 30, fontWeight: 700, color: kpi.color, fontVariantNumeric: "tabular-nums", lineHeight: 1, margin: "0 0 8px", letterSpacing: "-0.02em" }}>
+                {/* Value */}
+                <p style={{
+                  fontSize: 28, fontWeight: 800, color: kpi.color,
+                  fontVariantNumeric: "tabular-nums", lineHeight: 1,
+                  margin: "0 0 9px", letterSpacing: "-0.025em",
+                }}>
                   {kpi.value}
                 </p>
+                {/* Sub */}
                 {kpi.sub}
               </div>
             ))}
@@ -149,40 +160,49 @@ export function LiveBar({
         </div>
 
         {/* ── Divider ── */}
-        <div style={{ width: 1, background: "var(--border)", margin: "0 32px", flexShrink: 0 }} />
+        <div style={{ width: 1, background: "var(--border)", margin: "0 28px", flexShrink: 0 }} />
 
         {/* ── Direita: meta + comandas ── */}
-        <div style={{ width: 180, flexShrink: 0, display: "flex", flexDirection: "column" }}>
+        <div style={{ width: 172, flexShrink: 0, display: "flex", flexDirection: "column" }}>
 
-          <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--fg-subtle)", margin: "0 0 10px" }}>
+          {/* Meta label */}
+          <p style={{
+            fontSize: 10, fontWeight: 500, textTransform: "uppercase",
+            letterSpacing: "0.1em", color: "var(--fg-subtle)", margin: "0 0 6px",
+          }}>
             Meta do Mês
           </p>
-          <p style={{ fontSize: 38, fontWeight: 700, color: "var(--fg)", fontVariantNumeric: "tabular-nums", lineHeight: 1, margin: "0 0 auto", letterSpacing: "-0.03em" }}>
+          {/* Meta value */}
+          <p style={{
+            fontSize: 40, fontWeight: 800, color: "var(--fg)",
+            fontVariantNumeric: "tabular-nums", lineHeight: 1,
+            margin: "0 0 auto", letterSpacing: "-0.04em",
+          }}>
             {meta > 0 ? `${metaProgresso}%` : "—"}
           </p>
 
           {meta > 0 ? (
-            <div style={{ marginTop: 16 }}>
-              <div style={{ height: 3, background: "var(--border-strong)", borderRadius: 2, overflow: "hidden", marginBottom: 7 }}>
+            <div style={{ marginTop: 14 }}>
+              <div style={{ height: 3, background: "var(--border-strong)", borderRadius: 2, overflow: "hidden", marginBottom: 6 }}>
                 <div style={{ height: 3, background: "var(--accent)", borderRadius: 2, width: `${metaProgresso}%`, transition: "width 0.6s" }} />
               </div>
-              <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>
+              <p style={{ fontSize: 11, color: "var(--fg-subtle)", fontWeight: 400, margin: 0 }}>
                 {metaAtingida ? "meta atingida ✓" : `falta ${currency.format(metaFalta)}`}
               </p>
             </div>
           ) : (
-            <p style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 12 }}>sem meta definida</p>
+            <p style={{ fontSize: 11, color: "var(--fg-subtle)", fontWeight: 400, marginTop: 10 }}>sem meta definida</p>
           )}
 
           {/* Comandas */}
-          <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
-            <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--fg-subtle)", margin: "0 0 6px" }}>
+          <div style={{ marginTop: 18, paddingTop: 14, borderTop: "1px solid var(--border)" }}>
+            <p style={{ fontSize: 10, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--fg-subtle)", margin: "0 0 5px" }}>
               Comandas
             </p>
-            <p style={{ fontSize: 22, fontWeight: 700, color: "var(--fg)", fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
+            <p style={{ fontSize: 24, fontWeight: 800, color: "var(--fg)", fontVariantNumeric: "tabular-nums", lineHeight: 1, letterSpacing: "-0.02em" }}>
               {data.pessoas}
             </p>
-            <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: "4px 0 0" }}>abertas agora</p>
+            <p style={{ fontSize: 11, color: "var(--fg-subtle)", fontWeight: 400, margin: "4px 0 0" }}>abertas agora</p>
           </div>
         </div>
 
