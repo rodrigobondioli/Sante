@@ -22,6 +22,7 @@ export function ContactSection() {
         />
 
         <h2
+          className="text-balance"
           style={{
             fontFamily: "var(--font-sans)",
             fontSize: "clamp(1.375rem, 5.5vw, 2rem)",

@@ -25,9 +25,10 @@ export function DonoSection() {
           {/* Texto */}
           <div>
             <h2
+              className="text-balance"
               style={{
                 fontFamily: "var(--font-sans)",
-                fontSize: "clamp(1.75rem, 8vw, 3rem)",
+                fontSize: "clamp(1.75rem, 4.5vw, 3.5rem)",
                 fontWeight: 600,
                 color: "#ffffff",
                 lineHeight: 1.15,
@@ -38,9 +39,10 @@ export function DonoSection() {
               O dono médio procura mais clientes.
             </h2>
             <h2
+              className="text-balance"
               style={{
                 fontFamily: "var(--font-sans)",
-                fontSize: "clamp(1.75rem, 8vw, 3rem)",
+                fontSize: "clamp(1.75rem, 4.5vw, 3.5rem)",
                 fontWeight: 600,
                 color: "#ffffff",
                 lineHeight: 1.15,

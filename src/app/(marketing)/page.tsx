@@ -98,7 +98,7 @@ export default async function Home() {
         {/* Header */}
         <div className="mx-auto mb-10 max-w-4xl px-4 md:mb-16 md:px-8 md:text-center lg:px-14">
           <h2
-            className="mb-4 text-white md:mb-5 md:whitespace-nowrap"
+            className="mb-4 text-white text-balance md:mb-5 md:whitespace-nowrap"
             style={{
               fontFamily: "var(--font-sans)",
               fontWeight: 600,
@@ -202,7 +202,7 @@ export default async function Home() {
             {/* Conteúdo */}
             <div>
               <h2
-                className="mb-8 text-white md:mb-10"
+                className="mb-8 text-white text-balance md:mb-10"
                 style={{
                   fontFamily: "var(--font-sans)",
                   fontWeight: 600,

@@ -88,7 +88,7 @@ export function ProcessoSection() {
     <>
       {/* ── Mobile: cards estáticos empilhados, sem sticky ── */}
       <section className="md:hidden px-4 py-10" style={{ background: BG }}>
-        <h2 style={{ ...TITLE_STYLE, margin: "0 0 24px" }}>
+        <h2 className="text-balance" style={{ ...TITLE_STYLE, margin: "0 0 24px" }}>
           Nosso Processo
         </h2>
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -155,7 +155,7 @@ export function ProcessoSection() {
           className="sticky top-0 z-10 flex h-screen flex-col items-center justify-center"
           style={{ background: BG }}
         >
-          <h2 className="text-center" style={{ ...TITLE_STYLE, margin: "0 0 28px", padding: "0 16px" }}>
+          <h2 className="text-center text-balance" style={{ ...TITLE_STYLE, margin: "0 0 28px", padding: "0 16px" }}>
             Nosso Processo
           </h2>
 
