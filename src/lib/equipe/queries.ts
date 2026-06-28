@@ -8,6 +8,7 @@ export interface MembroEquipe {
   role: BarRole;
   ativo: boolean;
   desde: string;
+  fotoUrl: string | null;
   // ranking
   totalComandas: number;
   totalVendas: number;
@@ -25,6 +26,7 @@ export async function getMembrosEquipe(barId: string): Promise<MembroEquipe[]> {
       role,
       ativo,
       nome,
+      foto_url,
       created_at,
       profiles!bar_members_user_id_fkey(nome)
     `)
@@ -36,6 +38,7 @@ export async function getMembrosEquipe(barId: string): Promise<MembroEquipe[]> {
       role: BarRole;
       ativo: boolean;
       nome: string | null;
+      foto_url: string | null;
       created_at: string;
       profiles: { nome: string } | null;
     }[]>();
@@ -67,6 +70,7 @@ export async function getMembrosEquipe(barId: string): Promise<MembroEquipe[]> {
       role:         m.role,
       ativo:        m.ativo,
       desde:        m.created_at,
+      fotoUrl:      m.foto_url ?? null,
       totalComandas: stat.count,
       totalVendas:   stat.total,
       ticketMedio:   stat.count > 0 ? stat.total / stat.count : 0,

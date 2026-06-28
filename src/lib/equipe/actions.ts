@@ -59,6 +59,26 @@ export async function removerMembro(membroId: string): Promise<{ ok: true } | { 
   }
 }
 
+export async function atualizarFotoMembro(
+  membroId: string,
+  fotoUrl: string | null,
+): Promise<{ ok: true } | { error: string }> {
+  try {
+    const current = await assertDono();
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("bar_members")
+      .update({ foto_url: fotoUrl })
+      .eq("id", membroId)
+      .eq("bar_id", current.bar.id);
+    if (error) return { error: error.message };
+    revalidatePath("/dashboard/equipe");
+    return { ok: true };
+  } catch (e: unknown) {
+    return { error: e instanceof Error ? e.message : "Erro ao salvar foto." };
+  }
+}
+
 export type AdicionarState = {
   error?: string;
   ok?: boolean;

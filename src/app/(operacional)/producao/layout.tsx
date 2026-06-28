@@ -13,19 +13,19 @@ export default async function ProducaoLayout({
   const admin = createAdminClient();
   const { data: rows } = await admin
     .from("bar_members")
-    .select("id, nome, role, pin")
+    .select("id, nome, role, pin, foto_url")
     .eq("bar_id", current.bar.id)
     .eq("ativo", true)
     .not("nome", "is", null)
     .order("created_at", { ascending: true })
-    .returns<{ id: string; nome: string | null; role: string; pin: string | null }[]>();
+    .returns<{ id: string; nome: string | null; role: string; pin: string | null; foto_url: string | null }[]>();
 
   let membros: MembroSimples[] = (rows ?? []).map(r => ({
     id: r.id,
     nome: r.nome ?? "Sem nome",
     role: r.role,
     temPin: !!r.pin,
-    fotoUrl: r.nome ? `/funcionarios/${encodeURIComponent(r.nome)}.png` : null,
+    fotoUrl: r.foto_url ?? (r.nome ? `/funcionarios/${encodeURIComponent(r.nome)}.png` : null),
   }));
 
   if (membros.length === 0 && !current.isKiosk) {

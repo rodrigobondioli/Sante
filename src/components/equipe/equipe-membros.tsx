@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import { Pencil, Check, X, Trash2, Eye, EyeOff, Loader2 } from "lucide-react";
-import { alterarRole, desativarMembro, reativarMembro, removerMembro } from "@/lib/equipe/actions";
+import { alterarRole, desativarMembro, reativarMembro, removerMembro, atualizarFotoMembro } from "@/lib/equipe/actions";
+import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/components/ui/toaster";
 import { CARD, LABEL, BTN_ICON } from "@/lib/ui";
 import type { BarRole } from "@/types/database";
@@ -13,6 +14,7 @@ export type MembroRow = {
   nome: string;
   role: BarRole;
   ativo: boolean;
+  fotoUrl: string | null;
   totalComandas: number;
   totalVendas: number;
   ticketMedio: number;
@@ -36,35 +38,124 @@ const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", curren
 
 const lbl: React.CSSProperties = { ...LABEL, margin: 0 };
 
-// ─── Avatar com fallback para foto de /funcionarios/ ─────────────────────────
-function MemberAvatar({ nome, size = 34 }: { nome: string; size?: number }) {
-  const [erro, setErro] = useState(false);
-  const fotoUrl = `/funcionarios/${encodeURIComponent(nome)}.png`;
+// ─── Avatar clicável com upload de foto ──────────────────────────────────────
+function MemberAvatar({
+  memberId, nome, fotoUrl: initialUrl, size = 34, canUpload = false,
+}: {
+  memberId: string;
+  nome: string;
+  fotoUrl: string | null;
+  size?: number;
+  canUpload?: boolean;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [url, setUrl] = useState<string | null>(initialUrl);
+  const [imgErro, setImgErro] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
-  if (!erro) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={fotoUrl}
-        alt={nome}
-        onError={() => setErro(true)}
-        style={{
-          width: size, height: size, borderRadius: "50%", objectFit: "cover",
-          flexShrink: 0,
-          border: "1px solid color-mix(in srgb, var(--border) 60%, transparent)",
-        }}
-      />
-    );
+  // fallback para arquivo estático
+  const staticUrl = `/funcionarios/${encodeURIComponent(nome)}.png`;
+  const displayUrl = url ?? staticUrl;
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const supabase = createClient();
+      const ext = file.name.split(".").pop() ?? "png";
+      const path = `${memberId}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("staff-photos")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: { publicUrl } } = supabase.storage
+        .from("staff-photos")
+        .getPublicUrl(path);
+      const res = await atualizarFotoMembro(memberId, publicUrl);
+      if ("error" in res) throw new Error(res.error);
+      setUrl(`${publicUrl}?t=${Date.now()}`); // cache-bust
+      setImgErro(false);
+      toast("Foto atualizada!", "ok");
+    } catch (err) {
+      toast((err as Error).message ?? "Erro ao enviar foto.", "error");
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
   }
 
+  const hasPhoto = !imgErro;
+
   return (
-    <div style={{
-      width: size, height: size, borderRadius: "50%", flexShrink: 0,
-      background: "color-mix(in srgb, var(--fg) 10%, transparent)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      fontSize: Math.round(size * 0.35), fontWeight: 700, color: "var(--fg)",
-    }}>
-      {nome[0]?.toUpperCase() ?? "?"}
+    <div
+      style={{ position: "relative", width: size, height: size, flexShrink: 0 }}
+      title={canUpload ? "Clique para trocar a foto" : undefined}
+    >
+      {canUpload && (
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          style={{ display: "none" }}
+          onChange={handleFile}
+        />
+      )}
+
+      {/* Avatar */}
+      {hasPhoto ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={displayUrl}
+          alt={nome}
+          onError={() => setImgErro(true)}
+          style={{
+            width: size, height: size, borderRadius: "50%", objectFit: "cover",
+            display: "block",
+            border: "1px solid color-mix(in srgb, var(--border) 60%, transparent)",
+            opacity: uploading ? 0.4 : 1,
+            transition: "opacity 0.15s",
+          }}
+        />
+      ) : (
+        <div style={{
+          width: size, height: size, borderRadius: "50%",
+          background: "color-mix(in srgb, var(--fg) 10%, transparent)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: Math.round(size * 0.35), fontWeight: 700, color: "var(--fg)",
+          opacity: uploading ? 0.4 : 1,
+        }}>
+          {nome[0]?.toUpperCase() ?? "?"}
+        </div>
+      )}
+
+      {/* Overlay de câmera ao hover / loading */}
+      {canUpload && (
+        <button
+          onClick={() => !uploading && inputRef.current?.click()}
+          disabled={uploading}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          style={{
+            position: "absolute", inset: 0, borderRadius: "50%",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            background: (uploading || hovered) ? "rgba(0,0,0,0.52)" : "rgba(0,0,0,0)",
+            border: "none", cursor: uploading ? "default" : "pointer",
+            transition: "background 0.15s",
+            WebkitTapHighlightColor: "transparent",
+          }}
+        >
+          {uploading ? (
+            <Loader2 size={Math.round(size * 0.45)} style={{ color: "#fff", animation: "spin 0.7s linear infinite" }} />
+          ) : hovered ? (
+            <svg width={Math.round(size * 0.45)} height={Math.round(size * 0.45)} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+          ) : null}
+        </button>
+      )}
     </div>
   );
 }
@@ -137,7 +228,7 @@ function MembroRow({
     >
       {/* Info */}
       <div className="flex-1 min-w-0" style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <MemberAvatar nome={m.nome} size={34} />
+        <MemberAvatar memberId={m.id} nome={m.nome} fotoUrl={m.fotoUrl} size={34} canUpload={isDono} />
         <p style={{ fontSize: 14, fontWeight: 500, color: "var(--fg)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {m.nome}
         </p>
