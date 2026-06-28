@@ -1,9 +1,6 @@
 /**
- * Header padrão do SUPERBAR — usado em TODAS as superfícies (Bartender, Caixa, Dashboard).
- * Uma única fonte de verdade para garantir consistência de altura, tipografia e badge.
- *
- * Uso:
- *   <AppHeader barNome="Aurora Bar" roleLabel="Bartender" right={<TrocarButton />} />
+ * Header padrão do SUPERBAR — usado em TODAS as superfícies operacionais.
+ * Logo "S" + nome do bar + badge de papel, consistente com o design do dashboard.
  */
 export function AppHeader({
   barNome,
@@ -11,9 +8,7 @@ export function AppHeader({
   right,
 }: {
   barNome: string;
-  /** Label do papel/superfície — ex: "Bartender", "Caixa", "Dono" */
   roleLabel: string;
-  /** Slot direito opcional: botões, nome do operador, alertas etc. */
   right?: React.ReactNode;
 }) {
   return (
@@ -26,14 +21,24 @@ export function AppHeader({
       borderBottom: "1px solid var(--border)",
       background: "var(--bg-elevated)",
     }}>
-      {/* Esquerda: nome do bar + badge de papel */}
+      {/* Esquerda: logo + nome do bar + badge */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, overflow: "hidden" }}>
+        {/* Logo "S" — igual ao dashboard sidebar */}
+        <div style={{
+          width: 28, height: 28, borderRadius: 7, flexShrink: 0,
+          background: "var(--accent)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <span style={{ fontSize: 13, fontWeight: 900, color: "#000", lineHeight: 1, letterSpacing: "-0.02em" }}>S</span>
+        </div>
+
         <span style={{
           fontSize: 14, fontWeight: 600, color: "var(--fg)",
           whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
         }}>
           {barNome}
         </span>
+
         <span style={{
           fontSize: 10, fontWeight: 700,
           padding: "3px 9px", borderRadius: 4,

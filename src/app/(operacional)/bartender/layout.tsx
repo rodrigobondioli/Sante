@@ -25,6 +25,7 @@ export default async function BartenderLayout({
     nome: r.nome ?? "Sem nome",
     role: r.role,
     temPin: !!r.pin,
+    fotoUrl: r.nome ? `/funcionarios/${encodeURIComponent(r.nome)}.png` : null,
   }));
 
   if (membros.length === 0 && !current.isKiosk) {
@@ -34,7 +35,7 @@ export default async function BartenderLayout({
       .eq("id", current.userId)
       .maybeSingle<{ id: string; nome: string }>();
     if (profile) {
-      membros = [{ id: profile.id, nome: profile.nome, role: current.role, temPin: false }];
+      membros = [{ id: profile.id, nome: profile.nome, role: current.role, temPin: false, fotoUrl: null }];
     }
   }
 

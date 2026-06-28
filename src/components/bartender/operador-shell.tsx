@@ -6,7 +6,7 @@ import { signOut } from "@/lib/auth/actions";
 import { checkPin } from "@/lib/kiosk/actions";
 import { AppHeader } from "@/components/ui/app-header";
 
-export type MembroSimples = { id: string; nome: string; role: string; temPin: boolean };
+export type MembroSimples = { id: string; nome: string; role: string; temPin: boolean; fotoUrl?: string | null };
 
 const STORAGE_KEY = "sb_operador";
 
@@ -23,6 +23,8 @@ function QuemEVoce({
   membros: MembroSimples[];
   onSelect: (m: MembroSimples) => void;
 }) {
+  const [fotoErros, setFotoErros] = useState<Set<string>>(new Set());
+
   return (
     <div style={{
       height: "100%", overflowY: "auto",
@@ -65,16 +67,30 @@ function QuemEVoce({
               (e.currentTarget).style.borderColor = "var(--border)";
             }}
           >
-            <div style={{
-              width: 56, height: 56, borderRadius: "50%",
-              background: "color-mix(in srgb, var(--accent) 50%, transparent)",
-              border: "1px solid color-mix(in srgb, var(--accent) 25%, transparent)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 22, fontWeight: 700, color: "var(--accent)",
-              margin: "0 auto 16px",
-            }}>
-              {m.nome[0]?.toUpperCase()}
-            </div>
+            {m.fotoUrl && !fotoErros.has(m.id) ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={m.fotoUrl}
+                alt={m.nome}
+                onError={() => setFotoErros(prev => new Set(prev).add(m.id))}
+                style={{
+                  width: 64, height: 64, borderRadius: "50%", objectFit: "cover",
+                  margin: "0 auto 16px", display: "block",
+                  border: "2px solid color-mix(in srgb, var(--accent) 40%, transparent)",
+                }}
+              />
+            ) : (
+              <div style={{
+                width: 64, height: 64, borderRadius: "50%",
+                background: "color-mix(in srgb, var(--accent) 50%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--accent) 25%, transparent)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 24, fontWeight: 700, color: "var(--accent)",
+                margin: "0 auto 16px",
+              }}>
+                {m.nome[0]?.toUpperCase()}
+              </div>
+            )}
             <p style={{ fontSize: 17, fontWeight: 600, color: "var(--fg)", margin: "0 0 6px" }}>
               {m.nome}
             </p>

@@ -27,6 +27,7 @@ export default async function GarcomLayout({
     nome: r.nome ?? "Sem nome",
     role: r.role,
     temPin: !!r.pin,
+    fotoUrl: r.nome ? `/funcionarios/${encodeURIComponent(r.nome ?? "")}.png` : null,
   }));
 
   // Fallback: se não há membros na equipe, usa o perfil do usuário autenticado
@@ -37,7 +38,7 @@ export default async function GarcomLayout({
       .eq("id", current.userId)
       .maybeSingle<{ id: string; nome: string }>();
     if (profile) {
-      membros = [{ id: profile.id, nome: profile.nome, role: current.role, temPin: false }];
+      membros = [{ id: profile.id, nome: profile.nome, role: current.role, temPin: false, fotoUrl: null }];
     }
   }
 
