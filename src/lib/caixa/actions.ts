@@ -82,11 +82,58 @@ export async function registrarPagamento(
     if (cli) {
       const novoTotal    = (cli.total_gasto ?? 0) + totalComanda;
       const novasVisitas = (cli.total_visitas ?? 0) + 1;
+
+      // ── Detectar drink favorito automaticamente ──────────────────────────
+      // Lógica: se o produto mais pedido aparece em ≥5 comandas pagas
+      // E representa ≥50% das visitas → registra como drink_favorito.
+      // Só atualiza se o threshold for atingido; mantém o valor manual caso não seja.
+      let drinkFavorito: string | null = null;
+
+      if (novasVisitas >= 5) {
+        const { data: cmdIds } = await supabase
+          .from("comandas")
+          .select("id")
+          .eq("cliente_id", cid)
+          .eq("bar_id", current.bar.id)
+          .eq("status", "paga");
+
+        const ids = (cmdIds ?? []).map((c) => c.id);
+
+        if (ids.length >= 5) {
+          type ItemRow = { nome: string | null; comanda_id: string | null };
+          const { data: items } = await supabase
+            .from("comanda_items")
+            .select("nome, comanda_id")
+            .in("comanda_id", ids)
+            .neq("status", "cancelado") as { data: ItemRow[] | null };
+
+          // Contar em quantas comandas distintas cada produto apareceu
+          const porcComanda = new Map<string, Set<string>>();
+          for (const item of items ?? []) {
+            if (!item.nome || !item.comanda_id) continue;
+            if (!porcComanda.has(item.nome)) porcComanda.set(item.nome, new Set());
+            porcComanda.get(item.nome)!.add(item.comanda_id);
+          }
+
+          let topNome = "";
+          let topCount = 0;
+          for (const [nome, set] of porcComanda) {
+            if (set.size > topCount) { topCount = set.size; topNome = nome; }
+          }
+
+          // Threshold: ≥5 comandas absolutas E ≥50% das visitas
+          if (topNome && topCount >= 5 && topCount / ids.length >= 0.5) {
+            drinkFavorito = topNome;
+          }
+        }
+      }
+
       await supabase.from("clientes").update({
         total_visitas: novasVisitas,
         total_gasto:   novoTotal,
         ticket_medio:  Math.round((novoTotal / novasVisitas) * 100) / 100,
         ultima_visita: new Date().toISOString(),
+        ...(drinkFavorito ? { drink_favorito: drinkFavorito } : {}),
       }).eq("id", cid);
     }
   }
