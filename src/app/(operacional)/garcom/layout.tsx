@@ -19,6 +19,7 @@ export default async function GarcomLayout({
     .eq("bar_id", current.bar.id)
     .eq("ativo", true)
     .not("nome", "is", null)
+    .in("role", ["garcom", "dono", "gerente", "bar_manager"])
     .order("created_at", { ascending: true })
     .returns<{ id: string; nome: string | null; role: string; pin: string | null; foto_url: string | null }[]>();
 
