@@ -12,17 +12,17 @@ const dataHora = new Intl.DateTimeFormat("pt-BR", {
 });
 
 const label: React.CSSProperties = {
-  fontSize: "11px",
+  fontSize: "10px",
   fontWeight: 500,
   color: "var(--fg-subtle)",
-  textTransform: "uppercase",
+  textTransform: "uppercase" as const,
   letterSpacing: "0.1em",
 };
 
 const card: React.CSSProperties = {
-  background: "var(--bg-elevated)",
-
-  borderRadius: "4px",
+  background: "var(--bg-card)",
+  border: "1px solid var(--border)",
+  borderRadius: "var(--radius-lg)",
   overflow: "hidden",
 };
 
@@ -41,7 +41,7 @@ export default async function TurnosPage() {
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 style={{ fontSize: "22px", fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", letterSpacing: "-0.01em", margin: 0 }}>
+          <h1 style={{ fontSize: "20px", fontWeight: 700, color: "var(--fg)", letterSpacing: "-0.02em", margin: 0 }}>
             Turnos
           </h1>
           <p style={{ fontSize: "14px", color: "var(--fg-muted)", margin: "6px 0 0" }}>
@@ -93,7 +93,7 @@ export default async function TurnosPage() {
                 <td className="hidden sm:table-cell align-middle" style={{ padding: "14px 20px", fontSize: "14px", color: "var(--fg)", textAlign: "right" }}>
                   {turno.totalComandas}
                 </td>
-                <td className="align-middle" style={{ padding: "14px 16px 14px 20px", fontSize: "14px", color: "var(--fg)", textAlign: "right", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
+                <td className="align-middle" style={{ padding: "14px 16px 14px 20px", fontSize: "14px", color: "var(--fg)", textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
                   {currency.format(turno.totalVendas)}
                 </td>
                 <td className="align-middle w-12 shrink-0" style={{ padding: "14px 20px 14px 8px", textAlign: "right" }}>

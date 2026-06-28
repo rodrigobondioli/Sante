@@ -15,17 +15,17 @@ const dataCurta = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-d
 const percent = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
 
 const card: React.CSSProperties = {
-  background: "var(--bg-elevated)",
-
-  borderRadius: "4px",
-  padding: "24px",
+  background: "var(--bg-card)",
+  border: "1px solid var(--border)",
+  borderRadius: "var(--radius-lg)",
+  padding: "20px 24px",
 };
 
 const sectionLabel: React.CSSProperties = {
-  fontSize: "11px",
+  fontSize: "10px",
   fontWeight: 500,
   color: "var(--fg-subtle)",
-  textTransform: "uppercase",
+  textTransform: "uppercase" as const,
   letterSpacing: "0.1em",
 };
 
@@ -51,7 +51,7 @@ export default async function RelatoriosPage({
     <div style={{ display: "flex", flexDirection: "column" }}>
       {/* Page header */}
       <div className="pt-6 pb-0 lg:px-10 lg:pt-8">
-        <h1 style={{ fontSize: "22px", fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", letterSpacing: "-0.01em", margin: 0 }}>
+        <h1 style={{ fontSize: "20px", fontWeight: 700, color: "var(--fg)", letterSpacing: "-0.02em", margin: 0 }}>
           Relatórios
         </h1>
         <p style={{ fontSize: "13px", color: "var(--fg-subtle)", marginTop: "4px", marginBottom: 0 }}>
@@ -77,7 +77,7 @@ export default async function RelatoriosPage({
             {/* Receita */}
             <div style={card}>
               <p style={sectionLabel}>Receita</p>
-              <p style={{ fontSize: 26, fontWeight: 600, color: "var(--fg)", margin: "8px 0 4px", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums" }}>
+              <p style={{ fontSize: 26, fontWeight: 700, color: "var(--fg)", margin: "8px 0 4px", fontVariantNumeric: "tabular-nums", letterSpacing: "-0.025em" }}>
                 {currency.format(comparacao.atual)}
               </p>
               <TrendBadge percent={comparacao.percentual} />
@@ -93,7 +93,7 @@ export default async function RelatoriosPage({
                   </span>
                 )}
               </div>
-              <p style={{ fontSize: 26, fontWeight: 600, color: "var(--fg)", margin: "8px 0 4px", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums" }}>
+              <p style={{ fontSize: 26, fontWeight: 700, color: "var(--fg)", margin: "8px 0 4px", fontVariantNumeric: "tabular-nums", letterSpacing: "-0.025em" }}>
                 {kpis.cmv !== null ? `${percent.format(kpis.cmv)}%` : "—"}
               </p>
               <p style={{ fontSize: 11, color: "var(--fg-subtle)" }}>custo sobre receita</p>
@@ -102,7 +102,7 @@ export default async function RelatoriosPage({
             {/* Margem Bruta */}
             <div style={card}>
               <p style={sectionLabel}>Margem Bruta</p>
-              <p style={{ fontSize: 26, fontWeight: 600, color: kpis.margemBruta !== null && kpis.margemBruta < 50 ? "var(--warn)" : "var(--fg)", margin: "8px 0 4px", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums" }}>
+              <p style={{ fontSize: 26, fontWeight: 700, color: kpis.margemBruta !== null && kpis.margemBruta < 50 ? "var(--warn)" : "var(--fg)", margin: "8px 0 4px", fontVariantNumeric: "tabular-nums", letterSpacing: "-0.025em" }}>
                 {kpis.margemBruta !== null ? `${percent.format(kpis.margemBruta)}%` : "—"}
               </p>
               <p style={{ fontSize: 11, color: "var(--fg-subtle)" }}>receita menos custo</p>
@@ -111,7 +111,7 @@ export default async function RelatoriosPage({
             {/* Ticket Médio */}
             <div style={card}>
               <p style={sectionLabel}>Ticket Médio</p>
-              <p style={{ fontSize: 26, fontWeight: 600, color: "var(--fg)", margin: "8px 0 4px", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums" }}>
+              <p style={{ fontSize: 26, fontWeight: 700, color: "var(--fg)", margin: "8px 0 4px", fontVariantNumeric: "tabular-nums", letterSpacing: "-0.025em" }}>
                 {kpis.ticketMedio !== null ? currency.format(kpis.ticketMedio) : "—"}
               </p>
               <p style={{ fontSize: 11, color: "var(--fg-subtle)" }}>por comanda paga</p>

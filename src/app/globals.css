@@ -1,52 +1,79 @@
 @import "tailwindcss";
 
-/* ═══════════════════════════════════════════════════
-   SUPERBAR — Design Tokens
+/* ═══════════════════════════════════════════════════════════
+   SUPERBAR — Design Tokens & Type Scale
    Sistema: Zinc + Amber · Inter
    Fonte de verdade: docs/DESIGN.md
-   ═══════════════════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════════ */
 
 :root {
-  /* Light mode */
+  /* ── Superfícies ── */
   --bg:              #F4F4F5;
   --bg-elevated:     #FFFFFF;
   --bg-card:         #FFFFFF;
   --bg-hover:        #F0F0F1;
-  --fg:              #09090B;
-  --fg-muted:        #71717A;
-  --fg-subtle:       #A1A1AA;
+
+  /* ── Texto ── */
+  --fg:              #09090B;   /* primário — headings, valores */
+  --fg-muted:        #3F3F46;   /* secundário — body text */
+  --fg-subtle:       #71717A;   /* terciário — labels, meta */
+
+  /* ── Bordas ── */
   --border:          rgba(0,0,0,0.08);
   --border-strong:   rgba(0,0,0,0.14);
+
+  /* ── Accent ── */
   --accent:          #D97706;
   --accent-fg:       #FFFFFF;
   --accent-bright:   #F59E0B;
   --ring:            #F59E0B;
+
+  /* ── Status ── */
   --ok:              #16A34A;  --ok-bg:     rgba(22,163,74,0.10);
   --warn:            #D97706;  --warn-bg:   rgba(217,119,6,0.10);
   --danger:          #DC2626;  --danger-bg: rgba(220,38,38,0.10);
-  --radius-sm:       4px;
-  --radius-md:       8px;
-  --radius-lg:       12px;
-  --bg-inset:         var(--bg-hover); /* alias legacy */
+
+  /* ── Raios ── */
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+
+  /* ── Legacy alias ── */
+  --bg-inset: var(--bg-hover);
 }
 
 [data-theme="dark"] {
+  /* ── Superfícies ── */
   --bg:              #0A0A0B;
   --bg-elevated:     #111113;
   --bg-card:         #1C1C1E;
   --bg-hover:        #242427;
+
+  /* ── Texto ──
+     Contraste calculado sobre --bg (#0A0A0B):
+     --fg        #FAFAFA  →  19:1  ✓ primário
+     --fg-muted  #A1A1AA  →   5.5:1 ✓ secundário
+     --fg-subtle #71717A  →   3.8:1 ✓ terciário (labels 10px+ acima do mínimo)
+  */
   --fg:              #FAFAFA;
   --fg-muted:        #A1A1AA;
-  --fg-subtle:       #52525B;
-  --border:          rgba(255,255,255,0.08);
-  --border-strong:   rgba(255,255,255,0.14);
+  --fg-subtle:       #71717A;
+
+  /* ── Bordas ── */
+  --border:          rgba(255,255,255,0.07);
+  --border-strong:   rgba(255,255,255,0.13);
+
+  /* ── Accent ── */
   --accent:          #F59E0B;
   --accent-fg:       #000000;
   --accent-bright:   #FCD34D;
   --ring:            #F59E0B;
-  --ok:              #22C55E;  --ok-bg:     rgba(34,197,94,0.10);
-  --warn:            #F59E0B;  --warn-bg:   rgba(245,158,11,0.10);
-  --danger:          #EF4444;  --danger-bg: rgba(239,68,68,0.10);
+
+  /* ── Status ── */
+  --ok:              #22C55E;  --ok-bg:     rgba(34,197,94,0.08);
+  --warn:            #F59E0B;  --warn-bg:   rgba(245,158,11,0.08);
+  --danger:          #EF4444;  --danger-bg: rgba(239,68,68,0.08);
 }
 
 @theme {
@@ -69,34 +96,28 @@
   --color-danger:        var(--danger);
   --color-danger-bg:     var(--danger-bg);
 
-  /* Aliases legacy */
-  --color-black: #000000;
-  --color-white: #ffffff;
-  --color-success:    var(--ok);
-  --color-success-bg: var(--ok-bg);
-  --color-error:      var(--danger);
-  --color-error-bg:   var(--danger-bg);
-  --color-warning:    var(--warn);
-  --color-warning-bg: var(--warn-bg);
+  --color-black:   #000000;
+  --color-white:   #ffffff;
+  --color-success: var(--ok);   --color-success-bg: var(--ok-bg);
+  --color-error:   var(--danger); --color-error-bg: var(--danger-bg);
+  --color-warning: var(--warn); --color-warning-bg: var(--warn-bg);
 
-  /* Fonts */
   --font-sans:    var(--font-sans, "Inter", system-ui, sans-serif);
   --font-mono:    var(--font-sans, "Inter", system-ui, sans-serif);
   --font-display: var(--font-sans, "Inter", system-ui, sans-serif);
 
-  /* Radius */
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
+  --radius-xl: 16px;
 
-  /* Legacy spacing */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-6: 24px;
-  --space-8: 32px;
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px;
+  --space-4: 16px; --space-6: 24px; --space-8: 32px;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   Base
+   ═══════════════════════════════════════════════════════════ */
 
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
@@ -114,15 +135,14 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-sans), "Inter", system-ui, sans-serif;
-    font-weight: 600;
+  h1, h2, h3, h4 {
+    font-weight: 700;
     letter-spacing: -0.025em;
     line-height: 1.2;
     color: var(--fg);
   }
 
-  ::-webkit-scrollbar       { width: 6px; height: 6px; }
+  ::-webkit-scrollbar       { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--fg-subtle); }
@@ -133,4 +153,64 @@
   }
 
   a { color: inherit; text-decoration: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Escala tipográfica semântica
+   Use estas classes diretamente nos componentes
+   ═══════════════════════════════════════════════════════════
+
+   Nível      px    weight  lh     ls
+   ─────────────────────────────────────
+   display    32    800     1.1    -0.03em   → KPIs grandes, hero
+   title-lg   24    700     1.15   -0.025em  → section titles
+   title      20    700     1.2    -0.02em   → page h1
+   heading    16    600     1.3    -0.015em  → card headers
+   body-lg    15    400     1.55   0          → descriptions
+   body       14    400     1.55   0          → default text
+   body-sm    13    400     1.5    0          → secondary text
+   small      12    400     1.4    0          → meta, timestamps
+   caption    11    400     1.35   0          → hints, badges
+   overline   10    500     1      0.1em     → labels, section headers
+   ───────────────────────────────────── */
+
+@layer components {
+  .t-display {
+    font-size: 32px; font-weight: 800; line-height: 1.1;
+    letter-spacing: -0.03em; font-variant-numeric: tabular-nums;
+  }
+  .t-title-lg {
+    font-size: 24px; font-weight: 700; line-height: 1.15;
+    letter-spacing: -0.025em;
+  }
+  .t-title {
+    font-size: 20px; font-weight: 700; line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  .t-heading {
+    font-size: 16px; font-weight: 600; line-height: 1.3;
+    letter-spacing: -0.015em;
+  }
+  .t-body-lg { font-size: 15px; font-weight: 400; line-height: 1.55; }
+  .t-body    { font-size: 14px; font-weight: 400; line-height: 1.55; }
+  .t-body-sm { font-size: 13px; font-weight: 400; line-height: 1.5;  }
+  .t-small   { font-size: 12px; font-weight: 400; line-height: 1.4;  }
+  .t-caption { font-size: 11px; font-weight: 400; line-height: 1.35; }
+  .t-overline {
+    font-size: 10px; font-weight: 500; line-height: 1;
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Animações
+   ═══════════════════════════════════════════════════════════ */
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.85); }
+}
+
+.animate-live-pulse {
+  animation: live-pulse 2s ease-in-out infinite;
 }

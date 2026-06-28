@@ -19,7 +19,7 @@ export default async function EstoquePage() {
 
       {/* Header */}
       <div>
-        <h1 style={{ fontSize: 22, fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", letterSpacing: "-0.01em", margin: 0 }}>
+        <h1 style={{ fontSize: 20, fontWeight: 700, color: "var(--fg)", letterSpacing: "-0.02em", margin: 0 }}>
           Estoque
         </h1>
         <p style={{ fontSize: 14, color: "var(--fg-muted)", margin: "6px 0 0" }}>
