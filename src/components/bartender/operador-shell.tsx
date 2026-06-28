@@ -34,14 +34,10 @@ function QuemEVoce({
     }}>
       <p style={{
         fontSize: 12, fontWeight: 600, color: "var(--fg-subtle)",
-        textTransform: "uppercase", letterSpacing: "0.14em", margin: "0 0 10px",
+        textTransform: "uppercase", letterSpacing: "0.14em", margin: "0 0 32px",
       }}>
         Quem está operando agora?
       </p>
-      <p style={{ fontSize: 32, fontWeight: 700, color: "var(--fg)", margin: "0 0 48px", textAlign: "center" }}>
-        Selecione seu nome
-      </p>
-
       <div style={{
         display: "flex", flexWrap: "wrap", gap: 16,
         justifyContent: "center", width: "100%", maxWidth: 760,
