@@ -18,7 +18,7 @@ export function AppHeader({
       paddingTop: "env(safe-area-inset-top)",
       height: "calc(52px + env(safe-area-inset-top))",
       flexShrink: 0,
-      borderBottom: "1px solid var(--border)",
+      borderBottom: "none",
       background: "var(--bg-elevated)",
     }}>
       {/* Esquerda: logo + nome do bar + badge */}

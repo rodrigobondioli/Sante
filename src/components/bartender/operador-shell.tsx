@@ -27,7 +27,7 @@ function QuemEVoce({
 
   return (
     <div style={{
-      height: "100%", overflowY: "auto",
+      flex: 1, overflowY: "auto",
       display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center",
       padding: "40px 24px",
@@ -159,7 +159,7 @@ function PinPad({
 
   return (
     <div style={{
-      height: "100%", display: "flex", flexDirection: "column",
+      flex: 1, display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center", padding: "40px 24px",
     }}>
       <div style={{
@@ -316,7 +316,7 @@ export function OperadorShell({
     return (
       <div style={{ height: "100dvh", display: "flex", flexDirection: "column", background: "var(--bg)" }}>
         <AppHeader barNome={barNome} roleLabel={roleLabel} />
-        <main style={{ flex: 1, overflow: "hidden" }}>
+        <main style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
           <PinPad
             membro={pinPendente}
             onSuccess={() => confirmarOperador(pinPendente)}
@@ -357,7 +357,7 @@ export function OperadorShell({
           )
         }
       />
-      <main style={{ flex: 1, overflow: "hidden" }}>
+      <main style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
         {operador
           ? children
           : <QuemEVoce membros={membros} onSelect={selecionar} />
