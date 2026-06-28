@@ -12,15 +12,15 @@ import { FaqSection } from "@/components/marketing/faq-section";
 import { ContactSection } from "@/components/marketing/contact-section";
 
 const doresLeft = [
-  { title: "Margem Invisível", desc: "Você sabe quanto vendeu. O lucro real continua escondido." },
-  { title: "Faturamento Atrasado", desc: "O dia fechou e os números chegam só na manhã seguinte." },
-  { title: "Info Presa na Equipe", desc: "Quer saber o que rolou? Tem que perguntar pro bartender." },
+  { title: "Margem invisível", desc: "Você sabe quanto vendeu. O lucro real continua escondido." },
+  { title: "Faturamento atrasado", desc: "O dia fechou e os números chegam só na manhã seguinte." },
+  { title: "Info presa na equipe", desc: "Quer saber o que rolou? Tem que perguntar pro bartender." },
 ];
 
 const doresRight = [
-  { title: "Sistema Para no Pico", desc: "Sexta lotada. O sistema trava justamente quando o bar enche." },
-  { title: "Decisão Sem Direção", desc: "Você sente que algo está errado, mas não sabe onde agir." },
-  { title: "Ganho Escondido", desc: "Produtos lucrativos passam despercebidos todos os dias." },
+  { title: "Sistema para no pico", desc: "Sexta lotada. O sistema trava justamente quando o bar enche." },
+  { title: "Decisão sem direção", desc: "Você sente que algo está errado, mas não sabe onde agir." },
+  { title: "Ganho escondido", desc: "Produtos lucrativos passam despercebidos todos os dias." },
 ];
 
 const paraVoce = [
@@ -98,13 +98,13 @@ export default async function Home() {
         {/* Header */}
         <div className="mx-auto mb-10 max-w-4xl px-4 md:mb-16 md:px-8 md:text-center lg:px-14">
           <h2
-            className="mb-4 uppercase text-white text-balance md:mb-5"
+            className="mb-4 text-white md:mb-5 whitespace-nowrap"
             style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 400,
-              fontSize: "clamp(1.375rem, 4vw, 2.5rem)",
+              fontFamily: "var(--font-sans)",
+              fontWeight: 600,
+              fontSize: 48,
               lineHeight: 1.05,
-              letterSpacing: "0.08em",
+              letterSpacing: "-0.02em",
             }}
           >
             Onde o dinheiro do seu bar vaza?
@@ -113,8 +113,9 @@ export default async function Home() {
             className="text-pretty"
             style={{
               color: "#ffffff",
-              fontFamily: "var(--font-roboto-mono)",
-              fontSize: "0.875rem",
+              fontFamily: "var(--font-sans)",
+              fontWeight: 400,
+              fontSize: 20,
               lineHeight: 1.5,
             }}
           >
@@ -131,14 +132,14 @@ export default async function Home() {
               {doresLeft.map((item) => (
                 <div key={item.title} className="rounded-2xl p-5 md:p-7" style={{ background: "#1C1C1E", border: "1px solid #2C2C2E" }}>
                   <p
-                    className="mb-3 uppercase text-balance md:mb-4"
-                    style={{ color: "#F59E0B", fontFamily: "var(--font-display)", fontWeight: 400, fontSize: "1rem", letterSpacing: "0.08em" }}
+                    className="mb-3 md:mb-4"
+                    style={{ color: "#F59E0B", fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 22, lineHeight: 1.2 }}
                   >
                     {item.title}
                   </p>
                   <p
                     className="leading-relaxed text-pretty"
-                    style={{ color: "#ffffff", fontFamily: "var(--font-roboto-mono)", fontSize: "0.875rem" }}
+                    style={{ color: "#ffffff", fontFamily: "var(--font-sans)", fontWeight: 400, fontSize: 16 }}
                   >
                     {item.desc}
                   </p>
@@ -162,14 +163,14 @@ export default async function Home() {
               {doresRight.map((item) => (
                 <div key={item.title} className="rounded-2xl p-5 md:p-7" style={{ background: "#1C1C1E", border: "1px solid #2C2C2E" }}>
                   <p
-                    className="mb-3 uppercase text-balance md:mb-4"
-                    style={{ color: "#F59E0B", fontFamily: "var(--font-display)", fontWeight: 400, fontSize: "1rem", letterSpacing: "0.08em" }}
+                    className="mb-3 md:mb-4"
+                    style={{ color: "#F59E0B", fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 22, lineHeight: 1.2 }}
                   >
                     {item.title}
                   </p>
                   <p
                     className="leading-relaxed text-pretty"
-                    style={{ color: "#ffffff", fontFamily: "var(--font-roboto-mono)", fontSize: "0.875rem" }}
+                    style={{ color: "#ffffff", fontFamily: "var(--font-sans)", fontWeight: 400, fontSize: 16 }}
                   >
                     {item.desc}
                   </p>
