@@ -8,6 +8,8 @@ import { NovoClienteButton } from "@/components/clientes/novo-cliente-button";
 
 const fmt   = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const fmtN  = (v: number) => v.toLocaleString("pt-BR");
+// Remove prefixo "Mesa X - " / "Balcão - " gerado pelo seed antigo
+const nomeDisplay = (nome: string) => nome.replace(/^[^-]+ - /, "");
 
 const LABEL: React.CSSProperties = {
   fontSize: 10, fontWeight: 700, letterSpacing: "0.10em",
@@ -54,7 +56,7 @@ export default async function ClientesPage() {
             <div style={{ marginTop: 12, borderTop: "1px solid var(--border)", paddingTop: 12 }}>
               {aniversariantes.slice(0, 3).map(c => (
                 <p key={c.id} style={{ fontSize: 12, color: "var(--fg-muted)", margin: "0 0 2px" }}>
-                  {c.nome}
+                  {nomeDisplay(c.nome)}
                   {c.data_nascimento ? ` · ${new Date(c.data_nascimento + "T12:00:00").toLocaleDateString("pt-BR", { day: "numeric", month: "short" })}` : ""}
                 </p>
               ))}
@@ -78,7 +80,7 @@ export default async function ClientesPage() {
             <div style={{ marginTop: 12, borderTop: "1px solid var(--border)", paddingTop: 12 }}>
               {inativos.slice(0, 3).map(c => (
                 <p key={c.id} style={{ fontSize: 12, color: "var(--fg-muted)", margin: "0 0 2px" }}>
-                  {c.nome} · {fmt(c.total_gasto)}
+                  {nomeDisplay(c.nome)} · {fmt(c.total_gasto)}
                 </p>
               ))}
             </div>

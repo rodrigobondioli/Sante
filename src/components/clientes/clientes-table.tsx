@@ -99,7 +99,8 @@ export function ClientesTable({ clientes }: Props) {
       {/* Header */}
       <div style={{
         display: "grid",
-        gridTemplateColumns: "2fr 1fr 1fr 80px 80px 90px 44px",
+        gridTemplateColumns: "2fr 120px 1fr 72px 120px 90px 44px",
+        gap: "0 16px",
         padding: "10px 20px",
         borderBottom: "1px solid var(--border)",
         background: "var(--bg-elevated)",
@@ -107,8 +108,8 @@ export function ClientesTable({ clientes }: Props) {
         textTransform: "uppercase",
       }}>
         <span>Cliente</span>
-        <span>Aniversário · Drink</span>
-        <span>Contato</span>
+        <span>Aniversário</span>
+        <span>Telefone</span>
         <span style={{ textAlign: "right" }}>Visitas</span>
         <span style={{ textAlign: "right" }}>Total</span>
         <span style={{ textAlign: "right" }}>Última</span>
@@ -123,7 +124,7 @@ export function ClientesTable({ clientes }: Props) {
             <div style={{
               padding: "16px 20px",
               borderBottom: "1px solid var(--border)",
-              background: "color-mix(in srgb, var(--accent) 4%, var(--bg))",
+              background: "var(--bg-elevated)",
             }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 10 }}>
                 {([
@@ -197,7 +198,8 @@ export function ClientesTable({ clientes }: Props) {
             /* ── Linha normal ── */
             <div style={{
               display: "grid",
-              gridTemplateColumns: "2fr 1fr 1fr 80px 80px 90px 44px",
+              gridTemplateColumns: "2fr 120px 1fr 72px 120px 90px 44px",
+              gap: "0 16px",
               padding: "14px 20px",
               borderBottom: "1px solid var(--border)",
               alignItems: "center",
