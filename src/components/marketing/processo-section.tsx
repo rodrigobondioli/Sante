@@ -143,11 +143,11 @@ export function ProcessoSection() {
         style={{ minHeight: `${N * 100}vh`, background: BG }}
       >
         <style>{`
-          .processo-stack { height: 340px; }
-          .processo-card  { padding: 32px 36px; }
+          .processo-stack { height: 240px; }
+          .processo-card  { padding: 28px 32px; }
           @media (min-width: 1024px) {
-            .processo-stack { height: 320px; }
-            .processo-card  { padding: 36px 48px; }
+            .processo-stack { height: 220px; }
+            .processo-card  { padding: 32px 44px; }
           }
         `}</style>
 
@@ -168,7 +168,9 @@ export function ProcessoSection() {
                   className="processo-card"
                   style={{
                     position: "absolute",
-                    inset: 0,
+                    top: 0,
+                    left: 0,
+                    right: 0,
                     background: CARD_COLORS[i],
                     border: "1px solid #2C2C2E",
                     borderRadius: "24px",
