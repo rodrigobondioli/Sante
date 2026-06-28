@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Pencil, Check, X, Trash2, Eye, EyeOff, Loader2 } from "lucide-react";
 import { alterarRole, desativarMembro, reativarMembro, removerMembro, atualizarFotoMembro } from "@/lib/equipe/actions";
 import { createClient } from "@/lib/supabase/client";
@@ -168,6 +169,7 @@ function MembroRow({
   isDono: boolean;
   currentUserId: string;
 }) {
+  const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [role, setRole] = useState<BarRole>(m.role);
   const [saving, setSaving] = useState(false);
@@ -201,6 +203,7 @@ function MembroRow({
         await reativarMembro(m.id);
         toast(`${m.nome} reativado.`, "ok");
       }
+      router.refresh();
     } catch {
       toast("Erro ao alterar acesso.", "error");
     } finally {
@@ -218,6 +221,7 @@ function MembroRow({
       setRemoving(false);
     } else {
       toast(`${m.nome} removido.`, "ok");
+      router.refresh();
     }
   }
 
