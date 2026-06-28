@@ -56,15 +56,15 @@ export default async function Home() {
           Inteligência operacional para donos de bar
         </div>
 
-        {/* H1 — responsive font, wraps naturally on mobile */}
+        {/* H1 */}
         <h1
-          className="mb-5 uppercase text-white text-balance md:mb-6"
+          className="mb-5 text-white text-balance md:mb-6"
           style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 400,
-            fontSize: "clamp(2.5rem, 7vw, 4rem)",
+            fontFamily: "var(--font-sans)",
+            fontWeight: 700,
+            fontSize: "clamp(2.5rem, 8vw, 72px)",
             lineHeight: 1.05,
-            letterSpacing: "-0.01em",
+            letterSpacing: "-0.02em",
           }}
         >
           <span className="block">Seu bar está ganhando</span>
@@ -73,17 +73,18 @@ export default async function Home() {
 
         {/* Subtitle */}
         <p
-          className="mb-8 text-center text-pretty md:mb-10"
+          className="mb-8 text-center md:mb-10"
           style={{
             color: "#ffffff",
-            fontFamily: "var(--font-roboto-mono)",
-            fontSize: "clamp(0.8125rem, 2.5vw, 1rem)",
-            lineHeight: 1.7,
-            maxWidth: "860px",
+            fontFamily: "var(--font-sans)",
+            fontSize: 20,
+            fontWeight: 400,
+            lineHeight: 1.6,
+            maxWidth: "700px",
           }}
         >
-          O primeiro sistema criado para mostrar o lucro real do seu bar.
-          {" "}Veja margem, CMV e oportunidades em tempo real. Menos relatórios e mais decisões.
+          <span className="block">O primeiro sistema criado para mostrar o lucro real do seu bar.</span>
+          <span className="block">Veja margem, CMV e oportunidades em tempo real. Menos relatórios e mais decisões.</span>
         </p>
 
         {/* CTA */}
