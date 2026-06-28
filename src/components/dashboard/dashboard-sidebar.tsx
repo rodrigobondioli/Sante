@@ -170,7 +170,7 @@ export function DashboardSidebar({
         )}
 
         {/* Support links */}
-        <div style={{ padding: touchMode ? "8px 12px" : "4px 10px" }}>
+        <div style={{ padding: touchMode ? "8px 12px 16px" : "4px 10px 12px" }}>
           {([
             { label: "Suporte",   type: "suporte",   Icon: HeadphonesIcon },
             { label: "Sugestão",  type: "sugestao",  Icon: Lightbulb },
