@@ -1,7 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 import type { Bar, BarRole, Turno } from "@/types/database";
 import { percentChange } from "@/lib/dashboard/percent-change";
 import { calcularCmv } from "@/lib/dashboard/menu-engineering";
+import { getBarByKioskToken } from "@/lib/kiosk/queries";
+import { KIOSK_COOKIE } from "@/lib/kiosk/actions";
 
 export interface CurrentBar {
   bar: Bar;
@@ -10,39 +13,65 @@ export interface CurrentBar {
   /** bar_members.id — identidade operacional para atribuição de pedidos, comandas,
    *  pagamentos e movimentos de estoque. Presente para qualquer membro com conta auth.
    *  Para staff sem auth (bartender/garçom/caixa), o memberId virá do device via
-   *  seleção local + PIN (Fase 2). */
+   *  seleção local + PIN. */
   memberId: string;
   userNome: string;
   userEmail: string;
   userAvatarUrl: string | null;
+  /** true = sessão kiosk (iPad do bar sem login do dono) */
+  isKiosk?: boolean;
 }
 
 export async function getCurrentBar(): Promise<CurrentBar | null> {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return null;
 
-  // bar_members tem duas FKs para profiles (user_id e convidado_por), então
-  // o embed precisa do hint do nome da constraint pra não ficar ambíguo.
-  const { data: membership } = await supabase
-    .from("bar_members")
-    .select("id, role, bars(*), profiles!bar_members_user_id_fkey(nome, avatar_url)")
-    .eq("user_id", auth.user.id)
-    .eq("ativo", true)
-    .limit(1)
-    .maybeSingle<{ id: string; role: BarRole; bars: Bar; profiles: { nome: string; avatar_url: string | null } | null }>();
+  // ── 1. Autenticação normal (dono / gerente com conta) ──────────────────────
+  if (auth.user) {
+    const { data: membership } = await supabase
+      .from("bar_members")
+      .select("id, role, bars(*), profiles!bar_members_user_id_fkey(nome, avatar_url)")
+      .eq("user_id", auth.user.id)
+      .eq("ativo", true)
+      .limit(1)
+      .maybeSingle<{ id: string; role: BarRole; bars: Bar; profiles: { nome: string; avatar_url: string | null } | null }>();
 
-  if (!membership?.bars) return null;
+    if (membership?.bars) {
+      return {
+        bar: membership.bars,
+        role: membership.role,
+        userId: auth.user.id,
+        memberId: membership.id,
+        userNome: membership.profiles?.nome ?? auth.user.email ?? "Usuário",
+        userEmail: auth.user.email ?? "",
+        userAvatarUrl: membership.profiles?.avatar_url ?? null,
+      };
+    }
+  }
 
-  return {
-    bar: membership.bars,
-    role: membership.role,
-    userId: auth.user.id,
-    memberId: membership.id,
-    userNome: membership.profiles?.nome ?? auth.user.email ?? "Usuário",
-    userEmail: auth.user.email ?? "",
-    userAvatarUrl: membership.profiles?.avatar_url ?? null,
-  };
+  // ── 2. Sessão kiosk (iPad sem login do dono) ───────────────────────────────
+  const cookieStore = await cookies();
+  const kioskCookie = cookieStore.get(KIOSK_COOKIE)?.value;
+  if (kioskCookie) {
+    const [, token] = kioskCookie.split(":");
+    if (token) {
+      const bar = await getBarByKioskToken(token);
+      if (bar) {
+        return {
+          bar,
+          role: "bartender" as BarRole, // papel genérico para kiosk; a tela usa OperadorShell
+          userId: "kiosk",
+          memberId: "",
+          userNome: "iPad do Bar",
+          userEmail: "",
+          userAvatarUrl: null,
+          isKiosk: true,
+        };
+      }
+    }
+  }
+
+  return null;
 }
 
 export async function getTurnoAtual(barId: string): Promise<Turno | null> {

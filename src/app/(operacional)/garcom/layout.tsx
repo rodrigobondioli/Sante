@@ -1,49 +1,53 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { getCurrentBar } from "@/lib/dashboard/queries";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { OperadorShell } from "@/components/bartender/operador-shell";
 import type { MembroSimples } from "@/components/bartender/operador-shell";
 
 export default async function GarcomLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) redirect("/login");
-
+}: Readonly<{ children: React.ReactNode }>) {
+  // getCurrentBar() tenta auth normal primeiro, depois cookie kiosk
   const current = await getCurrentBar();
-  if (!current) redirect("/onboarding");
+  if (!current) redirect("/login");
 
-  const { data: rows } = await supabase
+  // Usa service role para listar membros — funciona tanto em auth normal quanto kiosk
+  const admin = createAdminClient();
+  const { data: rows } = await admin
     .from("bar_members")
-    .select("id, nome, role")
+    .select("id, nome, role, pin")
     .eq("bar_id", current.bar.id)
     .eq("ativo", true)
     .not("nome", "is", null)
     .order("created_at", { ascending: true })
-    .returns<{ id: string; nome: string | null; role: string }[]>();
+    .returns<{ id: string; nome: string | null; role: string; pin: string | null }[]>();
 
   let membros: MembroSimples[] = (rows ?? []).map(r => ({
     id: r.id,
     nome: r.nome ?? "Sem nome",
     role: r.role,
+    temPin: !!r.pin,
   }));
 
-  if (membros.length === 0) {
-    const { data: profile } = await supabase
+  // Fallback: se não há membros na equipe, usa o perfil do usuário autenticado
+  if (membros.length === 0 && !current.isKiosk) {
+    const { data: profile } = await admin
       .from("profiles")
       .select("id, nome")
       .eq("id", current.userId)
-      .maybeSingle();
+      .maybeSingle<{ id: string; nome: string }>();
     if (profile) {
-      membros = [{ id: profile.id, nome: profile.nome, role: current.role }];
+      membros = [{ id: profile.id, nome: profile.nome, role: current.role, temPin: false }];
     }
   }
 
   return (
-    <OperadorShell membros={membros} barNome={current.bar.nome} roleLabel="Garçom">
+    <OperadorShell
+      membros={membros}
+      barNome={current.bar.nome}
+      roleLabel="Garçom"
+      isKiosk={current.isKiosk}
+    >
       {children}
     </OperadorShell>
   );
