@@ -23,14 +23,13 @@ export function AppHeader({
     }}>
       {/* Esquerda: logo + nome do bar + badge */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, overflow: "hidden" }}>
-        {/* Logo "S" — igual ao dashboard sidebar */}
-        <div style={{
-          width: 28, height: 28, borderRadius: 7, flexShrink: 0,
-          background: "var(--accent)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          <span style={{ fontSize: 13, fontWeight: 900, color: "#000", lineHeight: 1, letterSpacing: "-0.02em" }}>S</span>
-        </div>
+        {/* Logo SUPERBAR */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/favicon.svg"
+          alt="SUPERBAR"
+          style={{ width: 28, height: 28, borderRadius: 7, flexShrink: 0, display: "block" }}
+        />
 
         <span style={{
           fontSize: 14, fontWeight: 600, color: "var(--fg)",

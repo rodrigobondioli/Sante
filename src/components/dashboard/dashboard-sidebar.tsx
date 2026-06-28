@@ -76,14 +76,8 @@ export function DashboardSidebar({
       {!hideHeader && (
         <div style={{ padding: "18px 20px 16px", borderBottom: "1px solid var(--border)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-            <div style={{
-              width: 28, height: 28, borderRadius: 7,
-              background: "var(--accent)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              flexShrink: 0,
-            }}>
-              <span style={{ fontSize: 13, fontWeight: 900, color: "var(--accent-fg)", lineHeight: 1, letterSpacing: "-0.02em" }}>S</span>
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/favicon.svg" alt="SUPERBAR" style={{ width: 28, height: 28, borderRadius: 7, flexShrink: 0, display: "block" }} />
             <span style={{ fontSize: 13, fontWeight: 700, color: "var(--fg)", letterSpacing: "-0.01em" }}>SUPERBAR</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
