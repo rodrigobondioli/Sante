@@ -110,7 +110,7 @@ export default async function Home() {
             Onde o dinheiro do seu bar vaza?
           </h2>
           <p
-            className="text-pretty"
+            className="text-balance"
             style={{
               color: "#ffffff",
               fontFamily: "var(--font-sans)",
@@ -138,7 +138,7 @@ export default async function Home() {
                     {item.title}
                   </p>
                   <p
-                    className="leading-relaxed text-pretty"
+                    className="leading-relaxed text-balance"
                     style={{ color: "#ffffff", fontFamily: "var(--font-sans)", fontWeight: 400, fontSize: 16 }}
                   >
                     {item.desc}
@@ -169,7 +169,7 @@ export default async function Home() {
                     {item.title}
                   </p>
                   <p
-                    className="leading-relaxed text-pretty"
+                    className="leading-relaxed text-balance"
                     style={{ color: "#ffffff", fontFamily: "var(--font-sans)", fontWeight: 400, fontSize: 16 }}
                   >
                     {item.desc}
