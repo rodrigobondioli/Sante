@@ -48,8 +48,8 @@ function FaqItem({ faq, initialOpen = false }: { faq: (typeof FAQS)[0]; initialO
             className="text-balance"
             style={{
               fontFamily: "var(--font-sans)",
-              fontSize: "clamp(1rem, 2.5vw, 1.25rem)",
-              fontWeight: 400,
+              fontSize: 22,
+              fontWeight: 600,
               color: YELLOW,
               lineHeight: 1.1,
             }}
@@ -83,10 +83,11 @@ function FaqItem({ faq, initialOpen = false }: { faq: (typeof FAQS)[0]; initialO
           <p
             className="text-pretty"
             style={{
-              fontFamily: "var(--font-roboto-mono)",
-              fontSize: "0.875rem",
+              fontFamily: "var(--font-sans)",
+              fontSize: 16,
+              fontWeight: 400,
               color: "#ffffff",
-              lineHeight: 1.75,
+              lineHeight: 1.7,
               padding: "0 0 24px",
               maxWidth: "680px",
             }}
@@ -118,7 +119,7 @@ export function FaqSection() {
               className="text-balance"
               style={{
                 fontFamily: "var(--font-sans)",
-                fontSize: "clamp(1.5rem, 4vw, 2.5rem)",
+                fontSize: 32,
                 fontWeight: 600,
                 color: "#ffffff",
                 lineHeight: 1.1,
@@ -129,10 +130,11 @@ export function FaqSection() {
             </h2>
             <p
               style={{
-                fontFamily: "var(--font-roboto-mono)",
-                fontSize: "0.875rem",
+                fontFamily: "var(--font-sans)",
+                fontSize: 20,
+                fontWeight: 400,
                 color: "#ffffff",
-                lineHeight: 1.7,
+                lineHeight: 1.6,
                 marginBottom: "1rem",
                 maxWidth: "260px",
               }}
