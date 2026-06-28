@@ -1,36 +1,26 @@
 import Link from "next/link";
-import { NavPill } from "@/components/ui/nav-pill";
-import { Button } from "@/components/ui/button";
-
-const links = [
-  { href: "#produto", label: "Produto" },
-  { href: "#precos", label: "Preços" },
-  { href: "#sobre", label: "Sobre" },
-];
+import Image from "next/image";
 
 export function SiteNav() {
   return (
-    <NavPill className="flex w-[min(640px,calc(100vw-2rem))] items-center justify-between gap-6">
-      <Link href="/" className="text-sm font-semibold tracking-tight text-fg">
-        Superbar
-      </Link>
-
-      <ul className="hidden items-center gap-6 sm:flex">
-        {links.map((link) => (
-          <li key={link.href}>
-            <Link
-              href={link.href}
-              className="text-sm text-fg-muted transition-colors hover:text-fg"
-            >
-              {link.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
-
-      <Button variant="primary" className="px-5 py-2 text-sm">
-        Começar agora
-      </Button>
-    </NavPill>
+    <nav className="relative md:fixed md:left-0 md:right-0 md:top-0 md:z-50">
+      <div className="flex items-center justify-between px-4 py-6 md:px-8 lg:px-14">
+        <Link href="/">
+          <Image
+            src="/img-lp/logo-superbar.svg"
+            alt="Superbar"
+            width={48}
+            height={48}
+            className="opacity-90"
+          />
+        </Link>
+        <span
+          className="text-xs font-bold uppercase tracking-[0.22em] text-white"
+          style={{ fontFamily: "var(--font-roboto-mono)" }}
+        >
+          Superbar Intelligence
+        </span>
+      </div>
+    </nav>
   );
 }

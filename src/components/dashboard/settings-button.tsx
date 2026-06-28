@@ -14,10 +14,11 @@ interface SettingsButtonProps {
   userAvatarUrl: string | null;
   autoPedido?: boolean;
   taxaServicoPct?: number;
+  alertCount?: number;
 }
 
 export function SettingsButton({
-  bar, barId, userId, userNome, userEmail, userAvatarUrl, autoPedido = false, taxaServicoPct = 10,
+  bar, barId, userId, userNome, userEmail, userAvatarUrl, autoPedido = false, taxaServicoPct = 10, alertCount = 0,
 }: SettingsButtonProps) {
   const [open, setOpen] = useState(false);
   const inicial = userNome.split(" ")[0].charAt(0).toUpperCase();
@@ -35,23 +36,37 @@ export function SettingsButton({
           borderRadius: 4,
         }}
       >
-        {userAvatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={userAvatarUrl}
-            alt={userNome}
-            style={{ width: 41, height: 41, borderRadius: "50%", objectFit: "cover", display: "block", flexShrink: 0 }}
-          />
-        ) : (
-          <div style={{
-            width: 41, height: 41, borderRadius: "50%",
-            background: "var(--accent)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 13, fontWeight: 700, color: "var(--accent-fg)", flexShrink: 0,
-          }}>
-            {inicial}
-          </div>
-        )}
+        <div style={{ position: "relative", flexShrink: 0 }}>
+          {userAvatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={userAvatarUrl}
+              alt={userNome}
+              style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover", display: "block" }}
+            />
+          ) : (
+            <div style={{
+              width: 32, height: 32, borderRadius: "50%",
+              background: "var(--accent)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 12, fontWeight: 700, color: "var(--accent-fg)",
+            }}>
+              {inicial}
+            </div>
+          )}
+          {alertCount > 0 && (
+            <span style={{
+              position: "absolute", top: -3, right: -3,
+              minWidth: 15, height: 15, borderRadius: "50%",
+              background: "#FF6F00", color: "#fff",
+              fontSize: 9, fontWeight: 700,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              padding: "0 3px", lineHeight: 1,
+            }}>
+              {alertCount > 9 ? "9+" : alertCount}
+            </span>
+          )}
+        </div>
         <ChevronDown style={{ width: 13, height: 13, color: "var(--fg-subtle)", flexShrink: 0 }} strokeWidth={2} />
       </button>
 

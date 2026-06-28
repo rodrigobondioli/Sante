@@ -1,67 +1,34 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { ClipboardList, Boxes, Wallet, Check, Activity, Calculator, Package, Shield } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { SectionHeading } from "@/components/marketing/section-heading";
+import Image from "next/image";
+import { Check } from "lucide-react";
+import { TextRevealSection } from "@/components/marketing/text-reveal";
+import { CTAButton } from "@/components/marketing/cta-button";
+import { ParallaxScene } from "@/components/marketing/parallax-scene";
+import { ProcessoSection } from "@/components/marketing/processo-section";
+import { DonoSection } from "@/components/marketing/dono-section";
+import { CtaSection } from "@/components/marketing/cta-section";
+import { FaqSection } from "@/components/marketing/faq-section";
+import { ContactSection } from "@/components/marketing/contact-section";
 
-// Estilos de link que imitam os variantes do Button (mesmas classes Tailwind)
-const linkPrimary =
-  "inline-flex items-center justify-center transition duration-150 active:scale-[0.97] rounded-md bg-accent px-[18px] py-[10px] font-medium text-accent-fg hover:brightness-110 no-underline";
-const linkSecondary =
-  "inline-flex items-center justify-center transition duration-150 active:scale-[0.97] rounded-md border border-border-strong bg-transparent px-[18px] py-[10px] text-fg hover:border-fg-muted no-underline";
-
-const features = [
-  {
-    icon: ClipboardList,
-    title: "Comandas em tempo real",
-    description:
-      "Cada comanda é por mesa, com itens sincronizados ao vivo entre bartender e caixa. Sem grito, sem papel.",
-  },
-  {
-    icon: Boxes,
-    title: "Controle de estoque",
-    description:
-      "Acompanhe o nível de cada insumo e receba alertas antes de acabar no meio do turno. Movimentações e histórico completo.",
-  },
-  {
-    icon: Wallet,
-    title: "Caixa sem rasura",
-    description:
-      "Pagamentos, turnos e fechamento de caixa auditados — sem planilha, sem divergência no final da noite.",
-  },
+const doresLeft = [
+  { title: "Margem Invisível", desc: "Você sabe quanto vendeu. O lucro real continua escondido." },
+  { title: "Faturamento Atrasado", desc: "O dia fechou e os números chegam só na manhã seguinte." },
+  { title: "Info Presa na Equipe", desc: "Quer saber o que rolou? Tem que perguntar pro bartender." },
 ];
 
-const diferenciais = [
-  {
-    icon: Activity,
-    label: "Faturamento em tempo real",
-    desc: "Veja o número do dia no celular, de qualquer lugar, enquanto o bar está cheio.",
-  },
-  {
-    icon: Calculator,
-    label: "CMV de cada drink",
-    desc: "Cadastre o custo de produção e descubra exatamente qual drink dá mais lucro.",
-  },
-  {
-    icon: Package,
-    label: "Um plano, tudo incluído",
-    desc: "Sem módulo extra, sem surpresa na fatura. Operação e inteligência no mesmo preço.",
-  },
-  {
-    icon: Shield,
-    label: "Sem multa para cancelar",
-    desc: "Nenhum contrato amarrado. A gente prende pelo valor que o sistema entrega, não pelo papel.",
-  },
+const doresRight = [
+  { title: "Sistema Para no Pico", desc: "Sexta lotada. O sistema trava justamente quando o bar enche." },
+  { title: "Decisão Sem Direção", desc: "Você sente que algo está errado, mas não sabe onde agir." },
+  { title: "Ganho Escondido", desc: "Produtos lucrativos passam despercebidos todos os dias." },
 ];
 
-const planFeatures = [
-  "Operação completa (bartender, caixa, mesas)",
-  "Faturamento e CMV em tempo real",
-  "Relatórios por turno e por período",
-  "Importação de cardápio via planilha",
-  "Suporte e atualizações incluídos",
-  "Implantação acompanhada neste período",
-  "Sem multa para cancelar",
+const paraVoce = [
+  'Já ouviu "vamos resolver na implantação". E nada mudou.',
+  "Abre cinco relatórios e continua sem resposta.",
+  "Recebe números. Mas não recebe decisões.",
+  "Quer um copiloto. Não mais um painel.",
+  "Cansou de usar sistema de restaurante adaptado para bar.",
 ];
 
 export default async function Home() {
@@ -70,154 +37,259 @@ export default async function Home() {
   if (host.startsWith("app.")) redirect("/login");
 
   return (
-    <>
-      {/* Hero */}
-      <section className="mx-4 mt-4 overflow-hidden rounded-lg border border-border bg-bg-elevated px-8 py-24 sm:px-16 sm:py-32">
-        <div className="relative mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
-          <p className="text-caption font-medium uppercase tracking-[0.15em] text-fg-subtle">
-            Sistema operacional para bares premium
+    <div className="min-h-screen" style={{ background: "#1133FF", color: "#FFFFFF" }}>
+
+      {/* ─── HERO ─────────────────────────────────────────────────────────── */}
+      <section
+        className="relative flex min-h-[calc(100dvh-96px)] w-full flex-col items-center justify-center px-4 text-center md:min-h-dvh md:px-8 lg:px-14"
+        style={{ background: "linear-gradient(to bottom, #0B0025 0%, #1133FF 100%)" }}
+      >
+        {/* Badge */}
+        <div
+          className="mb-6 inline-flex items-center rounded-full px-4 py-2 text-xs text-white/80 md:mb-8 md:px-5 md:text-sm"
+          style={{
+            border: "1px solid rgba(255,255,255,0.2)",
+            fontFamily: "var(--font-roboto-mono)",
+            letterSpacing: "0.04em",
+          }}
+        >
+          Inteligência operacional para donos de bar
+        </div>
+
+        {/* H1 — responsive font, wraps naturally on mobile */}
+        <h1
+          className="mb-5 uppercase text-white text-balance md:mb-6"
+          style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 400,
+            fontSize: "clamp(2.5rem, 7vw, 4rem)",
+            lineHeight: 1.05,
+            letterSpacing: "-0.01em",
+          }}
+        >
+          <span className="block">Seu bar está ganhando</span>
+          <span className="block">dinheiro ou só vendendo mais?</span>
+        </h1>
+
+        {/* Subtitle */}
+        <p
+          className="mb-8 text-center text-pretty md:mb-10"
+          style={{
+            color: "#ffffff",
+            fontFamily: "var(--font-roboto-mono)",
+            fontSize: "clamp(0.8125rem, 2.5vw, 1rem)",
+            lineHeight: 1.7,
+            maxWidth: "860px",
+          }}
+        >
+          O primeiro sistema criado para mostrar o lucro real do seu bar.
+          {" "}Veja margem, CMV e oportunidades em tempo real. Menos relatórios e mais decisões.
+        </p>
+
+        {/* CTA */}
+        <div className="flex items-center justify-center">
+          <CTAButton />
+        </div>
+      </section>
+
+      {/* ─── DORES ─────────────────────────────────────────────────────────── */}
+      <section className="py-10 md:py-[120px]">
+        {/* Header */}
+        <div className="mx-auto mb-10 max-w-4xl px-4 md:mb-16 md:px-8 md:text-center lg:px-14">
+          <h2
+            className="mb-4 uppercase text-white text-balance md:mb-5"
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 400,
+              fontSize: "clamp(1.375rem, 4vw, 2.5rem)",
+              lineHeight: 1.05,
+              letterSpacing: "0.08em",
+            }}
+          >
+            Onde o dinheiro do seu bar vaza?
+          </h2>
+          <p
+            className="text-pretty"
+            style={{
+              color: "#ffffff",
+              fontFamily: "var(--font-roboto-mono)",
+              fontSize: "0.875rem",
+              lineHeight: 1.5,
+            }}
+          >
+            Você vende todos os dias. O problema é descobrir tarde demais onde o dinheiro está vazando.
           </p>
-          <h1 className="text-display-lg sm:text-display-2xl font-bold text-fg">
-            Seu bar, sob <span className="text-accent-bright">controle total.</span>
-          </h1>
-          <p className="text-body-lg max-w-xl text-fg-muted">
-            Comandas, estoque, caixa e turno em um único sistema. Sem planilha,
-            sem surpresa no fechamento.
-          </p>
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-4">
-            <a href="/cadastro" className={linkPrimary}>
-              Criar minha conta
-            </a>
-            <a href="mailto:rodrigobondioli@gmail.com" className={linkSecondary}>
-              Falar com a equipe
-            </a>
+        </div>
+
+        {/* Grid: mobile = 1 col (mascote hidden), desktop = 3 col */}
+        <div className="mx-auto max-w-[1440px] px-4 md:px-8 lg:px-14">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_420px_1fr] lg:items-center lg:gap-x-8">
+
+            {/* Left cards */}
+            <div className="flex flex-col gap-4 lg:gap-5">
+              {doresLeft.map((item) => (
+                <div key={item.title} className="rounded-2xl p-5 md:p-7" style={{ background: "#110039" }}>
+                  <p
+                    className="mb-3 uppercase text-balance md:mb-4"
+                    style={{ color: "#1133FF", fontFamily: "var(--font-display)", fontWeight: 400, fontSize: "1rem", letterSpacing: "0.08em" }}
+                  >
+                    {item.title}
+                  </p>
+                  <p
+                    className="leading-relaxed text-pretty"
+                    style={{ color: "#ffffff", fontFamily: "var(--font-roboto-mono)", fontSize: "0.875rem" }}
+                  >
+                    {item.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Mascote — hidden on mobile */}
+            <div className="hidden items-center justify-center lg:flex">
+              <Image
+                src="/img-lp/coquetelaria-vazando.png"
+                alt="Coqueteleira vazando"
+                width={420}
+                height={660}
+                className="w-full"
+              />
+            </div>
+
+            {/* Right cards */}
+            <div className="flex flex-col gap-4 lg:gap-5">
+              {doresRight.map((item) => (
+                <div key={item.title} className="rounded-2xl p-5 md:p-7" style={{ background: "#110039" }}>
+                  <p
+                    className="mb-3 uppercase text-balance md:mb-4"
+                    style={{ color: "#1133FF", fontFamily: "var(--font-display)", fontWeight: 400, fontSize: "1rem", letterSpacing: "0.08em" }}
+                  >
+                    {item.title}
+                  </p>
+                  <p
+                    className="leading-relaxed text-pretty"
+                    style={{ color: "#ffffff", fontFamily: "var(--font-roboto-mono)", fontSize: "0.875rem" }}
+                  >
+                    {item.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section id="como-funciona" className="px-8 py-24 sm:px-16">
-        <SectionHeading
-          align="center"
-          overline="O que o SUPERBAR faz"
-          title={
-            <>
-              Tudo que seu bar precisa{" "}
-              <span className="text-accent-bright">em um lugar.</span>
-            </>
-          }
-          className="mx-auto max-w-2xl"
-        />
-        <div className="mt-16 grid gap-6 sm:grid-cols-3">
-          {features.map((feature) => (
-            <Card key={feature.title} variant="hero">
-              <feature.icon className="h-6 w-6 text-accent-bright" strokeWidth={1.5} />
-              <h3 className="text-h3 mt-4 font-semibold text-fg">{feature.title}</h3>
-              <p className="text-body-sm mt-2 text-fg-muted">{feature.description}</p>
-            </Card>
-          ))}
-        </div>
-      </section>
+      {/* ─── TEXT REVEAL ───────────────────────────────────────────────────── */}
+      <TextRevealSection />
 
-      {/* Diferenciais */}
-      <section className="mx-4 overflow-hidden rounded-lg border border-border bg-bg-elevated px-8 py-20 sm:px-16">
-        <SectionHeading
-          align="center"
-          overline="Por que o SUPERBAR"
-          title={
-            <>
-              Feito pra bar,{" "}
-              <span className="text-accent-bright">não adaptado de restaurante.</span>
-            </>
-          }
-          className="mx-auto max-w-2xl"
-        />
-        <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {diferenciais.map((d) => (
-            <div key={d.label} className="flex flex-col gap-3">
-              <d.icon className="h-5 w-5 text-accent-bright" strokeWidth={1.5} />
-              <p className="text-body-base font-semibold text-fg">{d.label}</p>
-              <p className="text-body-sm text-fg-muted">{d.desc}</p>
+      {/* ─── PARA QUEM É ──────────────────────────────────────────────────── */}
+      <section id="produto" className="py-10 md:py-[120px]">
+        <div className="mx-auto max-w-[1440px] px-4 md:px-8 lg:px-14">
+          <div className="grid grid-cols-1 gap-10 lg:items-stretch lg:gap-20 lg:grid-cols-[1fr_2fr]">
+
+            {/* Foto */}
+            <div className="relative h-[260px] overflow-hidden rounded-2xl lg:h-full">
+              <Image
+                src="/img-lp/foto-drink1.png"
+                alt="Bartender com drink"
+                fill
+                className="object-cover object-center"
+              />
             </div>
-          ))}
-        </div>
-      </section>
 
-      {/* Pricing */}
-      <section className="px-8 py-24 sm:px-16">
-        <SectionHeading
-          align="center"
-          overline="Plano único"
-          title={
-            <>
-              Um preço,{" "}
-              <span className="text-accent-bright">tudo dentro.</span>
-            </>
-          }
-          className="mx-auto max-w-2xl"
-        />
-
-        <div className="mx-auto mt-16 max-w-md">
-          <Card className="flex flex-col gap-6 border-accent-bright">
+            {/* Conteúdo */}
             <div>
-              <p className="text-caption font-semibold uppercase tracking-[0.12em] text-accent-bright">
-                Plano Fundador
-              </p>
-              <p className="text-body-sm mt-1 text-fg-muted">
-                Para os 10 primeiros bares. Vagas limitadas.
-              </p>
+              <h2
+                className="mb-8 uppercase text-white text-balance md:mb-10"
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 400,
+                  fontSize: "clamp(1.25rem, 3.5vw, 2rem)",
+                  letterSpacing: "0.08em",
+                  lineHeight: 1.1,
+                }}
+              >
+                O Superbar é para você que:
+              </h2>
+
+              <ul className="mb-8 flex flex-col md:mb-10">
+                {paraVoce.map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-center gap-3 py-5 md:gap-4 md:py-7"
+                    style={{ borderTop: "1px solid rgba(255,255,255,0.12)" }}
+                  >
+                    <Check
+                      className="h-4 w-4 flex-shrink-0 md:h-5 md:w-5"
+                      style={{ color: "#1133FF" }}
+                      strokeWidth={2.5}
+                    />
+                    <span
+                      className="text-pretty"
+                      style={{
+                        fontFamily: "var(--font-roboto-mono)",
+                        fontSize: "clamp(0.8125rem, 2.5vw, 1rem)",
+                        color: "#ffffff",
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {item}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <CTAButton />
             </div>
-
-            <div className="flex items-baseline gap-1">
-              <span className="font-mono text-[2.5rem] font-bold leading-none text-fg">
-                R$ 697
-              </span>
-              <span className="text-body-sm text-fg-subtle">/mês</span>
-            </div>
-
-            <ul className="flex flex-col gap-3">
-              {planFeatures.map((feat) => (
-                <li key={feat} className="flex items-start gap-2">
-                  <Check
-                    className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent-bright"
-                    strokeWidth={2.5}
-                  />
-                  <span className="text-body-sm text-fg-muted">{feat}</span>
-                </li>
-              ))}
-            </ul>
-
-            <a href="mailto:rodrigobondioli@gmail.com" className={linkPrimary}>
-              Quero ser fundador →
-            </a>
-
-            <p className="text-caption text-center text-fg-subtle">
-              A partir do 11º bar: R$&nbsp;997/mês. Sem módulo extra em ambos.
-            </p>
-          </Card>
+          </div>
         </div>
       </section>
 
-      {/* CTA final */}
-      <section className="mx-4 mb-4 overflow-hidden rounded-lg border border-border bg-bg-elevated px-8 py-20 text-center sm:px-16">
-        <h2 className="text-display-lg font-bold text-fg">
-          Pronto para <span className="text-accent-bright">profissionalizar</span> seu bar?
-        </h2>
-        <p className="text-body-lg mx-auto mt-4 max-w-xl text-fg-muted">
-          Fale com a gente. Implantação acompanhada, sem burocracia.
-        </p>
-        <div className="mt-8 flex justify-center">
-          <a href="mailto:rodrigobondioli@gmail.com" className={linkPrimary}>
-            Entrar em contato
-          </a>
-        </div>
-      </section>
+      {/* ─── PARALLAX SCENE ───────────────────────────────────────────────── */}
+      <ParallaxScene />
 
-      {/* Footer */}
-      <footer className="text-body-sm flex flex-col items-center gap-2 px-8 py-12 text-center text-fg-subtle">
-        <span className="font-semibold text-fg">Superbar</span>
-        <span>© {new Date().getFullYear()} Superbar. Todos os direitos reservados.</span>
+      {/* ─── PROCESSO ─────────────────────────────────────────────────────── */}
+      <ProcessoSection />
+
+      {/* ─── DONO MÉDIO vs DONO INTELIGENTE ───────────────────────────────── */}
+      <DonoSection />
+
+      {/* ─── CTA FINAL ─────────────────────────────────────────────────────── */}
+      <CtaSection />
+
+      {/* ─── FAQ ───────────────────────────────────────────────────────────── */}
+      <FaqSection />
+
+      {/* ─── CONTATO FINAL ─────────────────────────────────────────────────── */}
+      <ContactSection />
+
+      {/* ─── FOOTER ────────────────────────────────────────────────────────── */}
+      <footer style={{ borderTop: "1px solid rgba(255,255,255,0.1)", background: "#1133FF" }}>
+        <div
+          className="flex flex-col gap-3 px-4 py-6 md:flex-row md:items-center md:justify-between md:px-8 md:py-6 lg:px-14"
+        >
+          <span
+            style={{
+              fontFamily: "var(--font-roboto-mono)",
+              fontSize: "0.75rem",
+              color: "#ffffff",
+              lineHeight: 1.5,
+            }}
+          >
+            SUPERBAR — Uma plataforma que roda a operação do seu bar em tempo real e transforma cada dado em decisão.
+          </span>
+          <span
+            style={{
+              fontFamily: "var(--font-roboto-mono)",
+              fontSize: "0.75rem",
+              color: "rgba(255,255,255,0.6)",
+              flexShrink: 0,
+            }}
+          >
+            Copyright © 2026. Superbar. Todos os direitos Reservados.
+          </span>
+        </div>
       </footer>
-    </>
+    </div>
   );
 }

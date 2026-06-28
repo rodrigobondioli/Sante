@@ -8,6 +8,28 @@ import { CARD, LABEL } from "@/lib/ui";
 const fmt = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
+interface TipoMeta {
+  label:       string;
+  borderColor: string;
+  labelColor:  string;
+}
+
+const TIPO_META: Record<string, TipoMeta> = {
+  cmv_alto_produto:  { label: "CMV ALTO",          borderColor: "#EF4444",       labelColor: "#EF4444"       },
+  produto_sem_custo: { label: "CUSTO INCOMPLETO",   borderColor: "var(--warn)",   labelColor: "var(--warn)"   },
+  ticket_queda:      { label: "TICKET CAINDO",      borderColor: "var(--warn)",   labelColor: "var(--warn)"   },
+  produto_esquecido: { label: "OPORTUNIDADE",       borderColor: "var(--ok)",     labelColor: "var(--ok)"     },
+  cortesia_elevada:  { label: "CORTESIA ELEVADA",   borderColor: "#EF4444",       labelColor: "#EF4444"       },
+};
+
+function tipoMeta(tipo: string): TipoMeta {
+  return TIPO_META[tipo] ?? {
+    label:       tipo.replace(/_/g, " ").toUpperCase(),
+    borderColor: "#EF4444",
+    labelColor:  "#EF4444",
+  };
+}
+
 function formatData(iso: string): string {
   return new Date(iso).toLocaleDateString("pt-BR", {
     day: "2-digit",
@@ -32,7 +54,7 @@ function InsightCard({
       style={{
         ...CARD,
         padding: "20px 24px",
-        borderLeft: "3px solid #ef4444",
+        borderLeft: `3px solid ${tipoMeta(insight.tipo).borderColor}`,
         display: "flex",
         flexDirection: "column",
         gap: 10,
@@ -42,8 +64,8 @@ function InsightCard({
     >
       {/* Tipo + data */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <p style={{ ...LABEL, color: "#ef4444" }}>
-          {insight.tipo.replace(/_/g, " ")}
+        <p style={{ ...LABEL, color: tipoMeta(insight.tipo).labelColor }}>
+          {tipoMeta(insight.tipo).label}
         </p>
         <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>
           {formatData(insight.criado_em)}
@@ -121,10 +143,11 @@ export function InsightCards({ insights }: { insights: InsightPendente[] }) {
 
   const MONITORANDO = [
     "CMV por produto",
-    "Ticket médio",
+    "Custo incompleto — produtos sem receita",
+    "Ticket médio semana a semana",
+    "Produtos com boa margem e baixo giro",
     "Estoque abaixo do mínimo",
-    "Produtos parados",
-    "Performance da equipe",
+    "Cortesias acima do normal",
   ];
 
   if (visible.length === 0) {

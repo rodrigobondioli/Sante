@@ -53,7 +53,7 @@ export function DashboardLayoutClient({
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
-    <div className="flex flex-col" style={{ height: "100dvh", overflow: "hidden", background: "var(--bg)" }}>
+    <div data-theme="dark" className="flex flex-col" style={{ height: "100dvh", overflow: "hidden", background: "var(--bg)" }}>
 
       {/* ── Mobile header (lg:hidden) ── */}
       <div className="lg:hidden flex-shrink-0">
@@ -97,9 +97,22 @@ export function DashboardLayoutClient({
         {/* Desktop sidebar */}
         <aside
           className="hidden lg:block flex-shrink-0"
-          style={{ width: 220, height: "100%", borderRight: "1px solid var(--border)" }}
+          style={{ width: 220, height: "100%" }}
         >
-          <DashboardSidebar barNome={barNome} userNome={userNome} role={role} insightCount={insightCount} />
+          <DashboardSidebar
+            barNome={barNome}
+            userNome={userNome}
+            role={role}
+            insightCount={insightCount}
+            alertas={alertas}
+            bar={bar}
+            barId={barId}
+            userId={userId}
+            userEmail={userEmail}
+            userAvatarUrl={userAvatarUrl}
+            autoPedido={autoPedido}
+            taxaServicoPct={taxaServicoPct}
+          />
         </aside>
 
         {/* Main */}

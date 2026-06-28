@@ -1,407 +1,173 @@
-# DESIGN.md — Superbar
+# SUPERBAR — Design System
 
-> Contrato visual do produto. Toda UI gerada (site, dashboard, telas operacionais) segue estas regras.
-> Fonte de verdade visual para o Claude Code e qualquer agente de codificação.
-
----
-
-## 0. O que mudou (zeramos o sistema antigo)
-
-O sistema visual anterior (dark com degradês, glow índigo, pills, raios grandes, índigo como tema) foi **descartado**. Nova direção, válida para tudo:
-
-**Limpo. Plano. Mono. Muito espaço. Um respiro de cor só.** Estética de instrumento de precisão — silencioso, estruturado, sem decoração. Sem degradê, sem glow, sem sombra colorida.
+> **Esta é a única fonte de verdade para decisões visuais.**
+> Não improvise estilo. Qualquer decisão fora deste documento é inconsistência.
 
 ---
 
-## 1. Princípios visuais
+## Filosofia
 
-- **Plano e silencioso.** Nada de degradê, glow ou sombra decorativa. Hierarquia se faz com espaço, peso tipográfico e cor com parcimônia.
-- **Cada cor tem função.** A base é preto/branco/cinza. O #260078 é o respiro — aparece só onde há ação. Cores semânticas só onde há estado operacional.
-- **Mono na frente.** Títulos e dados em monoespaçada dão o tom "instrumento". Corpo em sans pra leitura.
-- **Espaço é design.** Generoso. O vazio organiza.
-- **Premium na execução (este doc). Descolado na personalidade.** A personalidade jovem (mascote, voz, copy) vive na camada de marca do site — dentro desta mesma paleta, sem quebrar o sistema.
+Clareza antes de decoração. Premium através de contenção.
 
----
-
-## 2. Temas (dark + light)
-
-Dois temas, **dark é o padrão**, com botão de troca pro usuário (ícone de sol/lua no topo).
-
-Arquitetura: **tokens semânticos via CSS variables.** A UI nunca usa hex cru — usa o token (`--bg`, `--fg`, `--accent`...). Trocar de tema é trocar os valores dos tokens. Por isso os dois temas custam quase nada: o sistema nasce assim na fundação.
-
-**Regra:** nenhum componente referencia cor fixa. Sempre o token.
+O design é um argumento: *"Este software é mais inteligente do que você esperava."*
+A interface some — os dados falam. Nenhum elemento existe por estética; cada elemento responde a uma pergunta de negócio.
 
 ---
 
-## 3. Paleta
+## Stack
 
-### 3.1 Regra de cor (a régua)
-
-- **Base:** branco, preto e tons de cinza.
-- **Ação:** `#260078` — **só em CTAs e detalhes de ação** (botão primário, foco, link, item de nav ativo). É o respiro; aparece pouco e por isso tem força.
-- **Semânticas (verde/âmbar/vermelho):** **só nas telas operacionais** (Bartender e Caixa), pra sinalizar estado. Proibidas no site, onboarding e dashboard — exceto um badge de status mínimo.
-
-### 3.2 Tokens — tema DARK (padrão)
-
-```css
-:root, [data-theme="dark"] {
-  --bg:            #0B0B0C;   /* fundo principal */
-  --bg-elevated:   #141416;   /* cards, superfícies elevadas */
-  --bg-inset:      #08080A;   /* campos, áreas recuadas */
-  --fg:            #FAFAFA;   /* texto principal */
-  --fg-muted:      #9A9AA0;   /* texto secundário */
-  --fg-subtle:     #65656B;   /* texto terciário, labels, placeholder */
-  --border:        rgba(255,255,255,0.08);  /* hairline padrão */
-  --border-strong: rgba(255,255,255,0.16);  /* divisória/ativo */
-
-  --accent:        #260078;   /* ação — fill de CTA */
-  --accent-fg:     #FFFFFF;   /* texto sobre o accent */
-  --accent-bright: #6B4FE8;   /* tint do accent p/ texto/ring sobre fundo escuro (legibilidade) */
-  --ring:          #6B4FE8;   /* foco no dark */
-}
-```
-
-### 3.3 Tokens — tema LIGHT
-
-```css
-[data-theme="light"] {
-  --bg:            #FFFFFF;
-  --bg-elevated:   #FAFAFA;
-  --bg-inset:      #F4F4F5;
-  --fg:            #0B0B0C;
-  --fg-muted:      #6B6B70;
-  --fg-subtle:     #9A9AA0;
-  --border:        rgba(0,0,0,0.10);
-  --border-strong: rgba(0,0,0,0.18);
-
-  --accent:        #260078;
-  --accent-fg:     #FFFFFF;
-  --accent-bright: #260078;   /* no claro o #260078 já é legível como texto/ring */
-  --ring:          #260078;
-}
-```
-
-> **Nota de contraste do #260078:** como fill de CTA com texto branco, funciona nos dois temas. Como *texto* ou *anel de foco* sobre fundo escuro ele fica baixo — por isso no dark usamos `--accent-bright` (#6B4FE8) nesses casos. CTA sólido = sempre `--accent`.
-
-### 3.4 Cores semânticas — APENAS Bartender e Caixa
-
-```css
-/* valem só nas surfaces operacionais; discretas, nunca berrantes */
-:root, [data-theme="dark"] {
-  --ok:        #22C55E;  --ok-bg:     rgba(34,197,94,0.12);   /* comanda ok / pago */
-  --warn:      #F59E0B;  --warn-bg:   rgba(245,158,11,0.12);  /* quer pagar / pendente */
-  --danger:    #EF4444;  --danger-bg: rgba(239,68,68,0.12);   /* cancelado / erro */
-}
-[data-theme="light"] {
-  --ok:        #16A34A;  --ok-bg:     rgba(22,163,74,0.10);
-  --warn:      #D97706;  --warn-bg:   rgba(217,119,6,0.10);
-  --danger:    #DC2626;  --danger-bg: rgba(220,38,38,0.10);
-}
-```
+- **Font:** Inter (carregada via `next/font/google`, variável `--font-sans`)
+- **Estilo:** Tailwind CSS v4 + inline styles via CSS variables
+- **Tema:** dark por padrão (`data-theme="dark"` no layout)
+- **CSS Vars:** definidas em `globals.css` — nunca use hex direto no JSX
 
 ---
 
-## 4. Tipografia
+## Paleta — Dark Mode (primário)
 
-### 4.1 Fontes
+| Token                | Valor             | Uso                                 |
+|---------------------|-------------------|-------------------------------------|
+| `--bg`              | `#0A0A0B`         | Fundo da página                     |
+| `--bg-elevated`     | `#111113`         | Sidebar, header, superfícies altas  |
+| `--bg-card`         | `#1C1C1E`         | Cards, painéis                      |
+| `--bg-hover`        | `#242427`         | Hover states, inputs                |
+| `--fg`              | `#FAFAFA`         | Texto primário                      |
+| `--fg-muted`        | `#A1A1AA`         | Texto secundário, legendas          |
+| `--fg-subtle`       | `#52525B`         | Labels, placeholders, eixos         |
+| `--border`          | `rgba(255,255,255,0.08)` | Bordas hairline              |
+| `--border-strong`   | `rgba(255,255,255,0.14)` | Divisores, separadores           |
+| `--accent`          | `#F59E0B`         | Ação primária, progresso, destaque  |
+| `--accent-fg`       | `#000000`         | Texto sobre fundo accent            |
+| `--accent-bright`   | `#FCD34D`         | Hover sobre accent                  |
+| `--ok`              | `#22C55E`         | Positivo, meta atingida             |
+| `--ok-bg`           | `rgba(34,197,94,0.10)` | Background de status ok        |
+| `--warn`            | `#F59E0B`         | Atenção (mesmo tom do accent)       |
+| `--warn-bg`         | `rgba(245,158,11,0.10)` | Background de aviso           |
+| `--danger`          | `#EF4444`         | Crítico, CMV alto, alerta           |
+| `--danger-bg`       | `rgba(239,68,68,0.10)` | Background de erro             |
 
-- **Display / títulos / dados:** monoespaçada (Geist Mono). É a assinatura do sistema.
-- **Corpo / parágrafos / UI:** sans (Geist).
-
-```javascript
-import { Geist, Geist_Mono } from 'next/font/google'
-const geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
-const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-mono' })
-```
-
-### 4.2 Escala
-
-```css
-/* Display — mono, títulos de hero/seção */
---text-display: 3rem / 1.1;     /* 48px */
---text-h1:      2rem / 1.15;    /* 32px — mono */
---text-h2:      1.5rem / 1.2;   /* 24px — mono */
---text-h3:      1.125rem / 1.3; /* 18px — mono */
-
-/* Corpo — sans */
---text-body-lg: 1.125rem / 1.6; /* 18px */
---text-body:    1rem / 1.6;     /* 16px */
---text-body-sm: 0.875rem / 1.5; /* 14px */
-
-/* Overline — label de seção (sans, caixa alta) */
---text-overline: 0.75rem / 1.4; /* 12px, uppercase, letter-spacing 0.12em, --fg-subtle */
-
-/* Dados — mono, tabular */
---text-data-xl: 2.5rem / 1;     /* 40px — KPI principal */
---text-data-lg: 1.75rem / 1;    /* 28px */
---text-data:    1rem / 1;       /* 16px — tabela */
-```
-
-```css
-.overline { font: var(--text-overline); text-transform: uppercase; letter-spacing: 0.12em; color: var(--fg-subtle); }
-.data-value { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
-h1,h2,h3,.display { font-family: var(--font-mono); letter-spacing: -0.01em; }
-```
+**Regra absoluta:** nunca use hex direto no JSX. Sempre `var(--token)`.
 
 ---
 
-## 5. Espaçamento (base 4px)
+## Tipografia
 
-```css
---space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-6:24px;
---space-8:32px; --space-10:40px; --space-12:48px; --space-16:64px; --space-24:96px; --space-32:128px;
-```
-Use espaço com generosidade. Seções respiram com `--space-16` a `--space-32`.
+Fonte: **Inter** em todos os contextos.
 
----
+| Estilo          | Font-size | Weight | Letter-spacing | Uso                         |
+|----------------|-----------|--------|----------------|-----------------------------|
+| Display        | 22–28px   | 700    | -0.025em       | H1, nome do bar, títulos    |
+| Heading        | 18–20px   | 600    | -0.02em        | Seções, sub-títulos         |
+| KPI Number     | 24–32px   | 700    | -0.01em        | Receita, ticket, métricas   |
+| Body           | 13–14px   | 400    | 0              | Texto corrido               |
+| Label / Overline | 10–11px | 600    | 0.08–0.10em    | Maiúsculas, CardOverline    |
+| Caption        | 11–12px   | 400–500| 0              | Subtexto, datas             |
 
-## 6. Raio (pequeno, plano)
-
-```css
---radius-sm: 2px;   /* badges, chips */
---radius-md: 4px;   /* botões, inputs, cards */
---radius-lg: 8px;   /* containers maiores */
-```
-**Sem pills.** O raio é discreto — a sensação é técnica, não "appzinho".
+**Números:** sempre `fontVariantNumeric: "tabular-nums"` para dados financeiros.
 
 ---
 
-## 7. Superfícies e bordas
+## Radii
 
-- Cards e painéis = `--bg-elevated` + borda `1px solid var(--border)`. **Sem sombra, sem glow.**
-- Divisórias e grids = `1px solid var(--border)`.
-- Estado ativo/foco = borda `--border-strong` ou anel `--ring`.
-- Profundidade se faz por **cor de superfície e borda**, nunca por sombra.
+| Token          | Valor | Uso                          |
+|----------------|-------|------------------------------|
+| `--radius-sm`  | 4px   | Badges, botões, inputs       |
+| `--radius-md`  | 8px   | Modais, dropdowns            |
+| `--radius-lg`  | 12px  | Cards do dashboard (DashCard)|
 
-```css
-.surface { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-md); }
+---
+
+## Sombras
+
+**Nenhuma.** Elevação é comunicada exclusivamente por contraste de cor entre `--bg`, `--bg-elevated`, `--bg-card`.
+
+Exceção: tooltips podem usar `box-shadow: 0 4px 16px rgba(0,0,0,0.4)`.
+
+---
+
+## Grid do Dashboard
+
+```
+┌─ Sidebar (220px) ──┬─ Main Content ────────────────────────┐
+│                    │ [LiveBar — full width]                 │
+│                    │─────────────────────────────────────── │
+│                    │  padding: 28px 32px                    │
+│                    │  gap: 24px entre zonas                 │
+│                    │                                        │
+│                    │  1. Header (bar name + date)           │
+│                    │  2. KPI Strip: 4 cards, 1fr each       │
+│                    │  3. Main: 1fr + 260px (chart + col)    │
+│                    │  4. Bottom: 3 × 1fr                    │
+│                    │  5. AI Input                           │
+└────────────────────┴────────────────────────────────────────┘
+```
+
+Breakpoints:
+- `< 768px`: sidebar vira drawer, grids colapsam para 1 coluna
+- `768–1024px`: KPI strip 2×2, main area coluna única
+- `> 1024px`: layout completo conforme acima
+
+---
+
+## Componentes base
+
+### DashCard
+```tsx
+// background: var(--bg-card)
+// border: 1px solid var(--border)
+// borderRadius: var(--radius-lg) = 12px
+// padding: 20px 24px (padrão) | 16px 18px (compact KPI strip)
+
+<DashCard>...</DashCard>
+<DashCard style={{ padding: "16px 18px" }}>...</DashCard>
+<DashCard accentLeft="var(--danger)">...</DashCard>
+```
+
+### CardOverline
+```tsx
+// font-size: 10px | weight: 600 | uppercase | letter-spacing: 0.09em
+// color: var(--fg-subtle) | margin-bottom: 10px
+
+<CardOverline>Receita</CardOverline>
+```
+
+### TrendText
+```tsx
+// Exibe delta percentual com seta e cor semântica
+// ok = var(--ok), danger = var(--danger)
+// texto envoltório usa var(--fg-muted)
+
+<TrendText percent={12.5} comparativoLabel="vs ontem" />
+<TrendText percent={-3.2} invert />  // positivo = ruim (ex: CMV)
+```
+
+### BarChart
+```tsx
+// Barras: gradiente amber (rgba(245,158,11,0.90) → rgba(245,158,11,0.25))
+// Eixo X: var(--fg-subtle)
+// Cursor hover: rgba(245,158,11,0.06)
+// fill=true: preench 100% da altura do container
+
+<BarChart data={[{label:"Seg",value:1200}]} />
+<BarChart data={dados} fill />  // preenche container (flex:1)
 ```
 
 ---
 
-## 8. Componentes
+## Padrões proibidos
 
-### 8.1 Navegação
-Topo fixo simples (não pill flutuante): logo à esquerda, busca/ações ao centro/direita, toggle de tema (sol/lua), menu de usuário. Sidebar (dashboard/admin) com seções em overline (ex: GERAL, OPERAÇÃO, CONFIG) e itens em texto + ícone stroke. Item ativo: texto `--fg` + barra/realce sutil, ícone em `--accent-bright`.
-
-### 8.2 Botões
-
-```css
-/* Primário — ação. Único lugar do #260078 sólido. */
-.btn-primary { background: var(--accent); color: var(--accent-fg); border-radius: var(--radius-md);
-  padding: 10px 18px; font-weight: 500; border: none; }
-.btn-primary:hover { filter: brightness(1.12); }
-
-/* Secundário — outline neutro */
-.btn-secondary { background: transparent; color: var(--fg); border: 1px solid var(--border-strong);
-  border-radius: var(--radius-md); padding: 10px 18px; }
-.btn-secondary:hover { border-color: var(--fg-muted); }
-
-/* Ghost — texto */
-.btn-ghost { background: transparent; color: var(--fg-muted); padding: 10px 14px; }
-.btn-ghost:hover { color: var(--fg); }
-
-/* Operacional — bartender/caixa: alvo de toque generoso */
-.btn-op { min-height: 48px; border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; }
-/* no Caixa: min-height 56px (ambiente com movimento) */
-```
-
-### 8.3 Cards e grid numerado (padrão da referência)
-
-```css
-.card { background: var(--bg-elevated); border: 1px solid var(--border);
-  border-radius: var(--radius-md); padding: var(--space-6); }
-
-/* Grid de primitivos: células com número (01, 02...) em mono, overline-like, divididas por hairline */
-.grid-cell .num { font-family: var(--font-mono); color: var(--fg-subtle); font-size: 0.75rem; }
-.grid-cell .title { font-family: var(--font-mono); font-size: 1.125rem; color: var(--fg); }
-.grid-cell .desc { color: var(--fg-muted); font-size: 0.875rem; }
-```
-
-### 8.4 Inputs
-
-```css
-.input { background: var(--bg-inset); border: 1px solid var(--border); border-radius: var(--radius-md);
-  color: var(--fg); padding: 10px 12px; font-family: var(--font-sans); }
-.input::placeholder { color: var(--fg-subtle); }
-.input:focus { outline: none; border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 25%, transparent); }
-```
-
-### 8.5 Badges / status
-
-```css
-.badge { display:inline-flex; align-items:center; gap:6px; padding:3px 10px;
-  border-radius: var(--radius-sm); font-size:0.75rem; font-weight:500; }
-.badge-neutral { background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--fg-muted); }
-.badge-accent  { background: color-mix(in srgb, var(--accent-bright) 16%, transparent); color: var(--accent-bright); }
-
-/* SÓ em Bartender/Caixa */
-.badge-ok     { background: var(--ok-bg);     color: var(--ok); }
-.badge-warn   { background: var(--warn-bg);   color: var(--warn); }
-.badge-danger { background: var(--danger-bg); color: var(--danger); }
-```
-
-### 8.6 Stat / KPI
-
-```css
-.stat-value { font-family: var(--font-mono); font-size: var(--text-data-xl); font-weight:700;
-  color: var(--fg); font-variant-numeric: tabular-nums; }
-.stat-label { font: var(--text-overline); text-transform:uppercase; letter-spacing:0.1em; color: var(--fg-subtle); }
-```
-
-### 8.7 Tabelas
-Densas e limpas. Cabeçalho em overline (`--fg-subtle`). Linhas divididas por hairline `--border`. Hover de linha: `color-mix(in srgb, var(--fg) 3%, transparent)`. Valores monetários sempre em mono.
-
-### 8.8 Bento grid (dashboard / admin)
-
-Dashboard e admin podem usar **bento grid** — células de tamanhos variados em vez de grade uniforme. O objetivo é criar hierarquia visual entre métricas: a métrica-chave ocupa mais espaço, as de contexto são menores.
-
-**Regras:**
-- Grid com `display: grid` e `grid-template-columns` customizado por contexto.
-- A célula destaque (`card-featured`) ocupa 2 linhas ou 2 colunas com `grid-row: span 2` ou `grid-column: span 2`.
-- Raio dos cards de dashboard/admin: `--radius-lg` (8px). Botões e inputs continuam em `--radius-md` (4px).
-- **Sem pill, sem sombra colorida.** A hierarquia vem de tamanho e tipografia, não de cor de fundo diferente.
-- Exceção permitida: a célula destaque pode ter um glow difuso e muito sutil no canto com `color-mix(in srgb, var(--accent-bright) 12%, transparent)` + `filter: blur(36px)`. Apenas uma célula por bento.
-
-```css
-/* Exemplo de bento 3 colunas / 2 linhas (admin) */
-.bento {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
-  grid-template-rows: auto auto;
-  gap: 10px;
-}
-.bento .card-featured { grid-row: span 2; } /* coluna da esquerda, altura dupla */
-.bento .card-wide     { grid-column: span 2; } /* segunda linha, colunas 2-3 */
-
-/* Card padrão de dashboard */
-.card-dash {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg); /* 8px — não radius-md */
-  padding: 20px 22px;
-}
-```
-
-**Quando não usar bento:** telas de operação (Bartender, Caixa) sempre usam layout linear simples — nenhum bento ali.
+- ❌ Hex direto: `color: "#F59E0B"` → use `color: "var(--accent)"`
+- ❌ `rgba(255,255,255,X)` hardcoded para texto → use `var(--fg-subtle)`, `var(--fg-muted)`
+- ❌ `borderRadius: 0` para cards → use `var(--radius-lg)`
+- ❌ `background: "var(--bg-inset)"` → token removido, use `var(--bg-hover)`
+- ❌ `fontFamily: "var(--font-mono)"` para display → use `var(--font-sans)` (ambos apontam para Inter, mas semântica importa)
+- ❌ Shadows em cards → elevação via cor
+- ❌ Gradients decorativos → não existe no sistema
 
 ---
 
-## 9. Regras por surface
+## Referências
 
-### Site de vendas
-- Paleta: P&B + cinza + `#260078` só nos CTAs. Sem cores semânticas.
-- Títulos em mono, overlines nas seções, muito espaço, hairlines.
-- **Camada de marca:** aqui entra a personalidade (mascote, copy descolada, composição com atitude) — mas **dentro desta paleta**, sem quebrar o sistema. O "cool" vem do mascote e da voz, não de cor extra.
-
-### Onboarding
-- P&B + cinza + `#260078` nos botões. Sem semânticas. Progress em barra `--border` com trecho ativo `--accent`.
-
-### Dashboard Dono
-- P&B + cinza + `#260078` na ação. KPIs em mono. Gráficos: linha `--accent-bright`, área `color-mix(in srgb, var(--accent-bright) 12%, transparent)`. Comparações ↑↓ podem usar `--ok`/`--danger` em texto pequeno (exceção de status).
-
-### Bartender (mobile/iPad)
-- P&B + cinza + `#260078` + **semânticas (estado)**. Toque mínimo 48px. Estado de comanda em badges semânticos: aberta/ok = `ok`, quer pagar = `warn`, cancelado = `danger`. Sem decoração — velocidade de leitura.
-
-### Caixa
-- Igual ao Bartender, toque 56px+. Valores em mono. Estado de mesa/comanda em semânticas. Teclado numérico em `btn-op`.
-
-### Admin
-- P&B + cinza + `--accent-bright` em ícone ativo da sidebar. Tabelas densas. Sidebar 220px com seções em overline.
-- Métricas de topo em **bento grid** (§ 8.8): MRR como card-featured (dupla altura), demais cards menores.
-- Cores semânticas (`--ok`/`--warn`/`--danger`) são **permitidas no admin** para indicar saúde dos clientes — sem exagero decorativo.
-
----
-
-## 10. Tailwind config (token-based, dual theme)
-
-```javascript
-// tailwind.config.ts
-import type { Config } from 'tailwindcss'
-export default {
-  darkMode: ['selector', '[data-theme="dark"]'],
-  content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
-  theme: {
-    extend: {
-      colors: {
-        bg: 'var(--bg)', 'bg-elevated': 'var(--bg-elevated)', 'bg-inset': 'var(--bg-inset)',
-        fg: 'var(--fg)', 'fg-muted': 'var(--fg-muted)', 'fg-subtle': 'var(--fg-subtle)',
-        border: 'var(--border)', 'border-strong': 'var(--border-strong)',
-        accent: 'var(--accent)', 'accent-fg': 'var(--accent-fg)', 'accent-bright': 'var(--accent-bright)',
-        ok: 'var(--ok)', warn: 'var(--warn)', danger: 'var(--danger)',
-      },
-      fontFamily: {
-        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
-        mono: ['var(--font-mono)', 'monospace'],
-      },
-      borderRadius: { sm: '2px', md: '4px', lg: '8px' },
-    },
-  },
-  plugins: [],
-} satisfies Config
-```
-
-> Toggle de tema: usar `next-themes` com `attribute="data-theme"`, `defaultTheme="dark"`. O ícone sol/lua no topo alterna `data-theme` entre `dark` e `light`.
-
----
-
-## 11. globals.css
-
-```css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* (tokens das seções 3.2 / 3.3 / 3.4 entram aqui em :root e [data-theme="light"]) */
-
-@layer base {
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--fg);
-    font-family: var(--font-sans), system-ui, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    transition: background-color 150ms, color 150ms;
-  }
-  h1, h2, h3 { font-family: var(--font-mono); letter-spacing: -0.01em; }
-
-  ::-webkit-scrollbar { width: 8px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: var(--radius-sm); }
-
-  :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
-}
-```
-
----
-
-## 12. Padrões proibidos
-
-- **Nunca** degradê (de qualquer tipo).
-- **Nunca** glow, sombra colorida ou sombra decorativa.
-- **Nunca** usar `#260078` como cor de fundo/tema — só ação.
-- **Nunca** cores semânticas fora de Bartender/Caixa (exceto badge de status mínimo).
-- **Nunca** pills como padrão; raio máximo 8px.
-- **Nunca** hex cru no componente — sempre o token (senão o tema quebra).
-- **Nunca** fonte fora de Geist / Geist Mono.
-- **Nunca** ícone colorido decorativo — stroke `--fg`, `--fg-muted` ou `--accent-bright`.
-
----
-
-## 13. A camada de marca no site
-
-O site pode (e deve) ser mais descolado que o app — mas **a paleta é a mesma**. A personalidade vem de:
-- **Mascote** (o copo herói "SB"): renderizar em traço plano, mono/duotone — preto sobre claro, com no máximo um toque de `#260078`. Encaixa no sistema, não destoa.
-- **Voz e copy** jovem (ver seção "Marca" do `docs/negocio.md`).
-- **Composição e movimento** com atitude.
-
-Cool na personalidade, impecável no craft. O mascote brinca; o sistema não.
-
----
-
-## 14. Referências
-
-- **Estética:** instrumento de precisão — mono, plano, hairlines, muito espaço (refs de admin/IAM tipo dashboard técnico).
-- **Stack:** Next.js (App Router) + Tailwind + Supabase + Vercel.
-- **Estratégia/marca:** `docs/negocio.md`.
-- **Regras de build:** `CLAUDE.md`.
+- Inspiração técnica: Linear, Vercel, Stripe Dashboard
+- Acento amber: comunica premium, hospitalidade, spirits, receita (diferente de todos os concorrentes que usam azul)
+- "Zinc palette" (Tailwind): bg `#0A0A0B` = zinc-950, card `#1C1C1E` = zinc-900 custom

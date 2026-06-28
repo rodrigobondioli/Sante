@@ -1,21 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist",
+const inter = Inter({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-sans",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Superbar",
-  description: "O cérebro do seu bar",
+  title: "SUPERBAR — Seu Bar Mais Inteligente",
+  description: "Plataforma de gestão inteligente para bares. Operação em tempo real, CMV, margem e decisões — tudo num painel feito exclusivamente para bar.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -23,6 +20,7 @@ export const metadata: Metadata = {
     title: "Superbar",
   },
   icons: {
+    icon: "/favicon.svg",
     apple: "/icon-192.png",
   },
 };
@@ -31,7 +29,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#0B0B0C",
+  themeColor: "#F59E0B",
 };
 
 export default function RootLayout({
@@ -42,7 +40,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         {children}

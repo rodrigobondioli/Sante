@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AlertTriangle, Users, Layers, DollarSign } from "lucide-react";
+import { AlertTriangle, Users, Layers, DollarSign, PhoneCall } from "lucide-react";
 
 // ─── Navegação ────────────────────────────────────────────────────────────────
 
@@ -11,6 +11,7 @@ const links = [
   { href: "/admin/clientes",   label: "Clientes",    icon: Users },
   { href: "/admin/implantacao",label: "Implantação", icon: Layers },
   { href: "/admin/financeiro", label: "Financeiro",  icon: DollarSign },
+  { href: "/admin/leads",      label: "Leads",       icon: PhoneCall },
 ];
 
 interface AdminSidebarProps {

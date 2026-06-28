@@ -1,9 +1,10 @@
 import type { CSSProperties } from "react";
 
 export const CARD: CSSProperties = {
-  background: "var(--bg-elevated)",
+  background: "var(--bg-card)",
   border: "1px solid var(--border)",
-  borderRadius: 4,
+  borderRadius: "var(--radius-lg)",
+  padding: "20px 24px",
 };
 
 export const LABEL: CSSProperties = {
@@ -67,7 +68,7 @@ export const BTN_ICON: CSSProperties = {
 };
 
 export const INPUT: CSSProperties = {
-  background: "var(--bg-inset)",
+  background: "var(--bg-hover)",
   border: "1px solid var(--border)",
   borderRadius: 4,
   padding: "9px 12px",

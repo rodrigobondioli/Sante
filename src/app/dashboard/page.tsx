@@ -1,11 +1,13 @@
-import { SettingsButton } from "@/components/dashboard/settings-button";
 import { TrendText } from "@/components/ui/trend-text";
 import { BarChart } from "@/components/ui/bar-chart";
 import { CategoriaBadge } from "@/components/dashboard/categoria-badge";
-import { AlertasBell } from "@/components/dashboard/alertas-bell";
 import { AiHeroInput } from "@/components/dashboard/ai-hero-input";
 import { LiveBar } from "@/components/dashboard/live-bar";
+import { ProximaMelhorAcao } from "@/components/dashboard/proxima-melhor-acao";
+import { DashCard } from "@/components/dashboard/dash-card";
+import { CardOverline } from "@/components/dashboard/card-overline";
 import { cn } from "@/lib/utils";
+import type { PontoPico } from "@/lib/dashboard/operacao";
 import {
   getCurrentBar,
   getTurnoAtual,
@@ -38,10 +40,47 @@ const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "
 const percent = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
 const dataExtenso = new Intl.DateTimeFormat("pt-BR", { weekday: "short", day: "2-digit", month: "short" });
 
-function saudacao(horaDoDia: number) {
-  if (horaDoDia < 12) return "Bom dia";
-  if (horaDoDia < 18) return "Boa tarde";
-  return "Boa noite";
+function VendasPorHoraChart({ pontos }: { pontos: PontoPico[] }) {
+  if (pontos.length < 2) return null;
+  const W = 600, H = 110, padL = 4, padR = 4, padT = 8, padB = 22;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+  const maxVal = Math.max(...pontos.map(p => p.drinks), 1);
+  const minHora = pontos[0].hora;
+  const maxHora = pontos[pontos.length - 1].hora;
+  const horaRange = Math.max(maxHora - minHora, 1);
+  const pts = pontos.map(p => ({
+    x: padL + ((p.hora - minHora) / horaRange) * chartW,
+    y: padT + chartH - (p.drinks / maxVal) * chartH,
+    hora: p.hora,
+  }));
+  const line = pts.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" ");
+  const area = [
+    `M ${pts[0].x.toFixed(1)} ${(padT + chartH).toFixed(1)}`,
+    ...pts.map(p => `L ${p.x.toFixed(1)} ${p.y.toFixed(1)}`),
+    `L ${pts[pts.length - 1].x.toFixed(1)} ${(padT + chartH).toFixed(1)} Z`,
+  ].join(" ");
+  const step = Math.ceil(pts.length / 6);
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: 110 }} preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="horaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="rgba(245,158,11,0.35)" stopOpacity="1" />
+          <stop offset="100%" stopColor="rgba(245,158,11,0.0)" stopOpacity="1" />
+        </linearGradient>
+      </defs>
+      <path d={area} fill="url(#horaGrad)" />
+      <path d={line} fill="none" stroke="rgba(245,158,11,0.85)" strokeWidth="1.5" />
+      {pts.map((p, i) => {
+        if (i !== 0 && i !== pts.length - 1 && i % step !== 0) return null;
+        return (
+          <text key={i} x={p.x} y={H - 4} textAnchor="middle" fontSize="10" fill="var(--fg-subtle)" fontFamily="var(--font-sans)">
+            {p.hora}h
+          </text>
+        );
+      })}
+    </svg>
+  );
 }
 
 function capitalizarPrimeiraLetra(texto: string) {
@@ -50,25 +89,29 @@ function capitalizarPrimeiraLetra(texto: string) {
 
 const sectionLabel: React.CSSProperties = {
   display: "block",
-  fontSize: "11px",
+  fontSize: "0.62rem",
+  fontFamily: "var(--font-mono)",
   fontWeight: 500,
   textTransform: "uppercase",
-  letterSpacing: "0.1em",
+  letterSpacing: "0.16em",
   color: "var(--fg-subtle)",
-  marginBottom: "12px",
+  marginBottom: 0,
+  opacity: 0.7,
 };
 
 const overline: React.CSSProperties = {
-  fontSize: "10px",
+  fontSize: "0.7rem",
+  fontFamily: "var(--font-mono)",
   fontWeight: 500,
   textTransform: "uppercase",
-  letterSpacing: "0.1em",
+  letterSpacing: "0.12em",
   color: "var(--fg-subtle)",
 };
 
 const card: React.CSSProperties = {
   background: "var(--bg-elevated)",
-  borderRadius: "4px",
+  border: "1px solid var(--border)",
+  borderRadius: "16px",
   padding: "20px 24px",
 };
 
@@ -113,19 +156,19 @@ export default async function DashboardPage() {
             <div style={{ ...card, padding: 0, marginBottom: 20 }}>
               {steps.map((step, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 20px", borderBottom: i < steps.length - 1 ? "1px solid var(--border)" : "none" }}>
-                  <div style={{ width: 22, height: 22, borderRadius: "50%", flexShrink: 0, background: step.done ? "var(--ok-bg)" : "color-mix(in srgb, var(--fg) 5%, transparent)", border: `1.5px solid ${step.done ? "var(--ok)" : "var(--border)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "var(--ok)" }}>
+                  <div style={{ width: 22, height: 22, borderRadius: "50%", flexShrink: 0, background: step.done ? "var(--ok-bg)" : "color-mix(in srgb, var(--fg) 5%, transparent)", border: `1.5px solid ${step.done ? "var(--ok)" : "var(--border)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "white" }}>
                     {step.done ? "✓" : ""}
                   </div>
                   <span style={{ flex: 1, fontSize: 13, color: step.done ? "var(--fg-muted)" : "var(--fg)" }}>{step.label}</span>
                   {step.href && !step.done && (
-                    <a href={step.href} style={{ fontSize: 12, fontWeight: 600, color: "var(--accent-bright)", textDecoration: "none", whiteSpace: "nowrap", flexShrink: 0 }}>Configurar →</a>
+                    <a href={step.href} style={{ fontSize: 12, fontWeight: 600, color: "white", textDecoration: "none", whiteSpace: "nowrap", flexShrink: 0 }}>Configurar →</a>
                   )}
                 </div>
               ))}
               <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 20px" }}>
                 <div style={{ width: 22, height: 22, borderRadius: "50%", flexShrink: 0, background: "color-mix(in srgb, var(--fg) 5%, transparent)", border: "1.5px solid var(--border)" }} />
                 <span style={{ flex: 1, fontSize: 13, color: "var(--fg)" }}>Peça ao caixa para abrir o primeiro turno</span>
-                <a href="/dashboard/caixa" style={{ fontSize: 12, fontWeight: 600, color: "var(--accent-bright)", textDecoration: "none", whiteSpace: "nowrap", flexShrink: 0 }}>Ver Caixa →</a>
+                <a href="/dashboard/caixa" style={{ fontSize: 12, fontWeight: 600, color: "white", textDecoration: "none", whiteSpace: "nowrap", flexShrink: 0 }}>Ver Caixa →</a>
               </div>
             </div>
           </div>
@@ -152,7 +195,6 @@ export default async function DashboardPage() {
     }
 
     const agora = new Date();
-    const primeiroNome = current.userNome.split(" ")[0];
     const dataFormatada = capitalizarPrimeiraLetra(dataExtenso.format(agora));
     const label = ultimoTurno ? labelTurno(ultimoTurno.abertoEm, ultimoTurno.fechadoEm) : null;
 
@@ -167,21 +209,11 @@ export default async function DashboardPage() {
     return (
       <div className="flex flex-col" style={{ overflowX: "hidden", width: "100%" }}>
 
-        {/* Hero */}
-        <div className="relative pt-8 pb-6 lg:px-8 lg:pt-14 lg:pb-10" style={{ background: "var(--bg)" }}>
-          <h1 className="lg:text-[24px] text-[18px]" style={{ fontWeight: 700, color: "var(--fg)", fontFamily: "var(--font-mono)", letterSpacing: "-0.01em", lineHeight: 1.15, marginBottom: "6px", textAlign: "center" }}>
-            {saudacao(agora.getHours())}, {primeiroNome}
-          </h1>
-          <p style={{ fontSize: "13px", color: "var(--fg-subtle)", textAlign: "center" }}>
-            {dataFormatada} · bar fechado
-          </p>
-        </div>
-
-        <div className="lg:px-8" style={{ paddingTop: "24px", paddingBottom: "48px", display: "flex", flexDirection: "column", gap: "32px" }}>
+        <div className="lg:px-8" style={{ paddingTop: "24px", paddingBottom: "48px", display: "flex", flexDirection: "column", gap: "40px" }}>
 
           {/* 0. SUPERBAR AI — acesso rápido no topo */}
           <section>
-            <span style={sectionLabel}>Superbar AI</span>
+            <span style={sectionLabel}>SUPERBAR IA</span>
             <AiHeroInput barId={current.bar.id} alertCount={inteligencia.stage === 2 ? inteligencia.insightsNaoLidos : 0} />
           </section>
 
@@ -194,24 +226,24 @@ export default async function DashboardPage() {
               <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 16 }}>
                 <div>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                    <span style={{ fontSize: 12, color: inteligencia.comandas >= 30 ? "var(--ok)" : "var(--fg-subtle)" }}>
+                    <span style={{ fontSize: 12, color: "var(--fg-subtle)" }}>
                       {inteligencia.comandas >= 30 ? "✓" : "○"} 30 comandas
                     </span>
                     <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--fg-muted)" }}>{inteligencia.comandas} / 30</span>
                   </div>
                   <div style={{ background: "var(--border-strong)", borderRadius: 2, height: 2, overflow: "hidden" }}>
-                    <div style={{ background: inteligencia.comandas >= 30 ? "var(--ok)" : "color-mix(in srgb, var(--accent) 50%, transparent)", borderRadius: 2, height: 2, width: `${Math.min(Math.round((inteligencia.comandas / 30) * 100), 100)}%`, transition: "width 0.6s ease" }} />
+                    <div style={{ background: "rgba(255,255,255,0.5)", borderRadius: 2, height: 2, width: `${Math.min(Math.round((inteligencia.comandas / 30) * 100), 100)}%`, transition: "width 0.6s ease" }} />
                   </div>
                 </div>
                 <div>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                    <span style={{ fontSize: 12, color: inteligencia.diasAtivo >= 7 ? "var(--ok)" : "var(--fg-subtle)" }}>
+                    <span style={{ fontSize: 12, color: "var(--fg-subtle)" }}>
                       {inteligencia.diasAtivo >= 7 ? "✓" : "○"} 7 dias de operação
                     </span>
                     <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--fg-muted)" }}>{inteligencia.diasAtivo} / 7</span>
                   </div>
                   <div style={{ background: "var(--border-strong)", borderRadius: 2, height: 2, overflow: "hidden" }}>
-                    <div style={{ background: inteligencia.diasAtivo >= 7 ? "var(--ok)" : "color-mix(in srgb, var(--accent) 50%, transparent)", borderRadius: 2, height: 2, width: `${Math.min(Math.round((inteligencia.diasAtivo / 7) * 100), 100)}%`, transition: "width 0.6s ease" }} />
+                    <div style={{ background: "rgba(255,255,255,0.5)", borderRadius: 2, height: 2, width: `${Math.min(Math.round((inteligencia.diasAtivo / 7) * 100), 100)}%`, transition: "width 0.6s ease" }} />
                   </div>
                 </div>
               </div>
@@ -225,10 +257,10 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <section>
-              <span style={sectionLabel}>Atenção</span>
+              <span style={sectionLabel}>Atenção Agora</span>
               {inteligencia.insightsNaoLidos === 0 ? (
                 <div style={{ ...card, display: "flex", alignItems: "flex-start", gap: 12 }}>
-                  <span style={{ fontSize: 13, color: "var(--ok)", fontWeight: 700, flexShrink: 0, lineHeight: 1.6 }}>✓</span>
+                  <span style={{ fontSize: 13, color: "white", fontWeight: 700, flexShrink: 0, lineHeight: 1.6 }}>✓</span>
                   <div>
                     <p style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)", margin: "0 0 6px" }}>Tudo sob controle</p>
                     <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>
@@ -244,7 +276,7 @@ export default async function DashboardPage() {
                     </p>
                     <p style={{ fontSize: 11, color: "var(--fg-muted)", margin: "3px 0 0" }}>Ver Inteligência →</p>
                   </div>
-                  <span style={{ background: "#ef4444", color: "#fff", fontSize: 11, fontWeight: 700, borderRadius: "50%", minWidth: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px", flexShrink: 0 }}>
+                  <span style={{ background: "rgba(255,255,255,0.15)", color: "#fff", fontSize: 11, fontWeight: 700, borderRadius: "50%", minWidth: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px", flexShrink: 0 }}>
                     {inteligencia.insightsNaoLidos > 9 ? "9+" : inteligencia.insightsNaoLidos}
                   </span>
                 </a>
@@ -255,7 +287,7 @@ export default async function DashboardPage() {
           {/* 2. NEGÓCIO — último turno + meta do mês */}
           {ultimoTurno && label && (
             <section>
-              <span style={sectionLabel}>Negócio</span>
+              <span style={sectionLabel}>Diagnóstico do Turno</span>
 
               {/* Data do turno */}
               <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 12 }}>
@@ -268,7 +300,7 @@ export default async function DashboardPage() {
 
                 <div style={{ ...card }}>
                   <p style={overline}>Faturamento</p>
-                  <p className="text-[22px] lg:text-[26px]" style={{ fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", marginTop: 4 }}>
+                  <p style={{ fontSize: "3rem", fontWeight: 700, color: "var(--fg)", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", marginTop: 4 }}>
                     {currency.format(ultimoTurno.faturamento)}
                   </p>
                   <p style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 2 }}>
@@ -278,14 +310,14 @@ export default async function DashboardPage() {
 
                 <div style={{ ...card }}>
                   <p style={overline}>Ticket médio</p>
-                  <p className="text-[22px] lg:text-[26px]" style={{ fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", marginTop: 4 }}>
+                  <p style={{ fontSize: "3rem", fontWeight: 700, color: "var(--fg)", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", marginTop: 4 }}>
                     {currency.format(ultimoTurno.ticketMedio)}
                   </p>
                 </div>
 
                 <div style={{ ...card }}>
                   <p style={overline}>CMV</p>
-                  <p className="text-[22px] lg:text-[26px]" style={{ fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", marginTop: 4 }}>
+                  <p style={{ fontSize: "3rem", fontWeight: 700, color: "var(--fg)", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", marginTop: 4 }}>
                     {ultimoTurno.cmv !== null ? `${ultimoTurno.cmv}%` : "—"}
                   </p>
                   <p style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 2 }}>
@@ -295,7 +327,7 @@ export default async function DashboardPage() {
 
                 <div style={{ ...card }}>
                   <p style={overline}>Top drink</p>
-                  <p className="text-[22px] lg:text-[26px]" style={{ fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", marginTop: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <p style={{ fontSize: "3rem", fontWeight: 700, color: "var(--fg)", fontFamily: "var(--font-mono)", marginTop: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {ultimoTurno.topDrink ?? "—"}
                   </p>
                   <p style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 2 }}>mais vendido</p>
@@ -314,14 +346,14 @@ export default async function DashboardPage() {
                         <span style={{ fontSize: 13, fontWeight: 400, color: "var(--fg-subtle)", marginLeft: 6 }}>de {currency.format(metaFechado)}</span>
                       </p>
                     </div>
-                    <span style={{ fontSize: 22, fontWeight: 700, fontFamily: "var(--font-mono)", color: metaAtingidaFechado ? "var(--ok)" : "var(--fg-muted)", marginTop: 18 }}>
+                    <span style={{ fontSize: 22, fontWeight: 700, fontFamily: "var(--font-mono)", color: "white", marginTop: 18 }}>
                       {metaProgressoFechado}%
                     </span>
                   </div>
                   <div style={{ background: "var(--border-strong)", borderRadius: "2px", height: "3px", overflow: "hidden" }}>
-                    <div style={{ background: metaAtingidaFechado ? "var(--ok)" : "var(--accent)", borderRadius: "2px", height: "3px", width: `${metaProgressoFechado}%`, transition: "width 0.6s ease" }} />
+                    <div style={{ background: "rgba(255,255,255,0.6)", borderRadius: "2px", height: "3px", width: `${metaProgressoFechado}%`, transition: "width 0.6s ease" }} />
                   </div>
-                  <p style={{ fontSize: 11, color: metaAtingidaFechado ? "var(--ok)" : "var(--fg-subtle)", marginTop: 6 }}>
+                  <p style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 6 }}>
                     {metaAtingidaFechado ? "Meta atingida!" : `falta ${currency.format(metaFaltaFechado)}`}
                     {!metaConfiguradaFechado && (
                       <span
@@ -345,7 +377,6 @@ export default async function DashboardPage() {
 
           {/* 3. OPERAÇÃO — resumo, não tela operacional */}
           <section>
-            <span style={sectionLabel}>Operação</span>
             <div className="grid grid-cols-2" style={{ gap: 12 }}>
 
               {/* Estoque */}
@@ -353,7 +384,7 @@ export default async function DashboardPage() {
                 <p style={overline}>Estoque</p>
                 {alertas.length > 0 ? (
                   <>
-                    <p className="text-[22px] lg:text-[26px]" style={{ fontWeight: 600, color: "var(--warn)", fontFamily: "var(--font-mono)", marginTop: 4 }}>
+                    <p style={{ fontSize: "3rem", fontWeight: 700, color: "white", fontFamily: "var(--font-mono)", marginTop: 4 }}>
                       {alertas.length}
                     </p>
                     <p style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 2 }}>
@@ -362,7 +393,7 @@ export default async function DashboardPage() {
                   </>
                 ) : (
                   <>
-                    <p className="text-[22px] lg:text-[26px]" style={{ fontWeight: 600, color: "var(--ok)", fontFamily: "var(--font-mono)", marginTop: 4 }}>
+                    <p style={{ fontSize: "3rem", fontWeight: 700, color: "white", fontFamily: "var(--font-mono)", marginTop: 4 }}>
                       OK
                     </p>
                     <p style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 2 }}>nenhum alerta</p>
@@ -377,7 +408,7 @@ export default async function DashboardPage() {
               {/* Relatórios */}
               <div style={card}>
                 <p style={overline}>Relatórios</p>
-                <p className="text-[22px] lg:text-[26px]" style={{ fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", marginTop: 4 }}>
+                <p style={{ fontSize: "3rem", fontWeight: 700, color: "var(--fg)", fontFamily: "var(--font-mono)", marginTop: 4 }}>
                   →
                 </p>
                 <p style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 2 }}>análise por período</p>
@@ -393,7 +424,7 @@ export default async function DashboardPage() {
           {/* Footer: turno fechado */}
           <p style={{ fontSize: 12, color: "var(--fg-subtle)", textAlign: "center" }}>
             Bar fechado ·{" "}
-            <a href="/caixa" style={{ color: "var(--accent-bright)", textDecoration: "none" }}>
+            <a href="/caixa" style={{ color: "white", textDecoration: "none" }}>
               O caixa abre o próximo turno →
             </a>
           </p>
@@ -437,7 +468,6 @@ export default async function DashboardPage() {
   ]);
 
   const agora = new Date();
-  const primeiroNome = current.userNome.split(" ")[0];
   const dataFormatada = capitalizarPrimeiraLetra(dataExtenso.format(agora));
 
   const coberturaReceita = calcularCoberturaReceita(produtosVendidos);
@@ -451,15 +481,15 @@ export default async function DashboardPage() {
     : cmvAtual < 42 ? "Custo elevado"
     : "CMV crítico"
   const cmvCorVeredito: string = cmvVeredito === "Margem excelente" || cmvVeredito === "Margem saudável"
-    ? "var(--ok)"
-    : cmvVeredito === "Custo elevado" ? "var(--warn)"
-    : cmvVeredito === "CMV crítico" ? "#ef4444"
+    ? "white"
+    : cmvVeredito === "Custo elevado" ? "white"
+    : cmvVeredito === "CMV crítico" ? "white"
     : "var(--fg-muted)"
   const ticketDelta = comparacao?.ticketMedio ?? null
   const ticketVeredito = ticketDelta !== null && Math.abs(ticketDelta) > 5
     ? ticketDelta > 0 ? "Ticket crescendo" : "Ticket caindo"
     : null
-  const ticketCorVeredito: string = ticketVeredito === "Ticket caindo" ? "var(--warn)" : "var(--ok)"
+  const ticketCorVeredito: string = "white"
 
   const insights: InsightItem[] = gerarInsight({
     produtosCategorizado: produtosCategorizados,
@@ -494,461 +524,336 @@ export default async function DashboardPage() {
   const metaFalta = Math.max(meta - metaAtual, 0);
   const metaAtingida = metaAtual >= meta && meta > 0;
 
+  // Natural language ticket impact (linguagem de dono)
+  const ticketDeltaPct = comparacao.ticketMedio;
+  let ritmoLabel: string | null = null;
+  if (ticketDeltaPct !== null && Math.abs(ticketDeltaPct) > 3 && kpis.comandasAbertas > 0) {
+    const impacto = Math.abs(kpis.ticketMedio * (ticketDeltaPct / 100) * kpis.comandasAbertas);
+    ritmoLabel = ticketDeltaPct < 0
+      ? `Ticket caiu ${Math.abs(ticketDeltaPct).toFixed(1)}% — projeta ${currency.format(impacto)} a menos no turno`
+      : `Ticket subiu ${ticketDeltaPct.toFixed(1)}% — projeta +${currency.format(impacto)} no turno`;
+  }
+  const proximaAcaoTexto = inteligencia.stage === 2 && insightsSorted.length > 0 ? insightsSorted[0].texto : null;
+
   return (
     <div className="flex flex-col" style={{ overflowX: "hidden", width: "100%" }}>
 
-      {/* Hero */}
-      <div className="relative pt-8 pb-6 lg:px-8 lg:pt-14 lg:pb-10"
-        style={{ background: "var(--bg)" }}>
-        <div className="hidden lg:flex"
-          style={{ position: "absolute", top: "16px", right: "32px", alignItems: "center", gap: "10px" }}>
-          <AlertasBell alertas={alertas} />
-          <SettingsButton
-            bar={current.bar}
-            barId={current.bar.id}
-            userId={current.userId}
-            userNome={current.userNome}
-            userEmail={current.userEmail}
-            userAvatarUrl={current.userAvatarUrl}
-          />
-        </div>
+      {/* ━━ ZONA 1 — Pulso do Turno (full-width, sem padding) ━━ */}
+      <LiveBar
+        turnoId={turno.id}
+        barId={current.bar.id}
+        faturamentoInicial={kpis.faturamento}
+        pessoasInicial={kpis.comandasAbertas}
+        drinksInicial={liveStats.drinks}
+        margemEstimada={cmvAtual}
+        comparacaoFaturamento={comparacao.faturamento}
+        comparacaoTicket={comparacao.ticketMedio}
+        cmvParcial={cmvParcial}
+      />
 
-        <h1
-          className="lg:text-[24px] text-[18px]"
-          style={{
-            fontWeight: 700,
-            color: "var(--fg)",
-            fontFamily: "var(--font-mono)",
-            letterSpacing: "-0.01em",
-            lineHeight: 1.15,
-            marginBottom: "6px",
-            textAlign: "center",
-          }}
-        >
-          {saudacao(agora.getHours())}, {primeiroNome}
-        </h1>
-        <p style={{ fontSize: "13px", color: "var(--fg-subtle)", textAlign: "center" }}>
-          {dataFormatada} · turno aberto
-        </p>
-      </div>
 
-      {/* Blocos principais */}
-      <div
-        className="lg:px-8"
-        style={{ paddingTop: "24px", paddingBottom: "48px", display: "flex", flexDirection: "column", gap: "32px" }}
-      >
+      {/* ── CONTENT ── */}
+      <div style={{ padding: "28px 32px 40px", display: "flex", flexDirection: "column", gap: 24 }}>
 
-        {/* 0. SUPERBAR AI — acesso rápido no topo */}
-        <section>
-          <span style={sectionLabel}>Superbar AI</span>
-          <AiHeroInput barId={current.bar.id} alertCount={nAction} />
-        </section>
-
-        {/* 1. APRENDIZADO (stage 1) ou ATENÇÃO (stage 2) */}
-        {inteligencia.stage === 1 ? (
-          <div style={{ ...card }}>
-            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)", marginBottom: 16 }}>
-              Superbar está aprendendo sobre seu bar
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 16 }}>
-              <div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                  <span style={{ fontSize: 12, color: inteligencia.comandas >= 30 ? "var(--ok)" : "var(--fg-subtle)" }}>
-                    {inteligencia.comandas >= 30 ? "✓" : "○"} 30 comandas
-                  </span>
-                  <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--fg-muted)" }}>{inteligencia.comandas} / 30</span>
-                </div>
-                <div style={{ background: "var(--border-strong)", borderRadius: 2, height: 2, overflow: "hidden" }}>
-                  <div style={{ background: inteligencia.comandas >= 30 ? "var(--ok)" : "color-mix(in srgb, var(--accent) 50%, transparent)", borderRadius: 2, height: 2, width: `${Math.min(Math.round((inteligencia.comandas / 30) * 100), 100)}%`, transition: "width 0.6s ease" }} />
-                </div>
-              </div>
-              <div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                  <span style={{ fontSize: 12, color: inteligencia.diasAtivo >= 7 ? "var(--ok)" : "var(--fg-subtle)" }}>
-                    {inteligencia.diasAtivo >= 7 ? "✓" : "○"} 7 dias de operação
-                  </span>
-                  <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--fg-muted)" }}>{inteligencia.diasAtivo} / 7</span>
-                </div>
-                <div style={{ background: "var(--border-strong)", borderRadius: 2, height: 2, overflow: "hidden" }}>
-                  <div style={{ background: inteligencia.diasAtivo >= 7 ? "var(--ok)" : "color-mix(in srgb, var(--accent) 50%, transparent)", borderRadius: 2, height: 2, width: `${Math.min(Math.round((inteligencia.diasAtivo / 7) * 100), 100)}%`, transition: "width 0.6s ease" }} />
-                </div>
-              </div>
+        {/* ═══ APRENDIZADO — exibe apenas quando stage 1 ═══ */}
+        {inteligencia.stage === 1 && (
+          <DashCard style={{ padding: "14px 20px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)", margin: 0 }}>
+                Superbar está aprendendo sobre seu bar
+              </p>
+              <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>
+                {inteligencia.diasAtivo < 7
+                  ? `${7 - inteligencia.diasAtivo} dias restantes`
+                  : inteligencia.comandas < 30
+                  ? `${30 - inteligencia.comandas} comandas restantes`
+                  : "calculando…"}
+              </span>
             </div>
-            <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>
-              {inteligencia.diasAtivo < 7
-                ? `Faltam ${7 - inteligencia.diasAtivo} ${7 - inteligencia.diasAtivo === 1 ? "dia" : "dias"} para gerar análises automáticas.`
-                : inteligencia.comandas < 30
-                ? `Faltam ${30 - inteligencia.comandas} comandas para gerar análises automáticas.`
-                : "Calculando análises…"}
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {[
+                { label: "30 comandas", atual: inteligencia.comandas, meta: 30 },
+                { label: "7 dias de operação", atual: inteligencia.diasAtivo, meta: 7 },
+              ].map(item => (
+                <div key={item.label}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                    <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>
+                      {item.atual >= item.meta ? "✓" : "○"} {item.label}
+                    </span>
+                    <span style={{ fontSize: 11, color: "var(--fg-muted)", fontVariantNumeric: "tabular-nums" }}>{item.atual}/{item.meta}</span>
+                  </div>
+                  <div style={{ background: "var(--border-strong)", borderRadius: 2, height: 2, overflow: "hidden" }}>
+                    <div style={{ background: "var(--accent)", borderRadius: 2, height: 2, width: `${Math.min(Math.round((item.atual / item.meta) * 100), 100)}%`, transition: "width 0.6s ease" }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </DashCard>
+        )}
+
+        {/* ═══ HEADER — bar name + date + ritmo ═══ */}
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 16 }}>
+          <div>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--fg)", letterSpacing: "-0.025em", margin: 0, lineHeight: 1.1 }}>
+              {current.bar.nome}
+            </h1>
+            <p style={{ fontSize: 12, color: "var(--fg-subtle)", margin: "4px 0 0" }}>
+              {dataFormatada} · Turno aberto
             </p>
           </div>
-        ) : (
-          <section>
-            <span style={sectionLabel}>Atenção</span>
-            {todosInsights.length === 0 && inteligencia.insightsNaoLidos === 0 ? (
-              // Compact — tudo sob controle
-              <div style={{ ...card, display: "flex", alignItems: "flex-start", gap: 12 }}>
-                <span style={{ fontSize: 13, color: "var(--ok)", fontWeight: 700, flexShrink: 0, lineHeight: 1.6 }}>✓</span>
-                <div>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)", margin: "0 0 6px" }}>Tudo sob controle</p>
+          {ritmoLabel && (
+            <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: 0, textAlign: "right", maxWidth: 280, lineHeight: 1.4 }}>
+              {ritmoLabel}
+            </p>
+          )}
+        </div>
+
+        {/* ═══ KPI STRIP — 4 cards horizontais ═══ */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+
+          {/* Receita */}
+          <DashCard style={{ padding: "16px 18px" }}>
+            <CardOverline>Receita</CardOverline>
+            <p style={{ fontSize: 24, fontWeight: 700, color: "var(--fg)", fontVariantNumeric: "tabular-nums", lineHeight: 1, margin: "6px 0 8px" }}>
+              {kpis.faturamento > 0 ? currency.format(kpis.faturamento) : "—"}
+            </p>
+            {comparacao.faturamento !== null
+              ? <TrendText percent={comparacao.faturamento} comparativoLabel="vs ontem" />
+              : <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>sem dados anteriores</span>
+            }
+          </DashCard>
+
+          {/* Ticket Médio */}
+          <DashCard style={{ padding: "16px 18px" }}>
+            <CardOverline>Ticket Médio</CardOverline>
+            <p style={{ fontSize: 24, fontWeight: 700, color: "var(--fg)", fontVariantNumeric: "tabular-nums", lineHeight: 1, margin: "6px 0 8px" }}>
+              {kpis.ticketMedio > 0 ? currency.format(kpis.ticketMedio) : "—"}
+            </p>
+            {comparacao.ticketMedio !== null
+              ? <TrendText percent={comparacao.ticketMedio} comparativoLabel="vs ontem" />
+              : <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>
+                  {kpis.ticketMedio > 0 ? `${kpis.comandasAbertas} comandas` : "sem vendas"}
+                </span>
+            }
+          </DashCard>
+
+          {/* Comandas */}
+          <DashCard style={{ padding: "16px 18px" }}>
+            <CardOverline>Comandas</CardOverline>
+            <p style={{ fontSize: 24, fontWeight: 700, color: "var(--fg)", fontVariantNumeric: "tabular-nums", lineHeight: 1, margin: "6px 0 8px" }}>
+              {kpis.comandasAbertas}
+            </p>
+            <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>abertas agora</span>
+          </DashCard>
+
+          {/* Margem */}
+          <DashCard style={{ padding: "16px 18px" }}>
+            <CardOverline>Margem</CardOverline>
+            <p style={{
+              fontSize: 24, fontWeight: 700, lineHeight: 1, margin: "6px 0 8px",
+              fontVariantNumeric: "tabular-nums",
+              color: cmvAtual === null ? "var(--fg)"
+                : (100 - cmvAtual) >= 64 ? "var(--ok)"
+                : cmvAtual > 42 ? "var(--danger)"
+                : "var(--fg)",
+            }}>
+              {cmvAtual !== null ? `${(100 - cmvAtual).toFixed(0)}%` : "—"}
+            </p>
+            <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>
+              {cmvAtual === null
+                ? "configurar custos"
+                : cmvParcial
+                  ? "estimativa parcial"
+                  : cmvVeredito ?? "sobre receita"}
+            </span>
+          </DashCard>
+        </div>
+
+        {/* ═══ MAIN AREA — chart + col direita ═══ */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 260px", gap: 20, minHeight: 340 }}>
+
+          {/* Esquerda — gráfico 7 dias */}
+          <DashCard style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ flexShrink: 0, marginBottom: 16 }}>
+              <CardOverline style={{ marginBottom: 6 }}>Receita — 7 dias</CardOverline>
+              <TrendText percent={receitaSemana.percentual} comparativoLabel="vs semana passada" />
+            </div>
+            <div style={{ flex: 1, minHeight: 180 }}>
+              <BarChart data={pontosReceita} fill />
+            </div>
+          </DashCard>
+
+          {/* Direita — meta + estoque */}
+          <div style={{ display: "grid", gridTemplateRows: "1fr 1fr", gap: 20 }}>
+
+            {/* Meta do Mês */}
+            <DashCard style={{ display: "flex", flexDirection: "column" }}>
+              <CardOverline>Meta do Mês</CardOverline>
+              <p style={{ fontSize: "2rem", fontWeight: 700, color: "var(--fg)", fontVariantNumeric: "tabular-nums", lineHeight: 1, margin: "6px 0 auto" }}>
+                {meta > 0 ? `${metaProgresso}%` : "—"}
+              </p>
+              {meta > 0 && (
+                <div style={{ marginTop: "auto", paddingTop: 12 }}>
+                  <div style={{ background: "var(--border-strong)", borderRadius: 2, height: 2, overflow: "hidden", marginBottom: 6 }}>
+                    <div style={{ background: "var(--accent)", borderRadius: 2, height: 2, width: `${metaProgresso}%`, transition: "width 0.6s ease" }} />
+                  </div>
                   <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>
-                    Monitorando CMV · Ticket médio · Estoque · Produtos · Equipe
+                    {metaAtingida ? "meta atingida ✓" : `falta ${currency.format(metaFalta)}`}
+                    {!metaConfigurada && (
+                      <span style={{ marginLeft: 6, fontSize: 9, fontWeight: 500, padding: "2px 5px", borderRadius: 3, background: "color-mix(in srgb, var(--fg) 7%, transparent)", color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                        sugerida
+                      </span>
+                    )}
                   </p>
                 </div>
-              </div>
-            ) : (
-              // Expandido — um card por insight
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {insightsSorted.map((item, i) => {
-                  const severityColor = item.tipo === "action" ? "#ef4444" : item.tipo === "opportunity" ? "var(--ok)" : "#3b82f6";
-                  const severityLabel = item.tipo === "action" ? "🔴 AÇÃO NECESSÁRIA" : item.tipo === "opportunity" ? "🟢 OPORTUNIDADE" : "🔵 INFORMAÇÃO";
-                  return (
-                    <div key={i} style={{
-                      background: "var(--bg-elevated)",
-                      borderRadius: "4px",
-                      padding: item.tipo === "info" ? "12px 16px" : "16px 20px",
-                    }}>
-                      <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: severityColor, margin: "0 0 6px" }}>
-                        {severityLabel}
-                      </p>
-                      <p style={{ fontSize: item.tipo === "info" ? 12 : 13, color: item.tipo === "info" ? "var(--fg-muted)" : "var(--fg)", margin: "0 0 4px", lineHeight: 1.5 }}>{item.texto}</p>
-                      {item.contexto && (
-                        <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: "0 0 6px", fontStyle: "italic" }}>{item.contexto}</p>
-                      )}
-                      {item.impactoReais !== undefined && (
-                        <p style={{ fontSize: 12, fontWeight: 600, color: item.impactoReais < 0 ? "#ef4444" : "var(--ok)", fontFamily: "var(--font-mono)", margin: "0 0 6px" }}>
-                          Impacto estimado: {item.impactoReais < 0 ? `−${currency.format(Math.abs(item.impactoReais))}` : `+${currency.format(item.impactoReais)}`} neste turno
-                        </p>
-                      )}
-                      {item.sugestao && (
-                        <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: 0, lineHeight: 1.5 }}>→ {item.sugestao}</p>
-                      )}
-                    </div>
-                  );
-                })}
+              )}
+            </DashCard>
 
-                {inteligencia.insightsNaoLidos > 0 && (
-                  <a href="/dashboard/inteligencia" style={{
-                    ...card,
-                    display: "flex", alignItems: "center", gap: 10, textDecoration: "none",
-                    padding: "14px 20px",
-                  }}>
-                    <span style={{ background: "#ef4444", color: "#fff", fontSize: 11, fontWeight: 700, borderRadius: "50%", minWidth: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      {inteligencia.insightsNaoLidos > 9 ? "9+" : inteligencia.insightsNaoLidos}
-                    </span>
-                    <span style={{ fontSize: 12, color: "var(--fg-muted)" }}>
-                      {inteligencia.insightsNaoLidos === 1 ? "1 análise detalhada disponível" : `${inteligencia.insightsNaoLidos} análises detalhadas disponíveis`} →
-                    </span>
+            {/* Estoque */}
+            <DashCard style={{ display: "flex", flexDirection: "column" }}>
+              <CardOverline>Estoque</CardOverline>
+              <p style={{ fontSize: "2rem", fontWeight: 700, lineHeight: 1, margin: "6px 0 auto", color: alertas.length > 0 ? "var(--danger)" : "var(--ok)" }}>
+                {alertas.length > 0 ? alertas.length : "OK"}
+              </p>
+              <div style={{ marginTop: "auto", paddingTop: 12 }}>
+                {alertas.length > 0 ? (
+                  <a href="/dashboard/estoque" style={{ fontSize: 11, color: "var(--danger)", textDecoration: "none" }}>
+                    {alertas.length === 1 ? "1 item crítico" : `${alertas.length} críticos`} →
                   </a>
+                ) : (
+                  <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>nenhum alerta</span>
+                )}
+              </div>
+            </DashCard>
+
+          </div>
+        </div>
+
+        {/* ═══ BOTTOM ROW — 3 cards iguais ═══ */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20 }}>
+
+          {/* Card 1 — Análises / Alertas */}
+          {inteligencia.stage === 2 && todosInsights.length > 0 ? (
+            <DashCard style={{ padding: 0, overflow: "hidden" }}>
+              {insightsSorted.slice(0, 3).map((item, i) => {
+                const cor = item.tipo === "action" ? "var(--danger)" : item.tipo === "opportunity" ? "var(--ok)" : "var(--border-strong)";
+                const isCritical = item.tipo === "action";
+                return (
+                  <div key={i} style={{
+                    borderLeft: `3px solid ${cor}`,
+                    borderBottom: i < Math.min(insightsSorted.length, 3) - 1 ? "1px solid var(--border)" : "none",
+                    background: isCritical ? "color-mix(in srgb, var(--danger) 5%, transparent)" : "transparent",
+                    padding: "14px 16px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 4,
+                  }}>
+                    <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: cor, margin: 0 }}>
+                      {item.tipo === "action" ? "CRÍTICO" : item.tipo === "opportunity" ? "OPORTUNIDADE" : "INFORMATIVO"}
+                    </p>
+                    <p style={{ fontSize: isCritical ? 13 : 12, fontWeight: isCritical ? 700 : 500, color: "var(--fg)", margin: 0, lineHeight: 1.4 }}>
+                      {item.texto}
+                    </p>
+                    {item.impactoReais !== undefined && (
+                      <p style={{ fontSize: 12, fontWeight: 700, color: isCritical ? "var(--danger)" : "var(--ok)", fontVariantNumeric: "tabular-nums", margin: 0 }}>
+                        {item.impactoReais < 0 ? `−${currency.format(Math.abs(item.impactoReais))}` : `+${currency.format(item.impactoReais)}`}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+              {inteligencia.insightsNaoLidos > 0 && (
+                <a href="/dashboard/inteligencia" style={{ display: "flex", alignItems: "center", padding: "10px 16px", textDecoration: "none", borderTop: "1px solid var(--border)" }}>
+                  <span style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600 }}>
+                    {inteligencia.insightsNaoLidos} análise{inteligencia.insightsNaoLidos !== 1 ? "s" : ""} disponível →
+                  </span>
+                </a>
+              )}
+            </DashCard>
+          ) : inteligencia.stage === 2 ? (
+            <DashCard style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <span style={{ fontSize: 18, color: "var(--ok)", flexShrink: 0 }}>✓</span>
+              <div>
+                <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: "0 0 3px" }}>Tudo sob controle</p>
+                <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>CMV · Ticket · Estoque</p>
+              </div>
+            </DashCard>
+          ) : (
+            <DashCard>
+              <CardOverline>Análises</CardOverline>
+              <p style={{ fontSize: 12, color: "var(--fg-subtle)", marginTop: 8, lineHeight: 1.5 }}>
+                Disponível após 30 comandas e 7 dias.
+              </p>
+            </DashCard>
+          )}
+
+          {/* Card 2 — Vendas por hora */}
+          <DashCard>
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 14 }}>
+              <CardOverline style={{ marginBottom: 0 }}>Vendas por hora</CardOverline>
+              {pico && (
+                <span style={{ fontSize: 11, color: "var(--fg-muted)", fontVariantNumeric: "tabular-nums" }}>Pico {pico.hora}h</span>
+              )}
+            </div>
+            {pontosHora.length >= 2 ? (
+              <VendasPorHoraChart pontos={pontosHora} />
+            ) : (
+              <div style={{ paddingTop: 8 }}>
+                <p style={{ fontSize: 12, color: "var(--fg-subtle)" }}>Aguardando pedidos…</p>
+                {mixPgto.length > 0 && (
+                  <p style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)", marginTop: 6, fontVariantNumeric: "tabular-nums" }}>
+                    {labelMetodo(mixPgto[0].metodo)} · {mixPgto[0].percentual}%
+                  </p>
                 )}
               </div>
             )}
-          </section>
-        )}
+          </DashCard>
 
-        {/* 2. AO VIVO — só existe quando turno está aberto */}
-        <section>
-          <span style={sectionLabel}>Turno Atual</span>
-          <LiveBar
-            turnoId={turno.id}
-            barId={current.bar.id}
-            faturamentoInicial={kpis.faturamento}
-            pessoasInicial={kpis.comandasAbertas}
-            drinksInicial={liveStats.drinks}
-          />
-        </section>
-
-        {/* 3. NEGÓCIO — turno atual + semana */}
-        <section>
-          <span style={sectionLabel}>Negócio</span>
-
-          {/* KPIs do turno */}
-          <div className="grid grid-cols-1 lg:grid-cols-3" style={{ gap: "12px" }}>
-
-            {/* CMV */}
-            <div
-              className="animate-fade-in-up"
-              style={{ ...card, animationDelay: "0ms" }}
-            >
-              {coberturaReceita.status === "indisponivel" ? (
-                <>
-                  <p style={overline}>CMV</p>
-                  <p className="text-[22px] lg:text-[26px]" style={{ fontWeight: 600, color: "var(--fg-subtle)", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", marginTop: 4 }}>—</p>
-                  <p style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 2, marginBottom: 4 }}>{coberturaReceita.cobertura}% da receita com custo</p>
-                  <a href="/dashboard/cardapio" style={{ fontSize: 11, color: "var(--accent)", textDecoration: "none" }}>Configurar →</a>
-                </>
-              ) : (
-                <>
-                  <p style={{ fontSize: 12, fontWeight: 600, color: cmvCorVeredito, margin: "0 0 4px", display: "flex", alignItems: "center", gap: 6 }}>
-                    {cmvVeredito}
-                    {coberturaReceita.status === "estimado" && (
-                      <span style={{ fontSize: 9, fontWeight: 500, padding: "2px 5px", borderRadius: 2, background: "color-mix(in srgb, var(--warn) 12%, transparent)", color: "var(--warn)", textTransform: "uppercase", letterSpacing: "0.05em" }}>estimado</span>
-                    )}
-                  </p>
-                  <p className="text-[22px] lg:text-[26px]" style={{ fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", margin: "0 0 3px" }}>
-                    {percent.format(cmvAtual ?? 0)}%
-                  </p>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>CMV do turno</span>
-                    <TrendText percent={comparacao.cmv} invert={true} />
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Ticket médio */}
-            <div
-              className="animate-fade-in-up"
-              style={{ ...card, animationDelay: "60ms" }}
-            >
-              {ticketVeredito ? (
-                <p style={{ fontSize: 12, fontWeight: 600, color: ticketCorVeredito, margin: "0 0 4px" }}>
-                  {ticketVeredito}
-                </p>
-              ) : (
-                <p style={{ ...overline, marginBottom: 4 }}>Ticket médio</p>
-              )}
-              <p
-                className="text-[22px] lg:text-[26px]"
-                style={{ fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", margin: "0 0 3px" }}
-              >
-                {currency.format(kpis.ticketMedio)}
+          {/* Card 3 — Próxima ação */}
+          {produtosTop5.length > 0 && produtosTop5[0].margemPercentual !== null ? (
+            <ProximaMelhorAcao
+              produtoNome={produtosTop5[0].produtoNome}
+              margemPercentual={produtosTop5[0].margemPercentual}
+              faturamento={produtosTop5[0].faturamento}
+              quantidadeVendida={produtosTop5[0].quantidadeVendida}
+              categoria={produtosTop5[0].categoria}
+              ranking={produtosTop5.slice(1).map(p => ({
+                produtoId: p.produtoId,
+                produtoNome: p.produtoNome,
+                margemPercentual: p.margemPercentual,
+                faturamento: p.faturamento,
+              }))}
+            />
+          ) : rankingMesas.length > 0 ? (
+            <DashCard>
+              <CardOverline>Mesa destaque</CardOverline>
+              <p style={{ fontSize: "2rem", fontWeight: 700, color: "var(--fg)", fontVariantNumeric: "tabular-nums", lineHeight: 1, margin: "8px 0 6px" }}>
+                {rankingMesas[0].mesaLabel}
               </p>
-              <TrendText percent={comparacao.ticketMedio} invert={false} />
-            </div>
-
-            {/* Meta do mês */}
-            <div
-              className="animate-fade-in-up flex items-start justify-between lg:block"
-              style={{ ...card, animationDelay: "120ms" }}
-            >
-              <div className="flex-1 min-w-0">
-                <p style={overline}>Meta do mês</p>
-                <p
-                  className="text-[22px] lg:text-[26px]"
-                  style={{ fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", marginTop: "4px" }}
-                >
-                  {currency.format(metaAtual)}
+              <p style={{ fontSize: 11, color: "var(--fg-subtle)", fontVariantNumeric: "tabular-nums" }}>
+                {currency.format(rankingMesas[0].faturamento)} · {rankingMesas[0].comandas} comanda{rankingMesas[0].comandas !== 1 ? "s" : ""}
+              </p>
+              {tempos.mediaMinutos !== null && (
+                <p style={{ fontSize: 12, color: "var(--fg-muted)", marginTop: 10 }}>
+                  Preparo médio: <strong style={{ fontVariantNumeric: "tabular-nums" }}>{tempos.mediaMinutos}min</strong>
                 </p>
-                <p style={{ fontSize: "11px", color: "var(--fg-subtle)", marginTop: "2px", marginBottom: "10px" }}>
-                  de {currency.format(meta)} · {metaProgresso}%
-                  {!metaConfigurada && (
-                    <span
-                      title="Calculada automaticamente com base no faturamento do mês anterior + 10%. Configure uma meta manual nas Configurações."
-                      style={{
-                        marginLeft: 6,
-                        fontSize: 9, fontWeight: 500,
-                        padding: "2px 6px", borderRadius: 2,
-                        background: "color-mix(in srgb, var(--fg) 8%, transparent)",
-                        color: "var(--fg-subtle)",
-                        textTransform: "uppercase", letterSpacing: "0.06em",
-                        cursor: "help", whiteSpace: "nowrap",
-                      }}
-                    >
-                      Sugerida
-                    </span>
-                  )}
-                </p>
-                <div style={{ background: "var(--border-strong)", borderRadius: "2px", height: "3px", overflow: "hidden" }}>
-                  <div style={{
-                    background: metaAtingida ? "var(--ok)" : "var(--accent)",
-                    borderRadius: "2px",
-                    height: "3px",
-                    width: `${metaProgresso}%`,
-                    transition: "width 0.6s ease",
-                  }} />
-                </div>
-                <p className="hidden lg:block" style={{ fontSize: "11px", color: metaAtingida ? "var(--ok)" : "var(--fg-subtle)", marginTop: "6px" }}>
-                  {metaAtingida ? "Meta atingida!" : `falta ${currency.format(metaFalta)}`}
-                </p>
-              </div>
-              <div className="flex-shrink-0 ml-4 lg:hidden" style={{ paddingTop: "22px" }}>
-                <span style={{
-                  fontSize: "14px", fontWeight: 700,
-                  fontFamily: "var(--font-mono)",
-                  color: metaAtingida ? "var(--ok)" : "var(--fg-muted)",
-                }}>
-                  {metaProgresso}%
-                </span>
-              </div>
-            </div>
-
-
-          </div>
-
-          {/* Semana — gráfico + top drinks */}
-          <div className="grid lg:grid-cols-5" style={{ gap: "12px", marginTop: "12px" }}>
-
-            {/* Receita — gráfico */}
-            <div
-              className="animate-fade-in-up lg:col-span-2"
-              style={{ ...card, animationDelay: "240ms" }}
-            >
-              <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10 }}>
-                <p style={overline}>Receita — 7 dias</p>
-                <TrendText percent={receitaSemana.percentual} comparativoLabel="vs semana passada" />
-              </div>
-              <div style={{ maxHeight: "90px", overflow: "hidden" }}>
-                <BarChart data={pontosReceita} height={90} />
-              </div>
-            </div>
-
-            {/* Oportunidade principal */}
-            <div
-              className="animate-fade-in-up lg:col-span-2 flex flex-col sm:flex-row"
-              style={{ ...card, animationDelay: "300ms" }}
-            >
-              {produtosTop5.length === 0 || produtosTop5[0].margemPercentual === null ? (
-                <div>
-                  <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--ok)", margin: "0 0 10px" }}>
-                    Oportunidade principal
-                  </p>
-                  <p style={{ fontSize: 13, color: "var(--fg-muted)" }}>Nenhuma venda com dado de margem ainda.</p>
-                </div>
-              ) : (
-                <>
-                  {/* Coluna principal — herói */}
-                  <div
-                    className={produtosTop5.length > 1 ? "sm:pr-8" : ""}
-                    style={{ flex: "1 1 0", minWidth: 0 }}
-                  >
-                    <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--ok)", margin: "0 0 14px" }}>
-                      Oportunidade principal
-                    </p>
-                    <p style={{ fontSize: 32, fontWeight: 800, color: "var(--fg)", fontFamily: "var(--font-mono)", margin: "0 0 16px", letterSpacing: "-0.03em", lineHeight: 1 }}>
-                      {produtosTop5[0].produtoNome}
-                    </p>
-                    <div style={{ display: "flex", gap: 20, marginBottom: 20, alignItems: "baseline" }}>
-                      <span style={{ fontSize: 22, color: "var(--ok)", fontFamily: "var(--font-mono)", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1 }}>
-                        {percent.format(produtosTop5[0].margemPercentual ?? 0)}%
-                      </span>
-                      <span style={{ fontSize: 11, color: "var(--fg-subtle)", fontFamily: "var(--font-mono)" }}>
-                        {currency.format(produtosTop5[0].faturamento)} vendido · {produtosTop5[0].quantidadeVendida}× pedido
-                      </span>
-                    </div>
-                    <p style={{ fontSize: 13, color: "var(--fg-muted)", lineHeight: 1.65, margin: 0 }}>
-                      {produtosTop5[0].categoria === "star" || produtosTop5[0].categoria === "cash_cow"
-                        ? "Já vende bem. Treine a equipe para sugerir ainda mais."
-                        : "Alta margem com potencial. Destaque no cardápio e no discurso da equipe."}
-                    </p>
-                  </div>
-
-                  {/* Coluna secundária — outros */}
-                  {produtosTop5.length > 1 && (
-                    <div
-                      className="flex-shrink-0 sm:w-[200px] mt-5 pt-5 sm:mt-0 sm:pt-0 border-t sm:border-t-0 sm:border-l sm:pl-7"
-                      style={{ borderColor: "var(--border)" }}
-                    >
-                      <p style={{ ...overline, marginBottom: 14 }}>Também vale</p>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                        {produtosTop5.slice(1).filter(p => p.margemPercentual !== null).map(p => (
-                          <div key={p.produtoId}>
-                            <p style={{ fontSize: 12, fontWeight: 500, color: "var(--fg-muted)", margin: "0 0 1px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                              {p.produtoNome}
-                            </p>
-                            <p style={{ fontSize: 11, color: "var(--fg-subtle)", fontFamily: "var(--font-mono)", margin: 0 }}>
-                              {percent.format(p.margemPercentual ?? 0)}% · {currency.format(p.faturamento)}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </>
               )}
-            </div>
+            </DashCard>
+          ) : (
+            <DashCard>
+              <CardOverline>Operação</CardOverline>
+              <p style={{ fontSize: 12, color: "var(--fg-subtle)", marginTop: 8 }}>
+                {tempos.mediaMinutos !== null
+                  ? `Preparo médio: ${tempos.mediaMinutos}min`
+                  : "Sem vendas neste turno ainda"}
+              </p>
+            </DashCard>
+          )}
 
-          </div>
-        </section>
+        </div>
 
-        {/* 4. OPERAÇÃO */}
-        <section>
-          <span style={sectionLabel}>Operação</span>
-          <div className="grid grid-cols-2 lg:grid-cols-4" style={{ gap: "12px" }}>
-
-            {/* Horário de pico — só aparece quando há dado */}
-            {pico && (
-              <div className="animate-fade-in-up" style={{ ...card, animationDelay: "200ms" }}>
-                <p style={overline}>Pico de vendas</p>
-                <p className="text-[22px] lg:text-[26px]" style={{ fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", marginTop: "4px" }}>
-                  {pico.hora}h–{pico.hora + 1}h
-                </p>
-                <p style={{ fontSize: "11px", color: "var(--fg-subtle)", marginTop: "2px" }}>
-                  {pico.drinks} drinks nessa hora
-                </p>
-              </div>
-            )}
-
-            {/* Mesa top — só aparece quando há dado */}
-            {rankingMesas.length > 0 && (
-              <div className="animate-fade-in-up" style={{ ...card, animationDelay: "240ms" }}>
-                <p style={overline}>Mesa top</p>
-                <p className="text-[22px] lg:text-[26px]" style={{ fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", marginTop: "4px" }}>
-                  {rankingMesas[0].mesaLabel}
-                </p>
-                <p style={{ fontSize: "11px", color: "var(--fg-subtle)", marginTop: "2px" }}>
-                  {currency.format(rankingMesas[0].faturamento)} · {rankingMesas[0].comandas} {rankingMesas[0].comandas === 1 ? "comanda" : "comandas"}
-                </p>
-              </div>
-            )}
-
-            {/* Mix de pagamento */}
-            <div className="animate-fade-in-up" style={{ ...card, animationDelay: "280ms" }}>
-              <p style={overline}>Pagamento</p>
-              {mixPgto.length > 0 ? (
-                <>
-                  <p className="text-[22px] lg:text-[26px]" style={{ fontWeight: 600, color: "var(--fg)", fontFamily: "var(--font-mono)", marginTop: "4px" }}>
-                    {labelMetodo(mixPgto[0].metodo)}
-                  </p>
-                  <p style={{ fontSize: "11px", color: "var(--fg-subtle)", marginTop: "2px" }}>
-                    {mixPgto[0].percentual}% dos pagamentos
-                  </p>
-                  {mixPgto.length > 1 && (
-                    <div style={{ marginTop: "8px", display: "flex", flexDirection: "column", gap: "4px" }}>
-                      {mixPgto.slice(1).map(f => (
-                        <div key={f.metodo} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                          <div style={{ flex: 1, height: 3, borderRadius: 2, background: "var(--border-strong)", overflow: "hidden" }}>
-                            <div style={{ width: `${f.percentual}%`, height: "100%", background: "color-mix(in srgb, var(--accent) 50%, transparent)", borderRadius: 2 }} />
-                          </div>
-                          <span style={{ fontSize: 10, color: "var(--fg-subtle)", minWidth: 32, textAlign: "right", fontFamily: "var(--font-mono)" }}>{f.percentual}%</span>
-                          <span style={{ fontSize: 10, color: "var(--fg-subtle)", minWidth: 50 }}>{labelMetodo(f.metodo)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <p style={{ fontSize: "13px", color: "var(--fg-subtle)", marginTop: "8px" }}>Sem pagamentos</p>
-              )}
-            </div>
-
-            {/* Tempo médio de preparo */}
-            <div className="animate-fade-in-up" style={{ ...card, animationDelay: "320ms" }}>
-              <p style={overline}>Preparo médio</p>
-              {tempos.mediaMinutos !== null ? (
-                <>
-                  <p className="text-[22px] lg:text-[26px]" style={{
-                    fontWeight: 600,
-                    color: tempos.mediaMinutos >= 8 ? "var(--warn)" : tempos.mediaMinutos <= 3 ? "var(--ok)" : "var(--fg)",
-                    fontFamily: "var(--font-mono)", marginTop: "4px",
-                  }}>
-                    {tempos.mediaMinutos}min
-                  </p>
-                  <p style={{ fontSize: "11px", color: "var(--fg-subtle)", marginTop: "2px" }}>
-                    {tempos.totalEntregues} de {tempos.totalRecebidos} {tempos.totalRecebidos === 1 ? "pedido" : "pedidos"} entregues
-                  </p>
-                </>
-              ) : tempos.totalRecebidos > 0 ? (
-                <p style={{ fontSize: "13px", color: "var(--fg-subtle)", marginTop: "8px" }}>Em andamento…</p>
-              ) : (
-                <p style={{ fontSize: "13px", color: "var(--fg-subtle)", marginTop: "8px" }}>Nenhum pedido ainda</p>
-              )}
-            </div>
-
-          </div>
-        </section>
-
-
+        {/* AI Input */}
+        <AiHeroInput barId={current.bar.id} alertCount={nAction} />
 
       </div>
     </div>

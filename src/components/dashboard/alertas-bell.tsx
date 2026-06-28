@@ -49,7 +49,7 @@ export function AlertasBell({ alertas }: AlertasBellProps) {
           borderRadius: "50%",
           border: "1px solid var(--border)",
           background: "transparent",
-          color: "var(--fg-muted)",
+          color: "#FFFFFF",
           cursor: "pointer",
           transition: "border-color 150ms, color 150ms",
         }}
@@ -60,7 +60,7 @@ export function AlertasBell({ alertas }: AlertasBellProps) {
           <span style={{
             position: "absolute", top: -3, right: -3,
             minWidth: 15, height: 15, borderRadius: "50%",
-            background: "var(--danger)", color: "#fff",
+            background: "#FF6F00", color: "#fff",
             fontSize: 9, fontWeight: 700,
             display: "flex", alignItems: "center", justifyContent: "center",
             padding: "0 3px",

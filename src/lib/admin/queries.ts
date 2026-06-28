@@ -481,3 +481,28 @@ export async function getAdminBarDetalhe(barId: string): Promise<BarDetalhe | nu
     membros: (membros ?? []).map((m) => ({ id: m.id, nome: m.nome, role: m.role, ativo: m.ativo, created_at: m.created_at })),
   };
 }
+
+// ─── Leads ───────────────────────────────────────────────────────────────────
+
+export interface Lead {
+  id: string;
+  nome_bar: string;
+  cidade: string;
+  tipo_bar: string;
+  whatsapp: string;
+  instagram: string | null;
+  status: string;
+  notas: string | null;
+  created_at: string;
+}
+
+export async function getLeads(): Promise<Lead[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("leads")
+    .select("id, nome_bar, cidade, tipo_bar, whatsapp, instagram, status, notas, created_at")
+    .order("created_at", { ascending: false })
+    .returns<Lead[]>();
+  if (error) return [];
+  return data ?? [];
+}

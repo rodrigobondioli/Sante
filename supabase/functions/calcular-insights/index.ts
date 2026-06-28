@@ -120,6 +120,22 @@ async function processarBar(
     if (insight) insightsParaInserir.push(insight);
   }
 
+  // Insight: produtos sem custo
+  const insightSemCusto = await calcularProdutosSemCusto(supabase, barId, porProduto, yearWeek);
+  if (insightSemCusto) insightsParaInserir.push(insightSemCusto);
+
+  // Insight: ticket em queda
+  const insightTicket = await calcularTicketTendencia(supabase, barId, yearWeek);
+  if (insightTicket) insightsParaInserir.push(insightTicket);
+
+  // Insight: produto esquecido (boa margem, baixo giro)
+  const insightEsquecido = await calcularProdutoEsquecido(supabase, barId, porProduto, yearWeek);
+  if (insightEsquecido) insightsParaInserir.push(insightEsquecido);
+
+  // Insight: cortesias acima do limite
+  const insightCortesia = await calcularCortesiaElevada(supabase, barId, yearWeek);
+  if (insightCortesia) insightsParaInserir.push(insightCortesia);
+
   if (!insightsParaInserir.length) return 0;
 
   // 4. Insere apenas os que ainda não existem (dedupe via check manual)
@@ -199,6 +215,257 @@ async function calcularCmvProduto(
     },
     dedupe_key: `cmv_alto_produto:${prod.produto_id}:${yearWeek}`,
     lido:       false,
+  };
+}
+
+// ─── Insight: produto_sem_custo ───────────────────────────────────────────────
+
+async function calcularProdutosSemCusto(
+  supabase: ReturnType<typeof createClient>,
+  barId: string,
+  porProduto: Map<string, VendaProduto>,
+  yearWeek: string,
+): Promise<InsightPayload | null> {
+  if (porProduto.size === 0) return null;
+
+  const produtoIds = Array.from(porProduto.keys());
+  const { data: comReceita } = await supabase
+    .from("receitas")
+    .select("produto_id")
+    .eq("bar_id", barId)
+    .in("produto_id", produtoIds)
+    .returns<{ produto_id: string }[]>();
+
+  const idsComReceita = new Set((comReceita ?? []).map(r => r.produto_id));
+  const semReceita = Array.from(porProduto.values()).filter(
+    p => !idsComReceita.has(p.produto_id)
+  );
+
+  if (semReceita.length === 0) return null;
+
+  const receitaTotalSemCusto = semReceita.reduce((s, p) => s + p.receita, 0);
+  const receitaTotal         = Array.from(porProduto.values()).reduce((s, p) => s + p.receita, 0);
+  const pctSemCusto          = receitaTotal > 0
+    ? Math.round((receitaTotalSemCusto / receitaTotal) * 100)
+    : 0;
+
+  // Só gera se representar ao menos 10% da receita (evita ruído)
+  if (pctSemCusto < 10) return null;
+
+  const nomes = semReceita.slice(0, 3).map(p => p.produto_nome).join(", ");
+  const resto = semReceita.length > 3 ? ` e mais ${semReceita.length - 3}` : "";
+
+  return {
+    bar_id: barId,
+    tipo:   "produto_sem_custo",
+    titulo: `${semReceita.length} produto${semReceita.length > 1 ? "s" : ""} sem custo cadastrado`,
+    descricao: [
+      `${pctSemCusto}% da receita da semana (R$ ${receitaTotalSemCusto.toFixed(0)}) vem de produtos sem receita técnica.`,
+      `Sem custo, a margem real é desconhecida.`,
+      `Produtos: ${nomes}${resto}.`,
+    ].join(" "),
+    impacto_valor: -Math.round(receitaTotalSemCusto * 100) / 100,
+    dado_referencia: {
+      n_sem_custo:           semReceita.length,
+      receita_sem_custo:     Math.round(receitaTotalSemCusto * 100) / 100,
+      pct_receita_sem_custo: pctSemCusto,
+      produtos:              semReceita.map(p => ({ id: p.produto_id, nome: p.produto_nome, receita: Math.round(p.receita * 100) / 100 })),
+      janela_dias:           JANELA_DIAS,
+    },
+    dedupe_key: `produto_sem_custo:${barId}:${yearWeek}`,
+    lido: false,
+  };
+}
+
+// ─── Insight: ticket_queda ────────────────────────────────────────────────────
+
+async function calcularTicketTendencia(
+  supabase: ReturnType<typeof createClient>,
+  barId: string,
+  yearWeek: string,
+): Promise<InsightPayload | null> {
+  const agora = new Date();
+  const d7    = new Date(agora); d7.setDate(agora.getDate() - 7);
+  const d14   = new Date(agora); d14.setDate(agora.getDate() - 14);
+
+  const { data: pagamentos } = await supabase
+    .from("pagamentos")
+    .select("valor_total, criado_em")
+    .eq("bar_id", barId)
+    .gte("criado_em", d14.toISOString())
+    .returns<{ valor_total: number; criado_em: string }[]>();
+
+  if (!pagamentos?.length) return null;
+
+  const semanaAtual = pagamentos.filter(p => new Date(p.criado_em) >= d7);
+  const semanaAntes = pagamentos.filter(p => new Date(p.criado_em) < d7);
+
+  if (semanaAtual.length < 5 || semanaAntes.length < 5) return null;
+
+  const ticketAtual = semanaAtual.reduce((s, p) => s + Number(p.valor_total), 0) / semanaAtual.length;
+  const ticketAntes = semanaAntes.reduce((s, p) => s + Number(p.valor_total), 0) / semanaAntes.length;
+
+  if (ticketAntes <= 0) return null;
+
+  const deltaPct = ((ticketAtual - ticketAntes) / ticketAntes) * 100;
+
+  if (deltaPct > -8) return null; // queda não significativa
+
+  const impacto = (ticketAntes - ticketAtual) * semanaAtual.length;
+
+  return {
+    bar_id: barId,
+    tipo:   "ticket_queda",
+    titulo: `Ticket médio caiu ${Math.abs(deltaPct).toFixed(0)}% esta semana`,
+    descricao: [
+      `Semana passada: R$ ${ticketAntes.toFixed(0)} por comanda.`,
+      `Esta semana: R$ ${ticketAtual.toFixed(0)}.`,
+      `Projetando ${semanaAtual.length} comandas, isso representa R$ ${impacto.toFixed(0)} a menos no período.`,
+    ].join(" "),
+    impacto_valor: -Math.round(impacto * 100) / 100,
+    dado_referencia: {
+      ticket_atual:        Math.round(ticketAtual * 100) / 100,
+      ticket_anterior:     Math.round(ticketAntes * 100) / 100,
+      delta_pct:           Math.round(deltaPct * 10) / 10,
+      n_comandas_atual:    semanaAtual.length,
+      n_comandas_anterior: semanaAntes.length,
+    },
+    dedupe_key: `ticket_queda:${barId}:${yearWeek}`,
+    lido: false,
+  };
+}
+
+// ─── Insight: produto_esquecido ───────────────────────────────────────────────
+
+async function calcularProdutoEsquecido(
+  supabase: ReturnType<typeof createClient>,
+  barId: string,
+  porProduto: Map<string, VendaProduto>,
+  yearWeek: string,
+): Promise<InsightPayload | null> {
+  if (porProduto.size < 4) return null; // bares pequenos: sem sinal suficiente
+
+  const LIMITE_VENDAS  = 4;   // vendido <= N vezes na semana
+  const LIMITE_CMV_BOM = 30;  // CMV abaixo disso = margem boa
+
+  const candidatos: (VendaProduto & { cmv: number; custoPorUnidade: number })[] = [];
+
+  for (const prod of porProduto.values()) {
+    if (prod.quantidade > LIMITE_VENDAS) continue; // vendendo bem, não é esquecido
+    if (prod.receita <= 0) continue;
+
+    const { data: receitas } = await supabase
+      .from("receitas")
+      .select("ingrediente_id, quantidade")
+      .eq("produto_id", prod.produto_id)
+      .eq("bar_id", barId)
+      .returns<{ ingrediente_id: string; quantidade: number }[]>();
+
+    if (!receitas?.length) continue;
+
+    let custoPorUnidade = 0;
+    for (const r of receitas) {
+      const { data: ing } = await supabase
+        .from("ingredientes")
+        .select("custo_atual")
+        .eq("id", r.ingrediente_id)
+        .single<{ custo_atual: number }>();
+      if (ing?.custo_atual) {
+        custoPorUnidade += Number(r.quantidade) * Number(ing.custo_atual);
+      }
+    }
+
+    if (custoPorUnidade <= 0) continue;
+
+    const precoPorUnidade = prod.receita / prod.quantidade;
+    const cmv = (custoPorUnidade / precoPorUnidade) * 100;
+
+    if (cmv > LIMITE_CMV_BOM) continue; // margem ruim, não é oportunidade
+
+    candidatos.push({ ...prod, cmv, custoPorUnidade });
+  }
+
+  if (candidatos.length === 0) return null;
+
+  const melhor = candidatos.sort((a, b) => a.cmv - b.cmv)[0];
+  const margemPct = Math.round(100 - melhor.cmv);
+  const potencial = (melhor.receita / melhor.quantidade) * (LIMITE_VENDAS * 2 - melhor.quantidade);
+
+  return {
+    bar_id: barId,
+    tipo:   "produto_esquecido",
+    titulo: `${melhor.produto_nome} tem margem de ${margemPct}% e quase não sai`,
+    descricao: [
+      `Vendido apenas ${melhor.quantidade}× nesta semana, mas com margem de ${margemPct}%.`,
+      `Sugerir para clientes pode gerar R$ ${potencial.toFixed(0)} adicionais.`,
+    ].join(" "),
+    impacto_valor: Math.round(potencial * 100) / 100,
+    dado_referencia: {
+      produto_id:        melhor.produto_id,
+      produto_nome:      melhor.produto_nome,
+      cmv_pct:           Math.round(melhor.cmv * 10) / 10,
+      margem:            margemPct,
+      quantidade:        melhor.quantidade,
+      potencial:         Math.round(potencial * 100) / 100,
+      todos_candidatos:  candidatos.length,
+      janela_dias:       JANELA_DIAS,
+    },
+    dedupe_key: `produto_esquecido:${melhor.produto_id}:${yearWeek}`,
+    lido: false,
+  };
+}
+
+// ─── Insight: cortesia_elevada ────────────────────────────────────────────────
+
+async function calcularCortesiaElevada(
+  supabase: ReturnType<typeof createClient>,
+  barId: string,
+  yearWeek: string,
+): Promise<InsightPayload | null> {
+  const LIMITE_CORTESIA_PCT = 12; // % — acima disso é alerta
+
+  const dataInicio = new Date();
+  dataInicio.setDate(dataInicio.getDate() - JANELA_DIAS);
+
+  const { data: pagamentos } = await supabase
+    .from("pagamentos")
+    .select("metodo, valor")
+    .eq("bar_id", barId)
+    .gte("criado_em", dataInicio.toISOString())
+    .returns<{ metodo: string; valor: number }[]>();
+
+  if (!pagamentos?.length) return null;
+
+  const total         = pagamentos.reduce((s, p) => s + Number(p.valor), 0);
+  const cortesias     = pagamentos.filter(p => p.metodo === "cortesia");
+  const totalCortesia = cortesias.reduce((s, p) => s + Number(p.valor), 0);
+
+  if (total <= 0 || cortesias.length === 0) return null;
+
+  const pct = (totalCortesia / total) * 100;
+
+  if (pct <= LIMITE_CORTESIA_PCT) return null;
+
+  return {
+    bar_id: barId,
+    tipo:   "cortesia_elevada",
+    titulo: `Cortesias representam ${pct.toFixed(0)}% da receita da semana`,
+    descricao: [
+      `R$ ${totalCortesia.toFixed(0)} dados como cortesia em ${cortesias.length} pagamento${cortesias.length > 1 ? "s" : ""}.`,
+      `O limite saudável é até ${LIMITE_CORTESIA_PCT}% da receita.`,
+      `Revise se todas as cortesias foram autorizadas.`,
+    ].join(" "),
+    impacto_valor: -Math.round(totalCortesia * 100) / 100,
+    dado_referencia: {
+      total_cortesia: Math.round(totalCortesia * 100) / 100,
+      n_cortesias:    cortesias.length,
+      pct_receita:    Math.round(pct * 10) / 10,
+      limite_pct:     LIMITE_CORTESIA_PCT,
+      receita_total:  Math.round(total * 100) / 100,
+      janela_dias:    JANELA_DIAS,
+    },
+    dedupe_key: `cortesia_elevada:${barId}:${yearWeek}`,
+    lido: false,
   };
 }
 

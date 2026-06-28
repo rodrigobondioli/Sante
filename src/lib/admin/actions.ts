@@ -56,3 +56,19 @@ export async function alterarStatusAssinatura(
   revalidatePath("/admin");
   revalidatePath(`/admin/${barId}`);
 }
+
+// ─── Atualizar status de lead ─────────────────────────────────────────────────
+
+export async function updateLeadStatus(
+  id: string,
+  status: string,
+  notas?: string,
+): Promise<{ ok: true } | { error: string }> {
+  await assertAdmin();
+  const admin = createAdminClient();
+  const update: Record<string, string> = { status };
+  if (notas !== undefined) update.notas = notas;
+  const { error } = await admin.from("leads").update(update).eq("id", id);
+  if (error) return { error: error.message };
+  return { ok: true };
+}

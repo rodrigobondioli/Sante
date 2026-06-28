@@ -24,7 +24,7 @@ export function AppHeader({
       height: "calc(52px + env(safe-area-inset-top))",
       flexShrink: 0,
       borderBottom: "1px solid var(--border)",
-      background: "var(--bg)",
+      background: "#FFFFFF",
     }}>
       {/* Esquerda: nome do bar + badge de papel */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, overflow: "hidden" }}>

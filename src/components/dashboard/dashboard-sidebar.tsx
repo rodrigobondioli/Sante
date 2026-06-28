@@ -8,11 +8,13 @@ import {
   TableProperties, Users, MonitorSmartphone, Wallet, Package, Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { BarRole } from "@/types/database";
+import type { BarRole, Bar } from "@/types/database";
 import { Drawer } from "@/components/ui/drawer";
+import { SettingsButton } from "./settings-button";
+import type { AlertaEstoque } from "@/lib/dashboard/queries";
 
 const links = [
-  { href: "/dashboard", label: "Hoje", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Operação ao Vivo", icon: LayoutDashboard },
   { href: "/dashboard/inteligencia", label: "Inteligência", icon: Sparkles, badge: true },
   { href: "/dashboard/relatorios", label: "Relatórios", icon: BarChart3 },
   { href: "/dashboard/turnos", label: "Turnos", icon: History },
@@ -31,6 +33,14 @@ interface DashboardSidebarProps {
   onNavigate?: () => void;
   hideHeader?: boolean;
   touchMode?: boolean;
+  alertas?: AlertaEstoque[];
+  bar?: Bar;
+  barId?: string;
+  userId?: string;
+  userEmail?: string;
+  userAvatarUrl?: string | null;
+  autoPedido?: boolean;
+  taxaServicoPct?: number;
 }
 
 const ROLE_LABEL: Record<string, string> = {
@@ -47,7 +57,7 @@ const footerItems = [
   { label: "Sugestão", type: "sugestao" as const },
 ];
 
-export function DashboardSidebar({ barNome, role, insightCount = 0, onNavigate, hideHeader, touchMode }: DashboardSidebarProps) {
+export function DashboardSidebar({ barNome, userNome, role, insightCount = 0, onNavigate, hideHeader, touchMode, alertas = [], bar, barId, userId, userEmail = "", userAvatarUrl, autoPedido = false, taxaServicoPct = 10 }: DashboardSidebarProps) {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerType, setDrawerType] = useState<"suporte" | "sugestao">("suporte");
@@ -63,8 +73,8 @@ export function DashboardSidebar({ barNome, role, insightCount = 0, onNavigate, 
         width: touchMode ? "100%" : "220px",
         height: touchMode ? "100%" : "100dvh",
         overflow: "hidden",
-        background: "var(--bg)",
-        borderRight: touchMode ? "none" : "1px solid var(--border)",
+        background: "var(--bg-elevated)",
+        borderRight: "1px solid var(--border)",
       }}
     >
       {/* Logo / bar name — oculto dentro do drawer mobile (já tem header próprio) */}
@@ -78,8 +88,8 @@ export function DashboardSidebar({ barNome, role, insightCount = 0, onNavigate, 
             fontWeight: 500,
             padding: "2px 6px",
             borderRadius: "2px",
-            background: "color-mix(in srgb, var(--accent-bright) 14%, transparent)",
-            color: "var(--accent-bright)",
+            background: "transparent",
+            color: "var(--accent)",
             whiteSpace: "nowrap",
             letterSpacing: "0.04em",
           }}>
@@ -91,29 +101,29 @@ export function DashboardSidebar({ barNome, role, insightCount = 0, onNavigate, 
       {/* Nav */}
       <nav
         className="flex flex-col"
-        style={{ padding: touchMode ? "12px 12px" : "12px 12px 0", gap: touchMode ? "2px" : "2px" }}
+        style={{ padding: touchMode ? "12px 12px" : "8px 12px 0" }}
       >
-        {links.map((link) => {
+        {links.map((link, idx) => {
           const active =
             link.href === "/dashboard"
               ? pathname === link.href
               : pathname.startsWith(link.href);
 
           return (
+            <div key={link.href}>
             <Link
-              key={link.href}
               href={link.href}
               onClick={onNavigate}
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: touchMode ? "14px" : "10px",
-                padding: linkPad,
+                padding: touchMode ? "14px 16px" : "8px 10px",
                 borderRadius: "4px",
                 fontSize: linkFont,
                 fontWeight: active ? 500 : 400,
                 color: active ? "var(--fg)" : "var(--fg-muted)",
-                background: active ? "color-mix(in srgb, var(--fg) 6%, transparent)" : "transparent",
+                background: active ? "rgba(255,255,255,0.07)" : "transparent",
                 textDecoration: "none",
                 transition: "background 150ms, color 150ms",
               }}
@@ -122,13 +132,13 @@ export function DashboardSidebar({ barNome, role, insightCount = 0, onNavigate, 
               <link.icon
                 className={iconClass}
                 strokeWidth={1.75}
-                style={{ color: active ? "var(--accent-bright)" : "var(--fg-subtle)" }}
+                style={{ color: active ? "var(--fg)" : "var(--fg-subtle)" }}
               />
               {link.label}
               {"badge" in link && link.badge && insightCount > 0 && (
                 <span style={{
                   marginLeft: "auto",
-                  background: "#ef4444",
+                  background: "var(--danger)",
                   color: "#fff",
                   fontSize: 10,
                   fontWeight: 700,
@@ -144,12 +154,34 @@ export function DashboardSidebar({ barNome, role, insightCount = 0, onNavigate, 
                 </span>
               )}
             </Link>
+            </div>
           );
         })}
       </nav>
 
       {/* Footer */}
       <div style={{ marginTop: "auto", display: "flex", flexDirection: "column" }}>
+
+        {/* User info — desktop only */}
+        {!touchMode && bar && barId && userId && (
+          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 16px", borderTop: "1px solid var(--border)" }}>
+            <span style={{ fontSize: 12, color: "var(--fg-muted)", fontFamily: "var(--font-mono)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {userNome.split(" ")[0]}
+            </span>
+            <SettingsButton
+              bar={bar}
+              barId={barId}
+              userId={userId}
+              userNome={userNome}
+              userEmail={userEmail}
+              userAvatarUrl={userAvatarUrl ?? null}
+              autoPedido={autoPedido}
+              taxaServicoPct={taxaServicoPct}
+              alertCount={alertas.length}
+            />
+          </div>
+        )}
+
         <div style={{ padding: touchMode ? "8px 12px" : "6px 12px", borderTop: "1px solid var(--border)" }}>
           {footerItems.map((item) => (
             <button
@@ -179,18 +211,19 @@ export function DashboardSidebar({ barNome, role, insightCount = 0, onNavigate, 
           onClick={onNavigate}
           style={{
             display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-            padding: touchMode ? "18px 0" : "14px 0",
-            background: "var(--accent)",
-            color: "var(--accent-fg)",
-            fontSize: touchMode ? "15px" : "13px",
-            fontWeight: 600,
+            padding: touchMode ? "18px 0" : "12px 0",
+            background: "rgba(255,255,255,0.05)",
+            borderTop: "1px solid var(--border)",
+            color: "var(--fg-muted)",
+            fontSize: touchMode ? "15px" : "12px",
+            fontWeight: 500,
             textDecoration: "none",
-            letterSpacing: "0.02em",
-            transition: "filter 150ms",
+            letterSpacing: "0.04em",
+            transition: "background 150ms, color 150ms",
           }}
-          className="hover:brightness-110"
+          className="hover:!bg-white/[0.08] hover:!text-[var(--fg)]"
         >
-          <MonitorSmartphone style={{ width: touchMode ? "16px" : "14px", height: touchMode ? "16px" : "14px" }} />
+          <MonitorSmartphone style={{ width: touchMode ? "16px" : "13px", height: touchMode ? "16px" : "13px" }} />
           Ver operação
         </Link>
       </div>
