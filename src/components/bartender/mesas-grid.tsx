@@ -501,94 +501,75 @@ export function MesasGrid({ barId, initialMesas, initialBalcao }: MesasGridProps
   );
 
   return (
-    <div className="flex-1 overflow-y-auto" style={{ padding: "20px 20px 40px" }}>
+    <div className="flex-1 flex flex-col" style={{ overflow: "hidden" }}>
 
-      {/* Busca */}
-      <div style={{ marginBottom: 20 }}>
+      {/* Topo fixo: busca + status */}
+      <div style={{ padding: "16px 20px 0", flexShrink: 0 }}>
         <ScanCartao />
+        <div style={{ marginTop: 16, marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+          <h1 style={{ fontSize: 20, fontWeight: 800, color: "var(--fg)", margin: 0, letterSpacing: "-0.3px" }}>
+            {totalOcupadas > 0 ? `${totalOcupadas} ocupada${totalOcupadas > 1 ? "s" : ""}` : "Todas livres"}
+          </h1>
+        </div>
       </div>
 
-      {/* Header de status */}
-      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 800, color: "var(--fg)", margin: 0, letterSpacing: "-0.3px" }}>
-          {totalOcupadas > 0 ? `${totalOcupadas} ocupada${totalOcupadas > 1 ? "s" : ""}` : "Todas livres"}
-        </h1>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+      {/* Grid de mesas — área scrollável */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "0 20px 40px" }}>
+        {mesas.length === 0 && (
+          <div style={{
+            background: "var(--bg-card)", borderRadius: "var(--radius-lg)", border: "1px solid var(--border)",
+            padding: "32px 20px", textAlign: "center", marginBottom: 20,
+          }}>
+            <p style={{ fontSize: 14, color: "var(--fg-subtle)", margin: 0 }}>Nenhuma mesa cadastrada.</p>
+            <p style={{ fontSize: 12, color: "var(--fg-subtle)", margin: "6px 0 0", opacity: 0.7 }}>
+              Configure as mesas em Dashboard → Mesas.
+            </p>
+          </div>
+        )}
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
           {aguardando.length > 0 && (
-            <span style={{
-              fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: "var(--radius-sm)",
-              background: "var(--warn-bg)", border: "1px solid var(--warn)", color: "var(--warn)",
-            }}>
-              {aguardando.length} aguardando pag.
-            </span>
+            <section>
+              <SecLabel label="Aguardando pagamento" count={aguardando.length} />
+              <div style={GRID_OCUPADAS}>
+                {aguardando.map(e => <MesaCard key={e.key} label={e.label} comandas={e.comandas} capacidade={e.capacidade} chamadaId={e.chamadaId} onAbrir={e.onAbrir} onAtender={e.onAtender} />)}
+              </div>
+            </section>
+          )}
+          {abertas.length > 0 && (
+            <section>
+              <SecLabel label="Abertas" count={abertas.length} />
+              <div style={GRID_OCUPADAS}>
+                {abertas.map(e => <MesaCard key={e.key} label={e.label} comandas={e.comandas} capacidade={e.capacidade} chamadaId={e.chamadaId} onAbrir={e.onAbrir} onAtender={e.onAtender} />)}
+              </div>
+            </section>
           )}
           {livres.length > 0 && (
-            <span style={{
-              fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: "var(--radius-sm)",
-              background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--fg-subtle)",
-            }}>
-              {livres.length} livre{livres.length > 1 ? "s" : ""}
-            </span>
+            <section>
+              <SecLabel label="Livres" count={livres.length} />
+              <div style={GRID_LIVRES}>
+                {livres.map(e => <MesaCard key={e.key} label={e.label} comandas={e.comandas} capacidade={e.capacidade} onAbrir={e.onAbrir} />)}
+              </div>
+            </section>
           )}
         </div>
       </div>
 
-      {mesas.length === 0 && (
-        <div style={{
-          background: "var(--bg-card)", borderRadius: "var(--radius-lg)", border: "1px solid var(--border)",
-          padding: "32px 20px", textAlign: "center", marginBottom: 20,
-        }}>
-          <p style={{ fontSize: 14, color: "var(--fg-subtle)", margin: 0 }}>Nenhuma mesa cadastrada.</p>
-          <p style={{ fontSize: 12, color: "var(--fg-subtle)", margin: "6px 0 0", opacity: 0.7 }}>
-            Configure as mesas em Dashboard → Mesas.
-          </p>
-        </div>
-      )}
-
-      {/* Keyframe de pulso para chamadas */}
+      {/* Keyframes */}
       <style>{`
         @keyframes pulse-chamada {
           0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
           50%       { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.22); }
         }
         .mesa-chamada { animation: pulse-chamada 1.4s ease-in-out infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
-        {aguardando.length > 0 && (
-          <section>
-            <SecLabel label="Aguardando pagamento" count={aguardando.length} />
-            <div style={GRID_OCUPADAS}>
-              {aguardando.map(e => <MesaCard key={e.key} label={e.label} comandas={e.comandas} capacidade={e.capacidade} chamadaId={e.chamadaId} onAbrir={e.onAbrir} onAtender={e.onAtender} />)}
-            </div>
-          </section>
-        )}
-        {abertas.length > 0 && (
-          <section>
-            <SecLabel label="Abertas" count={abertas.length} />
-            <div style={GRID_OCUPADAS}>
-              {abertas.map(e => <MesaCard key={e.key} label={e.label} comandas={e.comandas} capacidade={e.capacidade} chamadaId={e.chamadaId} onAbrir={e.onAbrir} onAtender={e.onAtender} />)}
-            </div>
-          </section>
-        )}
-        {livres.length > 0 && (
-          <section>
-            <SecLabel label="Livres" count={livres.length} />
-            <div style={GRID_LIVRES}>
-              {livres.map(e => <MesaCard key={e.key} label={e.label} comandas={e.comandas} capacidade={e.capacidade} onAbrir={e.onAbrir} />)}
-            </div>
-          </section>
-        )}
-      </div>
 
       {/* Overlay: abrindo comanda */}
       {isOpening && (
         <>
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 60 }} />
-          <div style={{
-            position: "fixed", inset: 0, zIndex: 61,
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
+          <div style={{ position: "fixed", inset: 0, zIndex: 61, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <div style={{
               background: "var(--bg-elevated)", border: "1px solid var(--border)",
               borderRadius: 12, padding: "28px 36px",
@@ -599,43 +580,29 @@ export function MesasGrid({ barId, initialMesas, initialBalcao }: MesasGridProps
                 border: "3px solid var(--border-strong)",
                 borderTopColor: "var(--accent)", animation: "spin 0.7s linear infinite",
               }} />
-              <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>
-                Abrindo comanda…
-              </p>
+              <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: 0 }}>Abrindo comanda…</p>
             </div>
           </div>
-          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </>
       )}
 
       {/* Banner de erro */}
       {openError && (
         <>
-          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 60 }}
-            onClick={() => setOpenError(null)} />
-          <div style={{
-            position: "fixed", inset: 0, zIndex: 61,
-            display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
-          }}>
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 60 }} onClick={() => setOpenError(null)} />
+          <div style={{ position: "fixed", inset: 0, zIndex: 61, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
             <div style={{
               background: "var(--bg-elevated)", border: "1px solid var(--danger)",
               borderRadius: 12, padding: "24px 28px", maxWidth: 360, width: "100%",
               display: "flex", flexDirection: "column", gap: 16,
             }}>
-              <p style={{ fontSize: 14, fontWeight: 600, color: "var(--danger)", margin: 0 }}>
-                ⚠ Erro ao abrir comanda
-              </p>
-              <p style={{ fontSize: 13, color: "var(--fg-muted)", margin: 0, lineHeight: 1.5 }}>
-                {openError}
-              </p>
-              <button
-                onClick={() => setOpenError(null)}
-                style={{
-                  background: "var(--bg-inset)", border: "1px solid var(--border)",
-                  borderRadius: 6, padding: "10px", fontSize: 13, fontWeight: 600,
-                  color: "var(--fg)", cursor: "pointer",
-                }}
-              >
+              <p style={{ fontSize: 14, fontWeight: 600, color: "var(--danger)", margin: 0 }}>⚠ Erro ao abrir comanda</p>
+              <p style={{ fontSize: 13, color: "var(--fg-muted)", margin: 0, lineHeight: 1.5 }}>{openError}</p>
+              <button onClick={() => setOpenError(null)} style={{
+                background: "var(--bg-inset)", border: "1px solid var(--border)",
+                borderRadius: 6, padding: "10px", fontSize: 13, fontWeight: 600,
+                color: "var(--fg)", cursor: "pointer",
+              }}>
                 Fechar
               </button>
             </div>
@@ -643,7 +610,7 @@ export function MesasGrid({ barId, initialMesas, initialBalcao }: MesasGridProps
         </>
       )}
 
-      {/* Modal: quantas pessoas (nova comanda) */}
+      {/* Modal: quantas pessoas */}
       {pendingAbrir && (
         <SeletorPessoas
           label={pendingAbrir.label}

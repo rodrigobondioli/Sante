@@ -1,3 +1,4 @@
+import React from "react";
 import { redirect } from "next/navigation";
 import { getCurrentBar } from "@/lib/dashboard/queries";
 import { listarClientes, getClientesStats, getAniversariantesDoMes, getClientesInativos } from "@/lib/clientes/queries";
@@ -7,6 +8,11 @@ import { NovoClienteButton } from "@/components/clientes/novo-cliente-button";
 
 const fmt   = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const fmtN  = (v: number) => v.toLocaleString("pt-BR");
+
+const LABEL: React.CSSProperties = {
+  fontSize: 10, fontWeight: 700, letterSpacing: "0.10em",
+  textTransform: "uppercase", color: "var(--fg-subtle)", margin: 0,
+};
 
 export default async function ClientesPage() {
   const current = await getCurrentBar();
