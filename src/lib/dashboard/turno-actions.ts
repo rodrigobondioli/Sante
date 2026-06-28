@@ -4,6 +4,27 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentBar, getTurnoAtual } from "@/lib/dashboard/queries";
 
+/**
+ * Retorna o turno aberto ou cria um automaticamente.
+ * Usado pelas telas operacionais — o bartender não precisa esperar o dono abrir.
+ */
+export async function getOuCriarTurno(
+  barId: string,
+  userId: string,
+): Promise<{ id: string } | null> {
+  const supabase = await createClient();
+  const turno = await getTurnoAtual(barId);
+  if (turno) return turno;
+
+  const { data } = await supabase
+    .from("turnos")
+    .insert({ bar_id: barId, abertura_por: userId, status: "aberto" })
+    .select("id")
+    .single<{ id: string }>();
+
+  return data ?? null;
+}
+
 export async function abrirTurno() {
   const current = await getCurrentBar();
   if (!current) return { error: "Não autenticado." };

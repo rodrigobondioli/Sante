@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentBar, getTurnoAtual } from "@/lib/dashboard/queries";
+import { getOuCriarTurno } from "@/lib/dashboard/turno-actions";
 import type { CartItem, Comanda } from "@/types/database";
 
 /** Abre comanda para uma mesa específica (ou balcão se mesaId for null). */
@@ -15,8 +16,8 @@ export async function abrirComanda(
   const current = await getCurrentBar();
   if (!current) return { error: "Sessão expirada. Faça login novamente." };
 
-  const turno = await getTurnoAtual(current.bar.id);
-  if (!turno) return { error: "Nenhum turno aberto. Peça para o gerente abrir o turno." };
+  const turno = await getOuCriarTurno(current.bar.id, current.userId);
+  if (!turno) return { error: "Erro ao iniciar turno." };
 
   const supabase = await createClient();
   const { data: novaComanda, error: dbError } = await supabase.from("comandas")

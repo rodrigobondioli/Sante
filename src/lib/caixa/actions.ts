@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentBar, getTurnoAtual } from "@/lib/dashboard/queries";
+import { getOuCriarTurno } from "@/lib/dashboard/turno-actions";
 import type { PagamentoMetodo } from "@/types/database";
 
 export async function registrarPagamento(
@@ -14,8 +15,8 @@ export async function registrarPagamento(
   const current = await getCurrentBar();
   if (!current) return { error: "Não autenticado." };
 
-  const turno = await getTurnoAtual(current.bar.id);
-  if (!turno) return { error: "Nenhum turno aberto." };
+  const turno = await getOuCriarTurno(current.bar.id, current.userId);
+  if (!turno) return { error: "Erro ao iniciar turno." };
 
   const supabase = await createClient();
 
