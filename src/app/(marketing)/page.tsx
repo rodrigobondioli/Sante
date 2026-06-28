@@ -83,8 +83,8 @@ export default async function Home() {
             maxWidth: "860px",
           }}
         >
-          <span className="block">O primeiro sistema criado para mostrar o lucro real do seu bar.</span>
-          <span className="block">Veja margem, CMV e oportunidades em tempo real. Menos relatórios e mais decisões.</span>
+          <span className="md:block">O primeiro sistema criado para mostrar o lucro real do seu bar.</span>
+          <span className="md:block"> Veja margem, CMV e oportunidades em tempo real. Menos relatórios e mais decisões.</span>
         </p>
 
         {/* CTA */}
