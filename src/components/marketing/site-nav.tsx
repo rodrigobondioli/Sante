@@ -9,8 +9,8 @@ export function SiteNav() {
           <Image
             src="/img-lp/logo-superbar.svg"
             alt="Superbar"
-            width={58}
-            height={58}
+            width={70}
+            height={70}
             className="opacity-90"
           />
         </Link>
