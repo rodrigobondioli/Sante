@@ -549,13 +549,19 @@ export default async function DashboardPage() {
         comparacaoFaturamento={comparacao.faturamento}
         comparacaoTicket={comparacao.ticketMedio}
         cmvParcial={cmvParcial}
+        barNome={current.bar.nome}
+        dataFormatada={dataFormatada}
+        metaProgresso={metaProgresso}
+        metaFalta={metaFalta}
+        metaAtingida={metaAtingida}
+        meta={meta}
       />
 
 
       {/* ── CONTENT ── */}
-      <div style={{ padding: "28px 32px 40px", display: "flex", flexDirection: "column", gap: 24 }}>
+      <div style={{ padding: "20px 32px 40px", display: "flex", flexDirection: "column", gap: 24 }}>
 
-        {/* ═══ APRENDIZADO — exibe apenas quando stage 1 ═══ */}
+        {/* ═══ APRENDIZADO (stage 1 only) ═══ */}
         {inteligencia.stage === 1 && (
           <DashCard style={{ padding: "14px 20px" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
@@ -570,169 +576,40 @@ export default async function DashboardPage() {
                   : "calculando…"}
               </span>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {[
-                { label: "30 comandas", atual: inteligencia.comandas, meta: 30 },
-                { label: "7 dias de operação", atual: inteligencia.diasAtivo, meta: 7 },
-              ].map(item => (
-                <div key={item.label}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                    <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>
-                      {item.atual >= item.meta ? "✓" : "○"} {item.label}
-                    </span>
-                    <span style={{ fontSize: 11, color: "var(--fg-muted)", fontVariantNumeric: "tabular-nums" }}>{item.atual}/{item.meta}</span>
-                  </div>
-                  <div style={{ background: "var(--border-strong)", borderRadius: 2, height: 2, overflow: "hidden" }}>
-                    <div style={{ background: "var(--accent)", borderRadius: 2, height: 2, width: `${Math.min(Math.round((item.atual / item.meta) * 100), 100)}%`, transition: "width 0.6s ease" }} />
-                  </div>
+            {[
+              { label: "30 comandas", atual: inteligencia.comandas, meta: 30 },
+              { label: "7 dias de operação", atual: inteligencia.diasAtivo, meta: 7 },
+            ].map(item => (
+              <div key={item.label} style={{ marginBottom: 10 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                  <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>{item.atual >= item.meta ? "✓" : "○"} {item.label}</span>
+                  <span style={{ fontSize: 11, color: "var(--fg-muted)", fontVariantNumeric: "tabular-nums" }}>{item.atual}/{item.meta}</span>
                 </div>
-              ))}
-            </div>
+                <div style={{ background: "var(--border-strong)", borderRadius: 2, height: 2, overflow: "hidden" }}>
+                  <div style={{ background: "var(--accent)", borderRadius: 2, height: 2, width: `${Math.min(Math.round((item.atual / item.meta) * 100), 100)}%`, transition: "width 0.6s" }} />
+                </div>
+              </div>
+            ))}
           </DashCard>
         )}
 
-        {/* ═══ HEADER — bar name + date + ritmo ═══ */}
-        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 16 }}>
-          <div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--fg)", letterSpacing: "-0.025em", margin: 0, lineHeight: 1.1 }}>
-              {current.bar.nome}
-            </h1>
-            <p style={{ fontSize: 12, color: "var(--fg-subtle)", margin: "4px 0 0" }}>
-              {dataFormatada} · Turno aberto
-            </p>
+        {/* ═══ GRÁFICO — Receita 7 dias ═══ */}
+        <div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+            <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--fg)", margin: 0, letterSpacing: "-0.01em" }}>
+              Receita dos últimos 7 dias
+            </h2>
+            <TrendText percent={receitaSemana.percentual} comparativoLabel="vs semana passada" />
           </div>
-          {ritmoLabel && (
-            <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: 0, textAlign: "right", maxWidth: 280, lineHeight: 1.4 }}>
-              {ritmoLabel}
-            </p>
-          )}
-        </div>
-
-        {/* ═══ KPI STRIP — 4 cards horizontais ═══ */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
-
-          {/* Receita */}
-          <DashCard style={{ padding: "16px 18px" }}>
-            <CardOverline>Receita</CardOverline>
-            <p style={{ fontSize: 24, fontWeight: 700, color: "var(--fg)", fontVariantNumeric: "tabular-nums", lineHeight: 1, margin: "6px 0 8px" }}>
-              {kpis.faturamento > 0 ? currency.format(kpis.faturamento) : "—"}
-            </p>
-            {comparacao.faturamento !== null
-              ? <TrendText percent={comparacao.faturamento} comparativoLabel="vs ontem" />
-              : <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>sem dados anteriores</span>
-            }
-          </DashCard>
-
-          {/* Ticket Médio */}
-          <DashCard style={{ padding: "16px 18px" }}>
-            <CardOverline>Ticket Médio</CardOverline>
-            <p style={{ fontSize: 24, fontWeight: 700, color: "var(--fg)", fontVariantNumeric: "tabular-nums", lineHeight: 1, margin: "6px 0 8px" }}>
-              {kpis.ticketMedio > 0 ? currency.format(kpis.ticketMedio) : "—"}
-            </p>
-            {comparacao.ticketMedio !== null
-              ? <TrendText percent={comparacao.ticketMedio} comparativoLabel="vs ontem" />
-              : <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>
-                  {kpis.ticketMedio > 0 ? `${kpis.comandasAbertas} comandas` : "sem vendas"}
-                </span>
-            }
-          </DashCard>
-
-          {/* Comandas */}
-          <DashCard style={{ padding: "16px 18px" }}>
-            <CardOverline>Comandas</CardOverline>
-            <p style={{ fontSize: 24, fontWeight: 700, color: "var(--fg)", fontVariantNumeric: "tabular-nums", lineHeight: 1, margin: "6px 0 8px" }}>
-              {kpis.comandasAbertas}
-            </p>
-            <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>abertas agora</span>
-          </DashCard>
-
-          {/* Margem */}
-          <DashCard style={{ padding: "16px 18px" }}>
-            <CardOverline>Margem</CardOverline>
-            <p style={{
-              fontSize: 24, fontWeight: 700, lineHeight: 1, margin: "6px 0 8px",
-              fontVariantNumeric: "tabular-nums",
-              color: cmvAtual === null ? "var(--fg)"
-                : (100 - cmvAtual) >= 64 ? "var(--ok)"
-                : cmvAtual > 42 ? "var(--danger)"
-                : "var(--fg)",
-            }}>
-              {cmvAtual !== null ? `${(100 - cmvAtual).toFixed(0)}%` : "—"}
-            </p>
-            <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>
-              {cmvAtual === null
-                ? "configurar custos"
-                : cmvParcial
-                  ? "estimativa parcial"
-                  : cmvVeredito ?? "sobre receita"}
-            </span>
+          <DashCard style={{ height: 220 }}>
+            <BarChart data={pontosReceita} fill />
           </DashCard>
         </div>
 
-        {/* ═══ MAIN AREA — chart + col direita ═══ */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 260px", gap: 20, minHeight: 340 }}>
-
-          {/* Esquerda — gráfico 7 dias */}
-          <DashCard style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ flexShrink: 0, marginBottom: 16 }}>
-              <CardOverline style={{ marginBottom: 6 }}>Receita — 7 dias</CardOverline>
-              <TrendText percent={receitaSemana.percentual} comparativoLabel="vs semana passada" />
-            </div>
-            <div style={{ flex: 1, minHeight: 180 }}>
-              <BarChart data={pontosReceita} fill />
-            </div>
-          </DashCard>
-
-          {/* Direita — meta + estoque */}
-          <div style={{ display: "grid", gridTemplateRows: "1fr 1fr", gap: 20 }}>
-
-            {/* Meta do Mês */}
-            <DashCard style={{ display: "flex", flexDirection: "column" }}>
-              <CardOverline>Meta do Mês</CardOverline>
-              <p style={{ fontSize: "2rem", fontWeight: 700, color: "var(--fg)", fontVariantNumeric: "tabular-nums", lineHeight: 1, margin: "6px 0 auto" }}>
-                {meta > 0 ? `${metaProgresso}%` : "—"}
-              </p>
-              {meta > 0 && (
-                <div style={{ marginTop: "auto", paddingTop: 12 }}>
-                  <div style={{ background: "var(--border-strong)", borderRadius: 2, height: 2, overflow: "hidden", marginBottom: 6 }}>
-                    <div style={{ background: "var(--accent)", borderRadius: 2, height: 2, width: `${metaProgresso}%`, transition: "width 0.6s ease" }} />
-                  </div>
-                  <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>
-                    {metaAtingida ? "meta atingida ✓" : `falta ${currency.format(metaFalta)}`}
-                    {!metaConfigurada && (
-                      <span style={{ marginLeft: 6, fontSize: 9, fontWeight: 500, padding: "2px 5px", borderRadius: 3, background: "color-mix(in srgb, var(--fg) 7%, transparent)", color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                        sugerida
-                      </span>
-                    )}
-                  </p>
-                </div>
-              )}
-            </DashCard>
-
-            {/* Estoque */}
-            <DashCard style={{ display: "flex", flexDirection: "column" }}>
-              <CardOverline>Estoque</CardOverline>
-              <p style={{ fontSize: "2rem", fontWeight: 700, lineHeight: 1, margin: "6px 0 auto", color: alertas.length > 0 ? "var(--danger)" : "var(--ok)" }}>
-                {alertas.length > 0 ? alertas.length : "OK"}
-              </p>
-              <div style={{ marginTop: "auto", paddingTop: 12 }}>
-                {alertas.length > 0 ? (
-                  <a href="/dashboard/estoque" style={{ fontSize: 11, color: "var(--danger)", textDecoration: "none" }}>
-                    {alertas.length === 1 ? "1 item crítico" : `${alertas.length} críticos`} →
-                  </a>
-                ) : (
-                  <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>nenhum alerta</span>
-                )}
-              </div>
-            </DashCard>
-
-          </div>
-        </div>
-
-        {/* ═══ BOTTOM ROW — 3 cards iguais ═══ */}
+        {/* ═══ BOTTOM ROW — 3 cards ═══ */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20 }}>
 
-          {/* Card 1 — Análises / Alertas */}
+          {/* Card 1 — Análises */}
           {inteligencia.stage === 2 && todosInsights.length > 0 ? (
             <DashCard style={{ padding: 0, overflow: "hidden" }}>
               {insightsSorted.slice(0, 3).map((item, i) => {
@@ -744,18 +621,15 @@ export default async function DashboardPage() {
                     borderBottom: i < Math.min(insightsSorted.length, 3) - 1 ? "1px solid var(--border)" : "none",
                     background: isCritical ? "color-mix(in srgb, var(--danger) 5%, transparent)" : "transparent",
                     padding: "14px 16px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 4,
                   }}>
-                    <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: cor, margin: 0 }}>
-                      {item.tipo === "action" ? "CRÍTICO" : item.tipo === "opportunity" ? "OPORTUNIDADE" : "INFORMATIVO"}
+                    <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: cor, margin: "0 0 4px" }}>
+                      {item.tipo === "action" ? "Crítico" : item.tipo === "opportunity" ? "Oportunidade" : "Info"}
                     </p>
                     <p style={{ fontSize: isCritical ? 13 : 12, fontWeight: isCritical ? 700 : 500, color: "var(--fg)", margin: 0, lineHeight: 1.4 }}>
                       {item.texto}
                     </p>
                     {item.impactoReais !== undefined && (
-                      <p style={{ fontSize: 12, fontWeight: 700, color: isCritical ? "var(--danger)" : "var(--ok)", fontVariantNumeric: "tabular-nums", margin: 0 }}>
+                      <p style={{ fontSize: 12, fontWeight: 700, color: isCritical ? "var(--danger)" : "var(--ok)", fontVariantNumeric: "tabular-nums", margin: "4px 0 0" }}>
                         {item.impactoReais < 0 ? `−${currency.format(Math.abs(item.impactoReais))}` : `+${currency.format(item.impactoReais)}`}
                       </p>
                     )}
@@ -763,18 +637,16 @@ export default async function DashboardPage() {
                 );
               })}
               {inteligencia.insightsNaoLidos > 0 && (
-                <a href="/dashboard/inteligencia" style={{ display: "flex", alignItems: "center", padding: "10px 16px", textDecoration: "none", borderTop: "1px solid var(--border)" }}>
-                  <span style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600 }}>
-                    {inteligencia.insightsNaoLidos} análise{inteligencia.insightsNaoLidos !== 1 ? "s" : ""} disponível →
-                  </span>
+                <a href="/dashboard/inteligencia" style={{ display: "block", padding: "10px 16px", textDecoration: "none", borderTop: "1px solid var(--border)", fontSize: 11, color: "var(--accent)", fontWeight: 600 }}>
+                  {inteligencia.insightsNaoLidos} análise{inteligencia.insightsNaoLidos !== 1 ? "s" : ""} disponível →
                 </a>
               )}
             </DashCard>
           ) : inteligencia.stage === 2 ? (
             <DashCard style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <span style={{ fontSize: 18, color: "var(--ok)", flexShrink: 0 }}>✓</span>
+              <span style={{ fontSize: 18, color: "var(--ok)" }}>✓</span>
               <div>
-                <p style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)", margin: "0 0 3px" }}>Tudo sob controle</p>
+                <p style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)", margin: "0 0 3px" }}>Tudo sob controle</p>
                 <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>CMV · Ticket · Estoque</p>
               </div>
             </DashCard>
@@ -782,7 +654,7 @@ export default async function DashboardPage() {
             <DashCard>
               <CardOverline>Análises</CardOverline>
               <p style={{ fontSize: 12, color: "var(--fg-subtle)", marginTop: 8, lineHeight: 1.5 }}>
-                Disponível após 30 comandas e 7 dias.
+                Disponível após 30 comandas e 7 dias de operação.
               </p>
             </DashCard>
           )}
@@ -791,9 +663,7 @@ export default async function DashboardPage() {
           <DashCard>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 14 }}>
               <CardOverline style={{ marginBottom: 0 }}>Vendas por hora</CardOverline>
-              {pico && (
-                <span style={{ fontSize: 11, color: "var(--fg-muted)", fontVariantNumeric: "tabular-nums" }}>Pico {pico.hora}h</span>
-              )}
+              {pico && <span style={{ fontSize: 11, color: "var(--fg-muted)", fontVariantNumeric: "tabular-nums" }}>Pico {pico.hora}h</span>}
             </div>
             {pontosHora.length >= 2 ? (
               <VendasPorHoraChart pontos={pontosHora} />
@@ -833,19 +703,17 @@ export default async function DashboardPage() {
               <p style={{ fontSize: 11, color: "var(--fg-subtle)", fontVariantNumeric: "tabular-nums" }}>
                 {currency.format(rankingMesas[0].faturamento)} · {rankingMesas[0].comandas} comanda{rankingMesas[0].comandas !== 1 ? "s" : ""}
               </p>
-              {tempos.mediaMinutos !== null && (
-                <p style={{ fontSize: 12, color: "var(--fg-muted)", marginTop: 10 }}>
-                  Preparo médio: <strong style={{ fontVariantNumeric: "tabular-nums" }}>{tempos.mediaMinutos}min</strong>
-                </p>
-              )}
             </DashCard>
           ) : (
             <DashCard>
-              <CardOverline>Operação</CardOverline>
-              <p style={{ fontSize: 12, color: "var(--fg-subtle)", marginTop: 8 }}>
-                {tempos.mediaMinutos !== null
-                  ? `Preparo médio: ${tempos.mediaMinutos}min`
-                  : "Sem vendas neste turno ainda"}
+              <CardOverline>Estoque</CardOverline>
+              <p style={{ fontSize: "2rem", fontWeight: 700, color: alertas.length > 0 ? "var(--danger)" : "var(--ok)", lineHeight: 1, margin: "8px 0 6px" }}>
+                {alertas.length > 0 ? alertas.length : "OK"}
+              </p>
+              <p style={{ fontSize: 11, color: "var(--fg-subtle)" }}>
+                {alertas.length > 0
+                  ? `${alertas.length === 1 ? "1 item crítico" : `${alertas.length} críticos`}`
+                  : "nenhum alerta"}
               </p>
             </DashCard>
           )}
