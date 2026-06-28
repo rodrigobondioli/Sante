@@ -24,7 +24,7 @@ export function ContactSection() {
         <h2
           style={{
             fontFamily: "var(--font-sans)",
-            fontSize: 32,
+            fontSize: "clamp(1.375rem, 5.5vw, 2rem)",
             fontWeight: 600,
             color: "#ffffff",
             letterSpacing: "-0.01em",

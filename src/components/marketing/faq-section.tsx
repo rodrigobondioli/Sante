@@ -48,7 +48,7 @@ function FaqItem({ faq, initialOpen = false }: { faq: (typeof FAQS)[0]; initialO
             className="text-balance"
             style={{
               fontFamily: "var(--font-sans)",
-              fontSize: 22,
+              fontSize: "clamp(1.0625rem, 2.5vw, 1.375rem)",
               fontWeight: 600,
               color: YELLOW,
               lineHeight: 1.1,
@@ -119,7 +119,7 @@ export function FaqSection() {
               className="text-balance"
               style={{
                 fontFamily: "var(--font-sans)",
-                fontSize: 32,
+                fontSize: "clamp(1.375rem, 5.5vw, 2rem)",
                 fontWeight: 600,
                 color: "#ffffff",
                 letterSpacing: "-0.01em",

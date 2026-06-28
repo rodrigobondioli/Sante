@@ -27,7 +27,7 @@ const CARD_COLORS = ["#1C1C1E", "#232325", "#2A2A2C"];
 const TITLE_STYLE: React.CSSProperties = {
   fontFamily: "var(--font-sans)",
   fontWeight: 600,
-  fontSize: 32,
+  fontSize: "clamp(1.375rem, 5.5vw, 2rem)",
   letterSpacing: "-0.01em",
   color: "#ffffff",
 };

@@ -61,7 +61,7 @@ export function CtaSection() {
         <p
           style={{
             fontFamily: "var(--font-sans)",
-            fontSize: "1.25rem",
+            fontSize: "clamp(1rem, 2.5vw, 1.25rem)",
             fontWeight: 400,
             color: "#ffffff",
             marginBottom: "2rem",

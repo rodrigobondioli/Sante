@@ -27,7 +27,7 @@ export function DonoSection() {
             <h2
               style={{
                 fontFamily: "var(--font-sans)",
-                fontSize: 48,
+                fontSize: "clamp(1.75rem, 8vw, 3rem)",
                 fontWeight: 600,
                 color: "#ffffff",
                 lineHeight: 1.15,
@@ -40,7 +40,7 @@ export function DonoSection() {
             <h2
               style={{
                 fontFamily: "var(--font-sans)",
-                fontSize: 48,
+                fontSize: "clamp(1.75rem, 8vw, 3rem)",
                 fontWeight: 600,
                 color: "#ffffff",
                 lineHeight: 1.15,
@@ -58,7 +58,7 @@ export function DonoSection() {
           style={{
             fontFamily: "var(--font-sans)",
             fontWeight: 400,
-            fontSize: 20,
+            fontSize: "clamp(1rem, 2.5vw, 1.25rem)",
             color: "#ffffff",
             lineHeight: 1.6,
             maxWidth: 640,

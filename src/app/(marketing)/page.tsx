@@ -77,7 +77,7 @@ export default async function Home() {
           style={{
             color: "#ffffff",
             fontFamily: "var(--font-sans)",
-            fontSize: 20,
+            fontSize: "clamp(1rem, 2.5vw, 1.25rem)",
             fontWeight: 400,
             lineHeight: 1.6,
             maxWidth: "860px",
@@ -98,11 +98,11 @@ export default async function Home() {
         {/* Header */}
         <div className="mx-auto mb-10 max-w-4xl px-4 md:mb-16 md:px-8 md:text-center lg:px-14">
           <h2
-            className="mb-4 text-white md:mb-5 whitespace-nowrap"
+            className="mb-4 text-white md:mb-5 md:whitespace-nowrap"
             style={{
               fontFamily: "var(--font-sans)",
               fontWeight: 600,
-              fontSize: 48,
+              fontSize: "clamp(1.75rem, 8vw, 3rem)",
               lineHeight: 1.05,
               letterSpacing: "-0.02em",
             }}
@@ -115,7 +115,7 @@ export default async function Home() {
               color: "#ffffff",
               fontFamily: "var(--font-sans)",
               fontWeight: 400,
-              fontSize: 20,
+              fontSize: "clamp(1rem, 2.5vw, 1.25rem)",
               lineHeight: 1.5,
             }}
           >
@@ -133,7 +133,7 @@ export default async function Home() {
                 <div key={item.title} className="rounded-2xl p-5 md:p-7" style={{ background: "#1C1C1E", border: "1px solid #2C2C2E" }}>
                   <p
                     className="mb-3 md:mb-4"
-                    style={{ color: "#F59E0B", fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 22, lineHeight: 1.2 }}
+                    style={{ color: "#F59E0B", fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: "clamp(1.125rem, 3vw, 1.375rem)", lineHeight: 1.2 }}
                   >
                     {item.title}
                   </p>
@@ -164,7 +164,7 @@ export default async function Home() {
                 <div key={item.title} className="rounded-2xl p-5 md:p-7" style={{ background: "#1C1C1E", border: "1px solid #2C2C2E" }}>
                   <p
                     className="mb-3 md:mb-4"
-                    style={{ color: "#F59E0B", fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 22, lineHeight: 1.2 }}
+                    style={{ color: "#F59E0B", fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: "clamp(1.125rem, 3vw, 1.375rem)", lineHeight: 1.2 }}
                   >
                     {item.title}
                   </p>
@@ -206,7 +206,7 @@ export default async function Home() {
                 style={{
                   fontFamily: "var(--font-sans)",
                   fontWeight: 600,
-                  fontSize: 32,
+                  fontSize: "clamp(1.375rem, 5.5vw, 2rem)",
                   lineHeight: 1.15,
                   letterSpacing: "-0.01em",
                 }}
