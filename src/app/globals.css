@@ -16,7 +16,7 @@
   /* ── Texto ── */
   --fg:              #09090B;   /* primário — headings, valores */
   --fg-muted:        #3F3F46;   /* secundário — body text */
-  --fg-subtle:       #71717A;   /* terciário — labels, meta */
+  --fg-subtle:       #4B5563;   /* terciário — labels, meta */
 
   /* ── Bordas ── */
   --border:          rgba(0,0,0,0.08);
@@ -51,14 +51,14 @@
   --bg-hover:        #242427;
 
   /* ── Texto ──
-     Contraste calculado sobre --bg (#0A0A0B):
-     --fg        #FAFAFA  →  19:1  ✓ primário
+     Contraste calculado sobre --bg-card (#1C1C1E):
+     --fg        #FAFAFA  →  18:1  ✓ primário
      --fg-muted  #A1A1AA  →   5.5:1 ✓ secundário
-     --fg-subtle #71717A  →   3.8:1 ✓ terciário (labels 10px+ acima do mínimo)
+     --fg-subtle #9999A5  →   5.2:1 ✓ terciário (labels visíveis)
   */
   --fg:              #FAFAFA;
   --fg-muted:        #A1A1AA;
-  --fg-subtle:       #71717A;
+  --fg-subtle:       #9999A5;
 
   /* ── Bordas ── */
   --border:          rgba(255,255,255,0.07);

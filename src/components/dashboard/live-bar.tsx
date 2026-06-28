@@ -112,25 +112,25 @@ export function LiveBar({
                 className="animate-live-pulse"
                 style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--ok)", display: "block", flexShrink: 0 }}
               />
-              <span style={{ fontSize: 10, fontWeight: 700, color: "var(--ok)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Ao Vivo</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "var(--ok)", letterSpacing: "0.07em", textTransform: "uppercase" }}>Ao Vivo</span>
             </span>
-            <span style={{ color: "var(--fg-subtle)", fontSize: 10 }}>·</span>
-            <span style={{ fontSize: 11, color: "var(--fg-subtle)", fontWeight: 400 }}>Turno aberto</span>
+            <span style={{ color: "var(--fg-subtle)", fontSize: 12 }}>·</span>
+            <span style={{ fontSize: 13, color: "var(--fg-subtle)", fontWeight: 400 }}>Turno aberto</span>
             {dataFormatada && (
               <>
-                <span style={{ color: "var(--fg-subtle)", fontSize: 10 }}>·</span>
-                <span style={{ fontSize: 11, color: "var(--fg-subtle)", fontWeight: 400 }}>{dataFormatada}</span>
+                <span style={{ color: "var(--fg-subtle)", fontSize: 12 }}>·</span>
+                <span style={{ fontSize: 13, color: "var(--fg-subtle)", fontWeight: 400 }}>{dataFormatada}</span>
               </>
             )}
           </div>
 
           {/* 3 KPIs */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 0 }}>
-            {[
-              { label: "Faturamento", value: currency.format(data.faturamento), sub: <Delta pct={comparacaoFaturamento} />, color: "var(--fg)" },
-              { label: "Ticket Médio", value: data.pessoas > 0 ? currency.format(ticketMedio) : "—", sub: <Delta pct={comparacaoTicket} />, color: "var(--fg)" },
-              { label: "Margem", value: margemValor, sub: <span style={{ fontSize: 11, color: "var(--fg-subtle)", fontWeight: 400 }}>{margemSub}</span>, color: margemColor },
-            ].map((kpi, i) => (
+            {([
+              { label: "Faturamento",  value: currency.format(data.faturamento),                          empty: false, sub: <Delta pct={comparacaoFaturamento} />, color: "var(--fg)" },
+              { label: "Ticket Médio", value: data.pessoas > 0 ? currency.format(ticketMedio) : null,     empty: data.pessoas === 0, sub: <Delta pct={comparacaoTicket} />, color: "var(--fg)" },
+              { label: "Margem",       value: margemValor,                                                empty: false, sub: <span style={{ fontSize: 12, color: "var(--fg-subtle)" }}>{margemSub}</span>, color: margemColor },
+            ] as const).map((kpi, i) => (
               <div key={i} style={{
                 paddingLeft: i > 0 ? 28 : 0,
                 paddingRight: i < 2 ? 28 : 0,
@@ -138,22 +138,28 @@ export function LiveBar({
               }}>
                 {/* Label */}
                 <p style={{
-                  fontSize: 10, fontWeight: 500, textTransform: "uppercase",
-                  letterSpacing: "0.1em", color: "var(--fg-subtle)",
-                  margin: "0 0 8px",
+                  fontSize: 12, fontWeight: 500, textTransform: "uppercase",
+                  letterSpacing: "0.08em", color: "var(--fg-subtle)",
+                  margin: "0 0 10px",
                 }}>
                   {kpi.label}
                 </p>
                 {/* Value */}
-                <p style={{
-                  fontSize: 28, fontWeight: 800, color: kpi.color,
-                  fontVariantNumeric: "tabular-nums", lineHeight: 1,
-                  margin: "0 0 9px", letterSpacing: "-0.025em",
-                }}>
-                  {kpi.value}
-                </p>
+                {kpi.empty ? (
+                  <p style={{ fontSize: 14, color: "var(--fg-subtle)", fontWeight: 400, margin: "0 0 9px", lineHeight: 1.4 }}>
+                    Sem comandas<br />abertas
+                  </p>
+                ) : (
+                  <p style={{
+                    fontSize: 28, fontWeight: 800, color: kpi.color,
+                    fontVariantNumeric: "tabular-nums", lineHeight: 1,
+                    margin: "0 0 9px", letterSpacing: "-0.025em",
+                  }}>
+                    {kpi.value}
+                  </p>
+                )}
                 {/* Sub */}
-                {kpi.sub}
+                {!kpi.empty && kpi.sub}
               </div>
             ))}
           </div>
@@ -167,8 +173,8 @@ export function LiveBar({
 
           {/* Meta label */}
           <p style={{
-            fontSize: 10, fontWeight: 500, textTransform: "uppercase",
-            letterSpacing: "0.1em", color: "var(--fg-subtle)", margin: "0 0 6px",
+            fontSize: 12, fontWeight: 500, textTransform: "uppercase",
+            letterSpacing: "0.08em", color: "var(--fg-subtle)", margin: "0 0 8px",
           }}>
             Meta do Mês
           </p>
@@ -186,23 +192,23 @@ export function LiveBar({
               <div style={{ height: 3, background: "var(--border-strong)", borderRadius: 2, overflow: "hidden", marginBottom: 6 }}>
                 <div style={{ height: 3, background: "var(--accent)", borderRadius: 2, width: `${metaProgresso}%`, transition: "width 0.6s" }} />
               </div>
-              <p style={{ fontSize: 11, color: "var(--fg-subtle)", fontWeight: 400, margin: 0 }}>
+              <p style={{ fontSize: 12, color: "var(--fg-subtle)", fontWeight: 400, margin: 0 }}>
                 {metaAtingida ? "meta atingida ✓" : `falta ${currency.format(metaFalta)}`}
               </p>
             </div>
           ) : (
-            <p style={{ fontSize: 11, color: "var(--fg-subtle)", fontWeight: 400, marginTop: 10 }}>sem meta definida</p>
+            <p style={{ fontSize: 12, color: "var(--fg-subtle)", fontWeight: 400, marginTop: 10 }}>sem meta definida</p>
           )}
 
           {/* Comandas */}
           <div style={{ marginTop: 18, paddingTop: 14, borderTop: "1px solid var(--border)" }}>
-            <p style={{ fontSize: 10, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--fg-subtle)", margin: "0 0 5px" }}>
+            <p style={{ fontSize: 12, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--fg-subtle)", margin: "0 0 6px" }}>
               Comandas
             </p>
             <p style={{ fontSize: 24, fontWeight: 800, color: "var(--fg)", fontVariantNumeric: "tabular-nums", lineHeight: 1, letterSpacing: "-0.02em" }}>
               {data.pessoas}
             </p>
-            <p style={{ fontSize: 11, color: "var(--fg-subtle)", fontWeight: 400, margin: "4px 0 0" }}>abertas agora</p>
+            <p style={{ fontSize: 12, color: "var(--fg-subtle)", fontWeight: 400, margin: "4px 0 0" }}>abertas agora</p>
           </div>
         </div>
 
