@@ -163,11 +163,12 @@ function MemberAvatar({
 
 // ─── Single member row ────────────────────────────────────────────────────────
 function MembroRow({
-  m, isDono, currentUserId,
+  m, isDono, currentUserId, onRemove,
 }: {
   m: MembroRow;
   isDono: boolean;
   currentUserId: string;
+  onRemove: (id: string) => void;
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
@@ -221,7 +222,7 @@ function MembroRow({
       setRemoving(false);
     } else {
       toast(`${m.nome} removido.`, "ok");
-      router.refresh();
+      onRemove(m.id);
     }
   }
 
@@ -325,13 +326,22 @@ function MembroRow({
 
 // ─── Export ───────────────────────────────────────────────────────────────────
 export function EquipeMembros({
-  ativos, inativos, isDono, currentUserId,
+  ativos: ativosInit, inativos: inativosInit, isDono, currentUserId,
 }: {
   ativos: MembroRow[];
   inativos: MembroRow[];
   isDono: boolean;
   currentUserId: string;
 }) {
+  const [removedIds, setRemovedIds] = useState<Set<string>>(new Set());
+
+  function onRemove(id: string) {
+    setRemovedIds(prev => new Set(prev).add(id));
+  }
+
+  const ativos  = ativosInit.filter(m => !removedIds.has(m.id));
+  const inativos = inativosInit.filter(m => !removedIds.has(m.id));
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
 
@@ -358,7 +368,7 @@ export function EquipeMembros({
 
           {ativos.map((m, i) => (
             <div key={m.id} style={{ borderTop: i > 0 ? "1px solid var(--border)" : undefined }}>
-              <MembroRow m={m} isDono={isDono} currentUserId={currentUserId} />
+              <MembroRow m={m} isDono={isDono} currentUserId={currentUserId} onRemove={onRemove} />
             </div>
           ))}
         </div>
@@ -371,7 +381,7 @@ export function EquipeMembros({
           <div style={{ ...CARD, overflow: "hidden" }}>
             {inativos.map((m, i) => (
               <div key={m.id} style={{ borderTop: i > 0 ? "1px solid var(--border)" : undefined }}>
-                <MembroRow m={m} isDono={isDono} currentUserId={currentUserId} />
+                <MembroRow m={m} isDono={isDono} currentUserId={currentUserId} onRemove={onRemove} />
               </div>
             ))}
           </div>
