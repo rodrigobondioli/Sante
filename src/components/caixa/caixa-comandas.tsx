@@ -48,7 +48,7 @@ function ComandaCard({ comanda, taxaServicoPct = 10 }: { comanda: ComandaPendent
           <p style={{ fontSize: 16, fontWeight: 600, color: "var(--ok)", margin: 0 }}>✓ {comanda.mesa}</p>
           <p style={{ fontSize: 13, color: "var(--fg-subtle)", margin: "4px 0 0" }}>Pagamento registrado</p>
         </div>
-        <p style={{ fontSize: 20, fontWeight: 700, color: "var(--fg)", margin: 0, fontFamily: "var(--font-mono)" }}>
+        <p style={{ fontSize: 20, fontWeight: 700, color: "var(--fg)", margin: 0, fontFamily: "var(--font-sans)" }}>
           {currency.format(totalFinal)}
         </p>
       </div>
@@ -77,7 +77,7 @@ function ComandaCard({ comanda, taxaServicoPct = 10 }: { comanda: ComandaPendent
                 <span style={{ color: "var(--fg-subtle)", marginRight: 8 }}>{item.quantidade}×</span>
                 {item.nome}
               </p>
-              <p style={{ fontSize: 13, color: "var(--fg-subtle)", margin: 0, fontFamily: "var(--font-mono)" }}>
+              <p style={{ fontSize: 13, color: "var(--fg-subtle)", margin: 0, fontFamily: "var(--font-sans)" }}>
                 {currency.format(item.preco_total)}
               </p>
             </div>
@@ -90,7 +90,7 @@ function ComandaCard({ comanda, taxaServicoPct = 10 }: { comanda: ComandaPendent
         {/* Subtotal */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
           <span style={{ fontSize: 13, color: "var(--fg-subtle)" }}>Subtotal</span>
-          <span style={{ fontSize: 13, color: "var(--fg-subtle)", fontFamily: "var(--font-mono)" }}>
+          <span style={{ fontSize: 13, color: "var(--fg-subtle)", fontFamily: "var(--font-sans)" }}>
             {currency.format(comanda.total)}
           </span>
         </div>
@@ -122,7 +122,7 @@ function ComandaCard({ comanda, taxaServicoPct = 10 }: { comanda: ComandaPendent
             </span>
           </div>
           <span style={{
-            fontSize: 13, fontFamily: "var(--font-mono)",
+            fontSize: 13, fontFamily: "var(--font-sans)",
             color: incluirServico ? "var(--fg-subtle)" : "rgba(255,255,255,0.2)",
             transition: "color 200ms",
           }}>
@@ -133,7 +133,7 @@ function ComandaCard({ comanda, taxaServicoPct = 10 }: { comanda: ComandaPendent
         {/* Divisor + Total */}
         <div style={{ borderTop: "1px solid var(--border)", paddingTop: 12, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
           <span style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)" }}>Total</span>
-          <span style={{ fontSize: 24, fontWeight: 800, color: "var(--fg)", fontFamily: "var(--font-mono)", letterSpacing: "-0.4px" }}>
+          <span style={{ fontSize: 24, fontWeight: 800, color: "var(--fg)", fontFamily: "var(--font-sans)", letterSpacing: "-0.4px" }}>
             {currency.format(totalFinal)}
           </span>
         </div>

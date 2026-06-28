@@ -39,7 +39,7 @@ function InsightsBar({ insights }: { insights: CaixaInsights }) {
               color: i === 0 ? "var(--fg)" : "var(--fg-muted)",
               margin: 0, letterSpacing: i === 0 ? "-0.6px" : "-0.3px",
               fontVariantNumeric: "tabular-nums", lineHeight: 1,
-              fontFamily: "var(--font-mono)",
+              fontFamily: "var(--font-sans)",
             }}>
               {s.value}
             </p>
@@ -53,7 +53,7 @@ function InsightsBar({ insights }: { insights: CaixaInsights }) {
           {insights.porMetodo.map(m => (
             <span key={m.metodo} style={{ fontSize: 12, color: "var(--fg-muted)" }}>
               <span style={{ color: "var(--fg-subtle)" }}>{METODO_LABEL[m.metodo]}</span>
-              {" "}<span style={{ fontWeight: 700, fontVariantNumeric: "tabular-nums", fontFamily: "var(--font-mono)" }}>{currency.format(m.total)}</span>
+              {" "}<span style={{ fontWeight: 700, fontVariantNumeric: "tabular-nums", fontFamily: "var(--font-sans)" }}>{currency.format(m.total)}</span>
             </span>
           ))}
         </div>
@@ -121,7 +121,7 @@ function MesaChips({
             <span style={{ fontSize: 12, fontWeight: 700, color: ativo ? "var(--fg)" : "var(--fg-muted)", whiteSpace: "nowrap" }}>
               {c.mesa}
             </span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: ativo ? "var(--accent-bright)" : "var(--fg-subtle)", fontVariantNumeric: "tabular-nums", fontFamily: "var(--font-mono)" }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: ativo ? "var(--accent-bright)" : "var(--fg-subtle)", fontVariantNumeric: "tabular-nums", fontFamily: "var(--font-sans)" }}>
               {currency.format(c.total)}
             </span>
           </button>
@@ -157,7 +157,7 @@ function CortesiaModal({
         <p style={{ fontSize: 10, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.10em", margin: "0 0 5px" }}>
           Cortesia — {comanda.mesa}
         </p>
-        <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--fg)", margin: "0 0 20px", fontFamily: "var(--font-mono)" }}>Qual o motivo?</h2>
+        <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--fg)", margin: "0 0 20px", fontFamily: "var(--font-sans)" }}>Qual o motivo?</h2>
 
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
           {MOTIVOS_RAPIDOS.map(m => (
@@ -184,7 +184,7 @@ function CortesiaModal({
           placeholder="Ou escreva o motivo..."
           style={{
             width: "100%", boxSizing: "border-box",
-            background: "var(--bg-inset)", border: "1px solid var(--border)",
+            background: "var(--bg-hover)", border: "1px solid var(--border)",
             borderRadius: 4, padding: "13px 16px",
             fontSize: 14, color: "var(--fg)", outline: "none", marginBottom: 16,
             colorScheme: "dark",
@@ -287,7 +287,7 @@ function ComandaCard({
           <p style={{ fontSize: 12, color: "var(--fg-subtle)", margin: "3px 0 0" }}>Pago via {metodoPago}</p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <p style={{ fontSize: 18, fontWeight: 700, color: "var(--fg-muted)", margin: 0, fontVariantNumeric: "tabular-nums", fontFamily: "var(--font-mono)" }}>
+          <p style={{ fontSize: 18, fontWeight: 700, color: "var(--fg-muted)", margin: 0, fontVariantNumeric: "tabular-nums", fontFamily: "var(--font-sans)" }}>
             {currency.format(totalFinal)}
           </p>
           {/* Imprimir após pagamento */}
@@ -341,7 +341,7 @@ function ComandaCard({
                 <span style={{ color: "var(--fg-subtle)", marginRight: 6 }}>{item.quantidade}×</span>
                 {item.nome}
               </p>
-              <p style={{ fontSize: 12, color: "var(--fg-subtle)", margin: 0, fontVariantNumeric: "tabular-nums", fontFamily: "var(--font-mono)" }}>
+              <p style={{ fontSize: 12, color: "var(--fg-subtle)", margin: 0, fontVariantNumeric: "tabular-nums", fontFamily: "var(--font-sans)" }}>
                 {currency.format(item.preco_total)}
               </p>
             </div>
@@ -354,7 +354,7 @@ function ComandaCard({
         {/* Subtotal */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
           <span style={{ fontSize: 12, color: "var(--fg-subtle)" }}>Subtotal</span>
-          <span style={{ fontSize: 12, color: "var(--fg-subtle)", fontFamily: "var(--font-mono)" }}>
+          <span style={{ fontSize: 12, color: "var(--fg-subtle)", fontFamily: "var(--font-sans)" }}>
             {currency.format(comanda.total)}
           </span>
         </div>
@@ -384,7 +384,7 @@ function ComandaCard({
             </span>
           </div>
           <span style={{
-            fontSize: 12, fontFamily: "var(--font-mono)",
+            fontSize: 12, fontFamily: "var(--font-sans)",
             color: incluirServico ? "var(--fg-subtle)" : "rgba(255,255,255,0.15)",
             transition: "color 180ms",
           }}>
@@ -400,7 +400,7 @@ function ComandaCard({
           <span style={{ fontSize: 12, fontWeight: 700, color: "var(--fg)" }}>Total</span>
           <span style={{
             fontSize: 22, fontWeight: 900, color: "var(--fg)",
-            fontFamily: "var(--font-mono)", letterSpacing: "-0.4px",
+            fontFamily: "var(--font-sans)", letterSpacing: "-0.4px",
           }}>
             {currency.format(totalFinal)}
           </span>

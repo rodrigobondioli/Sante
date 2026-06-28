@@ -61,7 +61,7 @@ export default async function CaixaPage() {
               <span style={{
                 fontSize: 13, fontWeight: 700,
                 color: "var(--warn)",
-                fontFamily: "var(--font-mono)",
+                fontFamily: "var(--font-sans)",
               }}>
                 {comandas.length} pendente{comandas.length > 1 ? "s" : ""}
               </span>

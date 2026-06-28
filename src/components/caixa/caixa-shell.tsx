@@ -248,10 +248,10 @@ function ComandaPagamentoSheet({
                   padding: "11px 0", borderBottom: "1px solid var(--border)",
                 }}>
                   <span style={{ fontSize: 14, color: "var(--fg)" }}>
-                    <span style={{ fontWeight: 700, fontFamily: "var(--font-mono)", marginRight: 6 }}>{it.qtd}×</span>
+                    <span style={{ fontWeight: 700, fontFamily: "var(--font-sans)", marginRight: 6 }}>{it.qtd}×</span>
                     {it.nome}
                   </span>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: "var(--fg)", fontFamily: "var(--font-mono)", whiteSpace: "nowrap", marginLeft: 12 }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: "var(--fg)", fontFamily: "var(--font-sans)", whiteSpace: "nowrap", marginLeft: 12 }}>
                     {currency.format(it.total)}
                   </span>
                 </div>
@@ -267,7 +267,7 @@ function ComandaPagamentoSheet({
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6, padding: "8px 0" }}>
               <span style={{ fontSize: 13, color: "var(--fg-subtle)" }}>Serviço {taxaServicoPct}%</span>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ fontSize: 13, color: "var(--fg-subtle)", fontFamily: "var(--font-mono)" }}>
+                <span style={{ fontSize: 13, color: "var(--fg-subtle)", fontFamily: "var(--font-sans)" }}>
                   {currency.format(servicoValor)}
                 </span>
                 <button
@@ -297,7 +297,7 @@ function ComandaPagamentoSheet({
             <span style={{ fontSize: 16, fontWeight: 700, color: "var(--fg)" }}>
               {pago ? "Pago" : "Total"}
             </span>
-            <span style={{ fontSize: 28, fontWeight: 900, color: "var(--fg)", fontFamily: "var(--font-mono)", letterSpacing: "-0.5px" }}>
+            <span style={{ fontSize: 28, fontWeight: 900, color: "var(--fg)", fontFamily: "var(--font-sans)", letterSpacing: "-0.5px" }}>
               {currency.format(totalFinal)}
             </span>
           </div>
@@ -373,7 +373,7 @@ function TabMesas({ mesas, barNome, taxaServicoPct = 10 }: { mesas: MesaComStatu
           Mesas
         </p>
         <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
-          <p style={{ fontSize: 20, fontWeight: 800, color: "var(--fg)", margin: 0, fontFamily: "var(--font-mono)", letterSpacing: "-0.3px" }}>
+          <p style={{ fontSize: 20, fontWeight: 800, color: "var(--fg)", margin: 0, fontFamily: "var(--font-sans)", letterSpacing: "-0.3px" }}>
             {totalOcupadas > 0 ? `${totalOcupadas} ocupada${totalOcupadas > 1 ? "s" : ""}` : "Todas livres"}
           </p>
           {aguardandoCount > 0 && (
@@ -428,7 +428,7 @@ function TabMesas({ mesas, barNome, taxaServicoPct = 10 }: { mesas: MesaComStatu
                     <IconClock />{tempoAbertaCaixa(maisAntiga.aberta_em)}
                   </span>
                 </div>
-                <span style={{ fontSize: 16, fontWeight: 900, fontFamily: "var(--font-mono)", color: "var(--fg)", letterSpacing: "-0.4px" }}>
+                <span style={{ fontSize: 16, fontWeight: 900, fontFamily: "var(--font-sans)", color: "var(--fg)", letterSpacing: "-0.4px" }}>
                   {currency.format(totalValor)}
                 </span>
               </div>
@@ -462,7 +462,7 @@ function TabMesas({ mesas, barNome, taxaServicoPct = 10 }: { mesas: MesaComStatu
                       )}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <span style={{ fontSize: 14, fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--fg)" }}>
+                      <span style={{ fontSize: 14, fontWeight: 700, fontFamily: "var(--font-sans)", color: "var(--fg)" }}>
                         {currency.format(c.total)}
                       </span>
                       <span style={{ color: "var(--fg-subtle)" }}><IconChevron /></span>
@@ -556,7 +556,7 @@ function TabTurno({ turno, barNome }: { turno: Turno | null; barNome: string }) 
         <p style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 6px" }}>
           {barNome}
         </p>
-        <p style={{ fontSize: 22, fontWeight: 800, color: turno ? "var(--ok)" : "var(--fg-subtle)", margin: 0, fontFamily: "var(--font-mono)" }}>
+        <p style={{ fontSize: 22, fontWeight: 800, color: turno ? "var(--ok)" : "var(--fg-subtle)", margin: 0, fontFamily: "var(--font-sans)" }}>
           {turno ? `● Turno aberto` : "○ Nenhum turno"}
         </p>
         {turno && duracao && (
@@ -577,7 +577,7 @@ function TabTurno({ turno, barNome }: { turno: Turno | null; barNome: string }) 
               borderRadius: 8, border: "1px solid var(--border)",
             }}>
               <p style={{ fontSize: 11, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 4px" }}>{s.label}</p>
-              <p style={{ fontSize: 20, fontWeight: 800, color: "var(--fg)", margin: 0, fontFamily: "var(--font-mono)" }}>{s.value}</p>
+              <p style={{ fontSize: 20, fontWeight: 800, color: "var(--fg)", margin: 0, fontFamily: "var(--font-sans)" }}>{s.value}</p>
             </div>
           ))}
         </div>

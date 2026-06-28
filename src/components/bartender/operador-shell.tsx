@@ -29,7 +29,7 @@ function QuemEVoce({ membros, onSelect }: { membros: MembroSimples[]; onSelect: 
       }}>
         Quem está operando agora?
       </p>
-      <p style={{ fontSize: 32, fontWeight: 700, color: "var(--fg)", margin: "0 0 48px", textAlign: "center", fontFamily: "var(--font-mono)" }}>
+      <p style={{ fontSize: 32, fontWeight: 700, color: "var(--fg)", margin: "0 0 48px", textAlign: "center", fontFamily: "var(--font-sans)" }}>
         Selecione seu nome
       </p>
 
