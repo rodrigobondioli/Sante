@@ -16,7 +16,10 @@ A interface some — os dados falam. Nenhum elemento existe por estética; cada 
 
 ## Stack
 
-- **Font:** Inter (carregada via `next/font/google`, variável `--font-sans`)
+- **Font:** Inter — única fonte do projeto inteiro (landing page + dashboard + auth)
+  - Carregada via `next/font/google` em `src/app/layout.tsx` → variável `--font-sans`
+  - `--font-display` e `--font-roboto-mono` são aliases de `--font-sans` definidos em `globals.css`
+  - Nunca adicione outra fonte sem decisão explícita
 - **Estilo:** Tailwind CSS v4 + inline styles via CSS variables
 - **Tema:** dark por padrão (`data-theme="dark"` no layout)
 - **CSS Vars:** definidas em `globals.css` — nunca use hex direto no JSX
