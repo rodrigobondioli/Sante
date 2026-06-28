@@ -32,7 +32,7 @@ export function CtaSection() {
       <div className="relative z-10 flex flex-col items-center px-4 text-center md:px-8 lg:px-14">
         <p
           style={{
-            fontFamily: "var(--font-display)",
+            fontFamily: "var(--font-sans)",
             fontWeight: 400,
             fontSize: "clamp(1.25rem, 3.5vw, 3.25rem)",
             color: "#ffffff",

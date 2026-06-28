@@ -27,6 +27,7 @@ export function ContactSection() {
             fontSize: 32,
             fontWeight: 600,
             color: "#ffffff",
+            letterSpacing: "-0.01em",
             lineHeight: 1.2,
             margin: 0,
           }}

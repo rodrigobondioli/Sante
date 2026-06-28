@@ -122,6 +122,7 @@ export function FaqSection() {
                 fontSize: 32,
                 fontWeight: 600,
                 color: "#ffffff",
+                letterSpacing: "-0.01em",
                 lineHeight: 1.1,
                 marginBottom: "1rem",
               }}
