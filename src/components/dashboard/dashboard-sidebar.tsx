@@ -117,7 +117,7 @@ export function DashboardSidebar({
                 fontSize: touchMode ? "15px" : "13px",
                 fontWeight: active ? 500 : 400,
                 color: active ? "var(--fg)" : "var(--fg-muted)",
-                background: active ? "color-mix(in srgb, var(--accent) 10%, transparent)" : "transparent",
+                background: active ? "color-mix(in srgb, var(--fg) 6%, transparent)" : "transparent",
                 textDecoration: "none",
                 transition: "background 120ms, color 120ms",
               }}
@@ -126,7 +126,7 @@ export function DashboardSidebar({
               <link.icon
                 className={touchMode ? "h-5 w-5 shrink-0" : "h-4 w-4 shrink-0"}
                 strokeWidth={1.75}
-                style={{ color: active ? "var(--accent)" : "var(--fg-subtle)" }}
+                style={{ color: active ? "var(--accent-bright)" : "var(--fg-subtle)" }}
               />
               <span style={{ flex: 1 }}>{link.label}</span>
               {"badge" in link && link.badge && insightCount > 0 && (
