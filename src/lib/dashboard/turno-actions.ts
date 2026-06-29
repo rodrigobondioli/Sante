@@ -14,10 +14,19 @@ export async function getOuCriarTurno(
   barId: string,
   userId: string,
 ) {
-  const turno = await getTurnoAtual(barId);
-  if (turno) return turno;
-
+  // Usa admin client em tudo: RLS pode bloquear o SELECT mesmo com turno existente,
+  // fazendo o INSERT falhar por conflito. Admin garante visibilidade total.
   const admin = createAdminClient();
+
+  const { data: existing } = await admin
+    .from("turnos")
+    .select("*")
+    .eq("bar_id", barId)
+    .eq("status", "aberto")
+    .maybeSingle();
+
+  if (existing) return existing;
+
   const { data, error } = await admin
     .from("turnos")
     .insert({ bar_id: barId, abertura_por: userId, status: "aberto", aberto_em: new Date().toISOString() })
