@@ -294,9 +294,9 @@ function ComandaModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
                       lineHeight: 1.6,
                       margin: 0,
                       textAlign: "center",
-                      maxWidth: 280,
+                      maxWidth: 340,
                     }}>
-                      A gente entra em contato pelo WhatsApp<br />em até 24 horas.
+                      A gente entra em contato pelo WhatsApp em até 24 horas.
                     </p>
                   </div>
                 ) : (
