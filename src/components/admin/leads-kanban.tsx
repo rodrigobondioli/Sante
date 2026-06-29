@@ -3,6 +3,7 @@
 import { useState, useTransition, useRef, useEffect } from "react";
 import type { Lead } from "@/lib/admin/queries";
 import { updateLead, deleteLead } from "@/lib/admin/actions";
+import { createClient } from "@/lib/supabase/client";
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
@@ -429,6 +430,23 @@ export function LeadsKanban({ leads: initial }: { leads: Lead[] }) {
   const [, startTransition] = useTransition();
 
   const selectedLead = selectedId ? (leads.find(l => l.id === selectedId) ?? null) : null;
+
+  // Realtime: captura novos leads (form do site ou adição manual)
+  useEffect(() => {
+    const supabase = createClient();
+    const channel = supabase
+      .channel("leads-realtime")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "leads" },
+        (payload) => {
+          const newLead = payload.new as Lead;
+          setLeads(prev => prev.some(l => l.id === newLead.id) ? prev : [newLead, ...prev]);
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   function handleDragStart(e: React.DragEvent, id: string) {
     setDraggingId(id);
