@@ -202,15 +202,11 @@ function MesaCard({ label, comandas, capacidade, chamadaId, onAbrir, onAtender }
 
   // ── Ocupada ──
   const hasChamada = !!chamadaId;
-  const bg = hasChamada
-    ? "var(--danger-bg)"
-    : hasAguardando
-      ? "var(--warn-bg)"
-      : "var(--bg-card)";
+  const bg = hasChamada ? "var(--danger-bg)" : "var(--bg-card)";
   const borderColor = hasChamada
     ? "var(--danger)"
     : hasAguardando
-      ? "var(--warn)"
+      ? "var(--accent)"
       : "var(--border)";
 
   return (

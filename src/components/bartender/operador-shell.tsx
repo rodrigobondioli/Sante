@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { signOut } from "@/lib/auth/actions";
 import { checkPin } from "@/lib/kiosk/actions";
 import { AppHeader } from "@/components/ui/app-header";
@@ -238,11 +237,6 @@ function PinPad({
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function destinoPorRole(role: string, currentPath: string): string | null {
-  if (role === "caixa" && currentPath !== "/caixa") return "/caixa";
-  return null;
-}
-
 // ─── Shell principal ──────────────────────────────────────────────────────────
 export function OperadorShell({
   membros,
@@ -258,7 +252,6 @@ export function OperadorShell({
   isKiosk?: boolean;
   children: React.ReactNode;
 }) {
-  const router = useRouter();
   const [operador, setOperador] = useState<MembroSimples | null>(null);
   const [pinPendente, setPinPendente] = useState<MembroSimples | null>(null);
   const [carregado, setCarregado] = useState(false);
@@ -268,8 +261,6 @@ export function OperadorShell({
       const salvo = localStorage.getItem(STORAGE_KEY);
       if (salvo) {
         const m = JSON.parse(salvo) as MembroSimples;
-        const destino = destinoPorRole(m.role, window.location.pathname);
-        if (destino) { router.push(destino); return; }
         setOperador(m);
       } else if (membros.length === 1) {
         const m = membros[0];
@@ -277,8 +268,6 @@ export function OperadorShell({
           setPinPendente(m);
         } else {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(m));
-          const destino = destinoPorRole(m.role, window.location.pathname);
-          if (destino) { router.push(destino); return; }
           setOperador(m);
         }
       }
@@ -293,8 +282,6 @@ export function OperadorShell({
 
   function confirmarOperador(m: MembroSimples) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(m));
-    const destino = destinoPorRole(m.role, window.location.pathname);
-    if (destino) { router.push(destino); return; }
     setPinPendente(null);
     setOperador(m);
   }

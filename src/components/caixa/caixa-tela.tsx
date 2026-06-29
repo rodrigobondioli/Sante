@@ -282,7 +282,7 @@ function DetailPanel({ group, barNome, taxaServicoPct, onPago, onClose }: {
   };
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div style={{ display: "flex", flexDirection: "column" }}>
 
       {/* Header */}
       <div style={{ padding: "16px 20px 14px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
@@ -311,8 +311,8 @@ function DetailPanel({ group, barNome, taxaServicoPct, onPago, onClose }: {
         )}
       </div>
 
-      {/* Conteúdo rolável: pessoas + totais + pagamento */}
-      <div style={{ overflowY: "auto", flex: 1 }}>
+      {/* Conteúdo: pessoas + totais + pagamento */}
+      <div>
 
         {/* Lista de pessoas */}
         <div>
@@ -354,11 +354,11 @@ function DetailPanel({ group, barNome, taxaServicoPct, onPago, onClose }: {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <button onClick={() => setIncluirServico(v => !v)} style={{
-                  width: 32, height: 18, borderRadius: 9, border: "none", padding: 0, flexShrink: 0,
+                  width: 52, height: 30, borderRadius: 15, border: "none", padding: 0, flexShrink: 0,
                   background: incluirServico ? "var(--accent)" : "rgba(255,255,255,0.12)",
                   position: "relative", cursor: "pointer", transition: "background 180ms",
                 }}>
-                  <span style={{ position: "absolute", top: 2, left: incluirServico ? 15 : 2, width: 14, height: 14, borderRadius: "50%", background: incluirServico ? "var(--accent-fg)" : "#fff", transition: "left 180ms" }} />
+                  <span style={{ position: "absolute", top: 3, left: incluirServico ? 23 : 3, width: 24, height: 24, borderRadius: "50%", background: incluirServico ? "var(--accent-fg)" : "#fff", transition: "left 180ms" }} />
                 </button>
                 <span style={{ fontSize: 12, color: "var(--fg-subtle)" }}>Serviço {taxaServicoPct}%</span>
               </div>
@@ -578,7 +578,7 @@ export function CaixaTela({
 
         {/* ── Painel direito: detalhe ── */}
         {grupoSelecionado ? (
-          <div className="hidden md:flex" style={{ flex: "0 0 50%", overflow: "hidden" }}>
+          <div className="hidden md:block" style={{ flex: "0 0 50%", overflowY: "auto" }}>
             <DetailPanel
               key={grupoSelecionado.key}
               group={grupoSelecionado}
