@@ -4,6 +4,8 @@ import { getComandasPendentes } from "@/lib/caixa/queries";
 import { CaixaComandas } from "@/components/caixa/caixa-comandas";
 import { TurnoControles } from "@/components/dashboard/turno-controles";
 
+export const dynamic = "force-dynamic";
+
 export default async function CaixaPage() {
   const current = await getCurrentBar();
   if (!current) return null;

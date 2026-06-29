@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { redirect } from "next/navigation";
 import { getCurrentBar } from "@/lib/dashboard/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
