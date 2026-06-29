@@ -5,7 +5,10 @@ import { createLeadAdmin } from "@/lib/admin/actions";
 
 const TIPO_OPTIONS = ["Coquetelaria", "Wine Bar", "Speakeasy", "Gastrobar", "Outro"];
 
-const EMPTY = { nome_bar: "", cidade: "São Paulo", tipo_bar: "Coquetelaria", whatsapp: "", instagram: "", notas: "" };
+const EMPTY = {
+  nome_bar: "", cidade: "São Paulo", tipo_bar: "Coquetelaria",
+  nome_responsavel: "", whatsapp: "", email: "", instagram: "", notas: "",
+};
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
@@ -42,8 +45,8 @@ export function LeadsAddForm() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.nome_bar.trim() || !form.cidade.trim() || !form.whatsapp.trim()) {
-      setError("Preencha nome do bar, cidade e WhatsApp.");
+    if (!form.nome_bar.trim()) {
+      setError("Nome do bar é obrigatório.");
       return;
     }
     setError(null);
@@ -113,14 +116,16 @@ export function LeadsAddForm() {
 
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
+              {/* Nome do bar */}
               <div>
                 <label style={labelStyle}>Nome do bar *</label>
                 <input name="nome_bar" value={form.nome_bar} onChange={handleChange} placeholder="Ex: Bar das Flores" style={inputStyle} />
               </div>
 
+              {/* Cidade + Tipo */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <div>
-                  <label style={labelStyle}>Cidade *</label>
+                  <label style={labelStyle}>Cidade</label>
                   <input name="cidade" value={form.cidade} onChange={handleChange} placeholder="São Paulo" style={inputStyle} />
                 </div>
                 <div>
@@ -131,16 +136,31 @@ export function LeadsAddForm() {
                 </div>
               </div>
 
+              {/* Nome responsável */}
               <div>
-                <label style={labelStyle}>WhatsApp *</label>
-                <input name="whatsapp" value={form.whatsapp} onChange={handleChange} placeholder="(11) 99999-9999" style={inputStyle} />
+                <label style={labelStyle}>Nome do responsável</label>
+                <input name="nome_responsavel" value={form.nome_responsavel} onChange={handleChange} placeholder="Ex: João Silva" style={inputStyle} />
               </div>
 
+              {/* WhatsApp + Email */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div>
+                  <label style={labelStyle}>WhatsApp</label>
+                  <input name="whatsapp" value={form.whatsapp} onChange={handleChange} placeholder="(11) 99999-9999" style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>E-mail</label>
+                  <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="contato@bar.com" style={inputStyle} />
+                </div>
+              </div>
+
+              {/* Instagram */}
               <div>
                 <label style={labelStyle}>Instagram</label>
                 <input name="instagram" value={form.instagram} onChange={handleChange} placeholder="@nomedobar" style={inputStyle} />
               </div>
 
+              {/* Notas */}
               <div>
                 <label style={labelStyle}>Notas</label>
                 <textarea

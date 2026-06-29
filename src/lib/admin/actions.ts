@@ -63,8 +63,10 @@ export async function createLeadAdmin(payload: {
   nome_bar: string;
   cidade: string;
   tipo_bar: string;
-  whatsapp: string;
+  whatsapp?: string;
   instagram?: string;
+  nome_responsavel?: string;
+  email?: string;
   notas?: string;
 }): Promise<{ ok: true } | { error: string }> {
   await assertAdmin();
@@ -73,8 +75,10 @@ export async function createLeadAdmin(payload: {
     nome_bar: payload.nome_bar.trim(),
     cidade: payload.cidade.trim(),
     tipo_bar: payload.tipo_bar,
-    whatsapp: payload.whatsapp.trim(),
+    whatsapp: payload.whatsapp?.trim() || null,
     instagram: payload.instagram?.trim() || null,
+    nome_responsavel: payload.nome_responsavel?.trim() || null,
+    email: payload.email?.trim() || null,
     notas: payload.notas?.trim() || null,
     status: "novo",
   });

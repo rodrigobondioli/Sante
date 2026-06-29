@@ -70,14 +70,27 @@ export function LeadsTable({ leads: initial }: { leads: Lead[] }) {
               </span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-              <a
-                href={`https://wa.me/${lead.whatsapp.replace(/\D/g, "")}`}
-                target="_blank"
-                rel="noreferrer"
-                style={{ fontSize: 12, color: "var(--ok)", textDecoration: "none", fontFamily: "var(--font-mono)" }}
-              >
-                {lead.whatsapp}
-              </a>
+              {lead.nome_responsavel && (
+                <span style={{ fontSize: 12, color: "var(--fg-muted)" }}>{lead.nome_responsavel}</span>
+              )}
+              {lead.whatsapp && (
+                <a
+                  href={`https://wa.me/${lead.whatsapp.replace(/\D/g, "")}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ fontSize: 12, color: "var(--ok)", textDecoration: "none", fontFamily: "var(--font-mono)" }}
+                >
+                  {lead.whatsapp}
+                </a>
+              )}
+              {lead.email && (
+                <a
+                  href={`mailto:${lead.email}`}
+                  style={{ fontSize: 12, color: "var(--fg-muted)", textDecoration: "none", fontFamily: "var(--font-mono)" }}
+                >
+                  {lead.email}
+                </a>
+              )}
               {lead.instagram && (
                 <a
                   href={`https://instagram.com/${lead.instagram.replace(/^@/, "")}`}

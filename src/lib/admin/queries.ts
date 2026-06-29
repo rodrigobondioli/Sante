@@ -679,8 +679,10 @@ export interface Lead {
   nome_bar: string;
   cidade: string;
   tipo_bar: string;
-  whatsapp: string;
+  whatsapp: string | null;
   instagram: string | null;
+  nome_responsavel: string | null;
+  email: string | null;
   status: string;
   notas: string | null;
   created_at: string;
@@ -690,7 +692,7 @@ export async function getLeads(): Promise<Lead[]> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("leads")
-    .select("id, nome_bar, cidade, tipo_bar, whatsapp, instagram, status, notas, created_at")
+    .select("id, nome_bar, cidade, tipo_bar, whatsapp, instagram, nome_responsavel, email, status, notas, created_at")
     .order("created_at", { ascending: false })
     .returns<Lead[]>();
   if (error) return [];
