@@ -289,12 +289,12 @@ function ComandaModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
                     </p>
                     <p style={{
                       fontFamily: "var(--font-roboto-mono)",
-                      fontSize: "0.8rem",
+                      fontSize: "1rem",
                       color: TEXT_SEC,
                       lineHeight: 1.6,
                       margin: 0,
                       textAlign: "center",
-                      maxWidth: 260,
+                      maxWidth: 280,
                     }}>
                       A gente entra em contato pelo WhatsApp<br />em até 24 horas.
                     </p>
