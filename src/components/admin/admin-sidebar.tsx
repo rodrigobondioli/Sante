@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AlertTriangle, Users, Layers, DollarSign, PhoneCall } from "lucide-react";
+import { LayoutDashboard, Users, Layers, DollarSign, PhoneCall } from "lucide-react";
 
 // ─── Navegação ────────────────────────────────────────────────────────────────
 
 const links = [
-  { href: "/admin",            label: "Atenção",     icon: AlertTriangle, exact: true },
+  { href: "/admin",            label: "Visão Geral", icon: LayoutDashboard, exact: true },
   { href: "/admin/clientes",   label: "Clientes",    icon: Users },
   { href: "/admin/implantacao",label: "Implantação", icon: Layers },
   { href: "/admin/financeiro", label: "Financeiro",  icon: DollarSign },

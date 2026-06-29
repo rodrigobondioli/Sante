@@ -57,6 +57,32 @@ export async function alterarStatusAssinatura(
   revalidatePath(`/admin/${barId}`);
 }
 
+// ─── Criar lead manualmente (admin) ──────────────────────────────────────────
+
+export async function createLeadAdmin(payload: {
+  nome_bar: string;
+  cidade: string;
+  tipo_bar: string;
+  whatsapp: string;
+  instagram?: string;
+  notas?: string;
+}): Promise<{ ok: true } | { error: string }> {
+  await assertAdmin();
+  const admin = createAdminClient();
+  const { error } = await admin.from("leads").insert({
+    nome_bar: payload.nome_bar.trim(),
+    cidade: payload.cidade.trim(),
+    tipo_bar: payload.tipo_bar,
+    whatsapp: payload.whatsapp.trim(),
+    instagram: payload.instagram?.trim() || null,
+    notas: payload.notas?.trim() || null,
+    status: "novo",
+  });
+  if (error) return { error: error.message };
+  revalidatePath("/admin/leads");
+  return { ok: true };
+}
+
 // ─── Atualizar status de lead ─────────────────────────────────────────────────
 
 export async function updateLeadStatus(

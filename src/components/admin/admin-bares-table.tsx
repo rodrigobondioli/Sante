@@ -44,9 +44,9 @@ function relDate(iso: string | null): string {
 
 function HealthBadge({ score, alertas }: { score: HealthScore; alertas: RiskAlert[] }) {
   const config = {
-    green:  { emoji: "🟢", label: "Saudável",  color: "var(--ok)",     bg: "var(--ok-bg)",     border: "color-mix(in srgb, var(--ok) 20%, transparent)"     },
-    yellow: { emoji: "🟡", label: "Atenção",   color: "var(--warn)",   bg: "var(--warn-bg)",   border: "color-mix(in srgb, var(--warn) 20%, transparent)"   },
-    red:    { emoji: "🔴", label: "Risco",     color: "var(--danger)", bg: "var(--danger-bg)", border: "color-mix(in srgb, var(--danger) 20%, transparent)" },
+    green:  { label: "Saudável", color: "var(--ok)",     },
+    yellow: { label: "Atenção",  color: "var(--warn)",   },
+    red:    { label: "Risco",    color: "var(--danger)", },
   }[score];
 
   const topAlert = alertas[0];
@@ -54,20 +54,21 @@ function HealthBadge({ score, alertas }: { score: HealthScore; alertas: RiskAler
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
       <span style={{
-        display: "inline-flex", alignItems: "center", gap: 5,
-        padding: "3px 9px", borderRadius: 99,
-        border: `1px solid ${config.border}`,
-        background: config.bg,
-        fontSize: 11, fontWeight: 600, color: config.color,
-        width: "fit-content", whiteSpace: "nowrap",
+        display: "inline-flex", alignItems: "center", gap: 6,
+        fontSize: 12, fontWeight: 600, color: config.color,
+        whiteSpace: "nowrap",
       }}>
-        {config.emoji} {config.label}
+        <span style={{
+          width: 7, height: 7, borderRadius: "50%",
+          background: config.color, flexShrink: 0,
+        }} />
+        {config.label}
       </span>
       {topAlert && (
         <span style={{
           fontSize: 10,
           color: topAlert.level === "red" ? "var(--danger)" : "var(--warn)",
-          paddingLeft: 2,
+          paddingLeft: 13,
         }}>
           {topAlert.label}
           {alertas.length > 1 && <span style={{ color: "var(--fg-subtle)" }}> +{alertas.length - 1}</span>}
