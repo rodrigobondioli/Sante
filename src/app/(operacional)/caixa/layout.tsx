@@ -29,14 +29,21 @@ export default async function CaixaLayout({
     fotoUrl: r.foto_url ?? (r.nome ? `/funcionarios/${encodeURIComponent(r.nome)}.png` : null),
   }));
 
-  if (membros.length === 0 && !current.isKiosk) {
-    const { data: profile } = await admin
-      .from("profiles")
-      .select("id, nome")
-      .eq("id", current.userId)
-      .maybeSingle<{ id: string; nome: string }>();
-    if (profile) {
-      membros = [{ id: profile.id, nome: profile.nome, role: current.role, temPin: false, fotoUrl: null }];
+  // Garante que o dono logado sempre aparece — mesmo sem bar_members com nome cadastrado
+  if (!current.isKiosk) {
+    const jaIncluso = membros.some(m => m.id === current.memberId);
+    if (!jaIncluso) {
+      const { data: profile } = await admin
+        .from("profiles")
+        .select("id, nome")
+        .eq("id", current.userId)
+        .maybeSingle<{ id: string; nome: string }>();
+      if (profile) {
+        membros = [
+          { id: current.memberId ?? profile.id, nome: profile.nome ?? current.userNome, role: current.role, temPin: false, fotoUrl: current.userAvatarUrl },
+          ...membros,
+        ];
+      }
     }
   }
 
