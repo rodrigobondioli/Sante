@@ -198,81 +198,106 @@ function ComandaModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
               {/* Card */}
               <div style={{ background: MODAL_BG, maxHeight: "85dvh", overflowY: "auto", display: "flex", flexDirection: "column" }}>
 
-                {/* ── Header ── */}
-                <div style={{
-                  padding: "20px 20px 24px",
-                  borderBottom: `1px solid rgba(65,36,2,0.14)`,
-                  display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px",
-                }}>
-                  <div>
-                    <h2
-                      id="comanda-title"
-                      style={{
-                        fontFamily: "var(--font-sans)",
-                        fontWeight: 700,
-                        fontSize: "1.375rem",
-                        color: TEXT_MAIN,
-                        lineHeight: 1.15,
-                        letterSpacing: "-0.01em",
-                        margin: "0 0 10px",
-                      }}
-                    >
-                      Seu bar ficou super inteligente.
-                    </h2>
-                    <p style={{
-                      fontFamily: "var(--font-roboto-mono)",
-                      fontSize: "0.75rem",
-                      color: TEXT_SEC,
-                      margin: 0, lineHeight: 1.5,
-                    }}>
-                      Preencha o form. A gente entra em contato pra começar.
-                    </p>
-                  </div>
-                  <button
-                    onClick={handleClose}
-                    aria-label="Fechar"
-                    style={{
-                      background: "none", border: "none", cursor: "pointer",
-                      color: TEXT_MAIN,
-                      width: 44, height: 44, flexShrink: 0,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      borderRadius: "8px",
-                    }}
-                  >
-                    <X size={18} />
-                  </button>
-                </div>
-
-                {/* ── Body ── */}
-                {success ? (
-                  <div style={{ padding: "40px 20px 32px", textAlign: "center", flex: 1 }}>
-                    <p style={{
-                      fontFamily: "var(--font-geist)",
-                      fontWeight: 600,
-                      fontSize: "1.125rem",
-                      color: TEXT_MAIN,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.05em",
-                      lineHeight: 1.3,
-                      marginBottom: "24px",
-                    }}>
-                      Pedido recebido.<br />
-                      Nossa equipe entra em contato<br />
-                      pelo WhatsApp em breve.
-                    </p>
-                    <button
-                      onClick={handleClose}
-                      style={{
+                {/* ── Header (só no form) ── */}
+                {!success && (
+                  <div style={{
+                    padding: "20px 20px 24px",
+                    borderBottom: `1px solid rgba(65,36,2,0.14)`,
+                    display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px",
+                  }}>
+                    <div>
+                      <h2
+                        id="comanda-title"
+                        style={{
+                          fontFamily: "var(--font-sans)",
+                          fontWeight: 700,
+                          fontSize: "1.375rem",
+                          color: TEXT_MAIN,
+                          lineHeight: 1.15,
+                          letterSpacing: "-0.01em",
+                          margin: "0 0 10px",
+                        }}
+                      >
+                        Seu bar ficou super inteligente.
+                      </h2>
+                      <p style={{
                         fontFamily: "var(--font-roboto-mono)",
                         fontSize: "0.75rem",
                         color: TEXT_SEC,
-                        background: "none", border: "none",
-                        cursor: "pointer", letterSpacing: "0.08em",
-                        minHeight: "44px", padding: "0 16px",
+                        margin: 0, lineHeight: 1.5,
+                      }}>
+                        Preencha o form. A gente entra em contato pra começar.
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleClose}
+                      aria-label="Fechar"
+                      style={{
+                        background: "none", border: "none", cursor: "pointer",
+                        color: TEXT_MAIN,
+                        width: 44, height: 44, flexShrink: 0,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        borderRadius: "8px",
                       }}
                     >
-                      FECHAR
+                      <X size={18} />
                     </button>
+                  </div>
+                )}
+
+                {/* ── Body ── */}
+                {success ? (
+                  <div style={{ padding: "48px 28px 48px", display: "flex", flexDirection: "column", alignItems: "center", gap: 0, position: "relative" }}>
+                    {/* X no canto */}
+                    <button
+                      onClick={handleClose}
+                      aria-label="Fechar"
+                      style={{
+                        position: "absolute", top: 16, right: 16,
+                        background: "none", border: "none", cursor: "pointer",
+                        color: TEXT_MAIN, width: 44, height: 44,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <X size={18} />
+                    </button>
+
+                    {/* Check */}
+                    <div style={{
+                      width: 56, height: 56, borderRadius: "50%",
+                      border: `2px solid ${TEXT_MAIN}`,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      marginBottom: 28, flexShrink: 0,
+                    }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={TEXT_MAIN} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    </div>
+
+                    <p style={{
+                      fontFamily: "var(--font-sans)",
+                      fontWeight: 800,
+                      fontSize: "1.5rem",
+                      color: TEXT_MAIN,
+                      letterSpacing: "-0.02em",
+                      lineHeight: 1.1,
+                      margin: "0 0 12px",
+                      textAlign: "center",
+                    }}>
+                      Recebemos.
+                    </p>
+                    <p style={{
+                      fontFamily: "var(--font-roboto-mono)",
+                      fontSize: "0.8rem",
+                      color: TEXT_SEC,
+                      lineHeight: 1.6,
+                      margin: 0,
+                      textAlign: "center",
+                      maxWidth: 260,
+                    }}>
+                      A gente entra em contato pelo WhatsApp<br />em até 24 horas.
+                    </p>
                   </div>
                 ) : (
                   <form
