@@ -17,13 +17,14 @@ export interface CaixaInsights {
   porMetodo: { metodo: PagamentoMetodo; total: number; quantidade: number }[];
 }
 
-export async function getComandasPendentes(barId: string, turnoId: string): Promise<ComandaPendente[]> {
+export async function getComandasPendentes(barId: string, _turnoId: string): Promise<ComandaPendente[]> {
   const supabase = await createClient();
 
+  // Mostra todas as pendentes do bar — sem filtro de turno.
+  // turno_id serve para analytics, não para filtrar o que o caixa vê.
   const { data: comandas } = await supabase.from("comandas")
     .select("id, aberta_em, fechada_em, mesa_id, mesas(numero, nome)")
     .eq("bar_id", barId)
-    .eq("turno_id", turnoId)
     .eq("status", "aguardando_pagamento")
     .order("fechada_em", { ascending: true }) as {
       data: {
