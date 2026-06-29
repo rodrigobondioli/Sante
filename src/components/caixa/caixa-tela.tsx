@@ -123,11 +123,9 @@ function MesaCard({ group, selected, pago, onSelect }: {
       onClick={onSelect}
       style={{
         aspectRatio: "1", borderRadius: 12,
-        border: selected
-          ? "2px solid var(--accent-bright)"
-          : "1px solid var(--border)",
+        border: selected ? "2px solid var(--accent)" : "1px solid var(--border)",
         background: selected
-          ? "color-mix(in srgb, var(--accent-bright) 8%, var(--bg-elevated))"
+          ? "color-mix(in srgb, var(--accent) 10%, var(--bg-elevated))"
           : "var(--bg-elevated)",
         display: "flex", flexDirection: "column",
         padding: "14px 14px 12px",
@@ -136,31 +134,20 @@ function MesaCard({ group, selected, pago, onSelect }: {
         WebkitTapHighlightColor: "transparent",
       }}
     >
-      {/* Mesa name */}
       <span style={{ fontSize: 14, fontWeight: 800, color: "var(--fg)", letterSpacing: "-0.2px", lineHeight: 1.2, flex: 1 }}>
         {group.mesa}
       </span>
-
-      {/* Tempo */}
-      <span style={{
-        fontSize: 11, fontWeight: 600,
-        color: urgente ? "var(--danger)" : "var(--fg-subtle)",
-        marginBottom: 6,
-      }}>
+      <span style={{ fontSize: 11, fontWeight: 600, color: urgente ? "var(--danger)" : "var(--fg-subtle)", marginBottom: 6 }}>
         {texto}
       </span>
-
-      {/* Total */}
       <span style={{
         fontSize: 17, fontWeight: 900,
-        color: selected ? "var(--accent-bright)" : "var(--fg)",
+        color: selected ? "var(--accent)" : "var(--fg)",
         fontFamily: "var(--font-sans)", letterSpacing: "-0.5px", lineHeight: 1,
         display: "block", marginBottom: 6,
       }}>
         {currency.format(group.total)}
       </span>
-
-      {/* Footer: nº comandas */}
       <span style={{ fontSize: 10, color: "var(--fg-subtle)" }}>
         {group.comandas.length} {group.comandas.length === 1 ? "pessoa" : "pessoas"}
       </span>
@@ -378,13 +365,13 @@ function DetailPanel({ group, barNome, taxaServicoPct, onPago, onClose }: {
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <button onClick={() => setIncluirServico(v => !v)} style={{
                 width: 32, height: 18, borderRadius: 9, border: "none", padding: 0, flexShrink: 0,
-                background: incluirServico ? "var(--accent-bright)" : "rgba(255,255,255,0.12)",
+                background: incluirServico ? "var(--accent)" : "rgba(255,255,255,0.12)",
                 position: "relative", cursor: "pointer", transition: "background 180ms",
               }}>
                 <span style={{
                   position: "absolute", top: 2, left: incluirServico ? 15 : 2,
                   width: 14, height: 14, borderRadius: "50%",
-                  background: incluirServico ? "#000" : "#fff", transition: "left 180ms",
+                  background: incluirServico ? "var(--accent-fg)" : "#fff", transition: "left 180ms",
                 }} />
               </button>
               <span style={{ fontSize: 12, color: "var(--fg-subtle)" }}>Serviço {taxaServicoPct}%</span>
@@ -432,12 +419,12 @@ function DetailPanel({ group, barNome, taxaServicoPct, onPago, onClose }: {
                 <button key={b.key} onClick={() => pagar(b.key)} disabled={isPending} style={{
                   flex: 1, height: 56,
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  background: "var(--accent-bright)", border: "none", borderRadius: 12,
+                  background: "var(--accent)", border: "none", borderRadius: 12,
                   cursor: isPending ? "not-allowed" : "pointer", opacity: isPending ? 0.5 : 1,
                   WebkitTapHighlightColor: "transparent",
                 }}>
                   <span style={{ fontSize: 20 }}>{b.icon}</span>
-                  <span style={{ fontSize: 15, fontWeight: 700, color: "#000" }}>{b.label}</span>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: "var(--accent-fg)" }}>{b.label}</span>
                 </button>
               ))}
             </div>
@@ -621,9 +608,7 @@ export function CaixaTela({
         {/* ── Painel esquerdo: grid de mesas ── */}
         <div
           style={{
-            width: grupoSelecionado ? 340 : "100%",
-            maxWidth: grupoSelecionado ? 340 : undefined,
-            flexShrink: 0,
+            flex: grupoSelecionado ? "0 0 50%" : "1",
             overflowY: "auto",
             borderRight: grupoSelecionado ? "1px solid var(--border)" : "none",
             padding: "16px",
@@ -639,10 +624,8 @@ export function CaixaTela({
           ) : (
             <div style={{
               display: "grid",
-              gridTemplateColumns: grupoSelecionado
-                ? "repeat(2, 1fr)"
-                : "repeat(auto-fill, minmax(140px, 1fr))",
-              gap: 10,
+              gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+              gap: 12,
             }}>
               {grupos.map(g => (
                 <MesaCard
@@ -659,7 +642,7 @@ export function CaixaTela({
 
         {/* ── Painel direito: detalhe ── */}
         {grupoSelecionado ? (
-          <div className="hidden md:flex" style={{ flex: 1, overflow: "hidden" }}>
+          <div className="hidden md:flex" style={{ flex: "0 0 50%", overflow: "hidden" }}>
             <DetailPanel
               key={grupoSelecionado.key}
               group={grupoSelecionado}
