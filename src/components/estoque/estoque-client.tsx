@@ -355,39 +355,42 @@ export function EstoqueClient({ itens, movimentos }: EstoqueClientProps) {
                   const sugerida = calcularSugerida(item);
                   return (
                     <div key={item.id} style={{
-                      display: "flex", alignItems: "center", gap: 12,
+                      display: "flex", alignItems: "center", gap: 16,
                       padding: "14px 20px",
                       borderBottom: i < alertas.length - 1 ? "1px solid var(--border)" : "none",
                     }}>
-                      <span style={{ fontSize: 14, fontWeight: 500, color: "var(--fg)", flex: 1 }}>
-                        {item.produtoNome}
-                      </span>
+                      {/* Esquerda: nome + info */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <span style={{ fontSize: 14, fontWeight: 500, color: "var(--fg)", display: "block" }}>
+                          {item.produtoNome}
+                        </span>
+                        <span style={{ fontSize: 11, color: "var(--fg-subtle)", display: "block", marginTop: 2 }}>
+                          atual {fmtQtd(item.quantidadeAtual)} · mín {fmtQtd(item.quantidadeMinima)}
+                        </span>
+                      </div>
 
-                      <div style={{ textAlign: "right", flexShrink: 0, minWidth: 80 }}>
-                        <span style={{ fontSize: 20, fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--fg)" }}>
+                      {/* Direita: qtd sugerida + botão */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+                        <span style={{ fontSize: 15, fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--fg)", whiteSpace: "nowrap" }}>
                           {fmtQtd(sugerida)}
-                          <span style={{ fontSize: 12, fontWeight: 400, color: "var(--fg-subtle)", marginLeft: 4 }}>
+                          <span style={{ fontSize: 11, fontWeight: 400, color: "var(--fg-subtle)", marginLeft: 3 }}>
                             {item.unidade}
                           </span>
                         </span>
-                        <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: "2px 0 0" }}>
-                          atual {fmtQtd(item.quantidadeAtual)} · mín {fmtQtd(item.quantidadeMinima)}
-                        </p>
+                        <button
+                          onClick={() => setModalItem(item)}
+                          style={{
+                            background: "var(--accent-bright)",
+                            color: "#000",
+                            border: "none",
+                            borderRadius: 6, padding: "7px 14px",
+                            fontSize: 13, fontWeight: 600, cursor: "pointer",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          Dar entrada
+                        </button>
                       </div>
-
-                      <button
-                        onClick={() => setModalItem(item)}
-                        style={{
-                          background: "var(--accent)",
-                          color: "var(--accent-fg)",
-                          border: "none",
-                          borderRadius: "var(--radius-lg)", padding: "7px 16px",
-                          fontSize: 13, fontWeight: 600, cursor: "pointer",
-                          whiteSpace: "nowrap", flexShrink: 0,
-                        }}
-                      >
-                        Dar entrada
-                      </button>
                     </div>
                   );
                 })}
