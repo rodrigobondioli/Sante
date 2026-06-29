@@ -81,7 +81,6 @@ function LeadCard({
       style={{
         background: "var(--bg-elevated)",
         border: "1px solid var(--border)",
-        borderLeft: `3px solid ${stageColor(lead.status)}`,
         borderRadius: 8,
         padding: "12px 12px 10px",
         cursor: "grab",
