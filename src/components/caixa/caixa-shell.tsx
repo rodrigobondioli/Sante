@@ -274,7 +274,7 @@ function ComandaPagamentoSheet({
                   onClick={() => setIncluirServico(v => !v)}
                   style={{
                     width: 42, height: 24, borderRadius: 12, border: "none", cursor: "pointer",
-                    background: incluirServico ? "var(--accent)" : "rgba(255,255,255,0.12)",
+                    background: incluirServico ? "color-mix(in srgb, var(--accent-bright) 70%, transparent)" : "rgba(255,255,255,0.12)",
                     position: "relative", transition: "background 200ms",
                     WebkitTapHighlightColor: "transparent",
                   }}
@@ -315,7 +315,7 @@ function ComandaPagamentoSheet({
               </div>
               <button onClick={onPago} style={{
                 padding: "14px", borderRadius: 8, border: "none",
-                background: "var(--accent)", color: "var(--accent-fg)",
+                background: "var(--accent-bright)", color: "#000",
                 fontSize: 15, fontWeight: 700, cursor: "pointer",
               }}>
                 Fechar
@@ -332,8 +332,8 @@ function ComandaPagamentoSheet({
                     padding: "14px 8px", borderRadius: 8, border: "none",
                     background: m.id === "cortesia"
                       ? "rgba(255,255,255,0.05)"
-                      : "var(--accent)",
-                    color: m.id === "cortesia" ? "var(--fg-subtle)" : "var(--accent-fg)",
+                      : "var(--accent-bright)",
+                    color: m.id === "cortesia" ? "var(--fg-subtle)" : "#000",
                     fontSize: 14, fontWeight: 700, cursor: isPending ? "not-allowed" : "pointer",
                     opacity: isPending ? 0.6 : 1,
                     gridColumn: m.id === "cortesia" ? "span 2" : undefined,
@@ -616,7 +616,7 @@ function TabTurno({ turno, barNome }: { turno: Turno | null; barNome: string }) 
           disabled={isPending}
           style={{
             padding: "18px", borderRadius: 8, border: "none",
-            background: "var(--accent)", color: "var(--accent-fg)",
+            background: "var(--accent-bright)", color: "#000",
             fontSize: 16, fontWeight: 700,
             cursor: isPending ? "not-allowed" : "pointer",
             opacity: isPending ? 0.6 : 1, transition: "opacity 150ms",
@@ -684,14 +684,14 @@ export function CaixaShell({
                 alignItems: "center", justifyContent: "center",
                 gap: 6, padding: "14px 8px",
                 margin: "0 8px", borderRadius: 8, border: "none",
-                background: ativo ? "var(--accent)" : "transparent",
-                color: ativo ? "var(--accent-fg)" : "var(--fg-subtle)",
+                background: ativo ? "color-mix(in srgb, var(--fg) 6%, transparent)" : "transparent",
+                color: ativo ? "var(--fg)" : "var(--fg-subtle)",
                 cursor: "pointer", position: "relative",
                 transition: "background 150ms, color 150ms",
                 WebkitTapHighlightColor: "transparent",
               }}
             >
-              <Icon style={{ width: 24, height: 24 }} />
+              <Icon style={{ width: 24, height: 24, color: ativo ? "var(--accent-bright)" : "var(--fg-subtle)" }} />
               <span style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 {label}
               </span>
