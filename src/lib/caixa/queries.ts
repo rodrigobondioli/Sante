@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { PagamentoMetodo } from "@/types/database";
 
 export interface ComandaPendente {
@@ -18,7 +18,8 @@ export interface CaixaInsights {
 }
 
 export async function getComandasPendentes(barId: string, _turnoId: string): Promise<ComandaPendente[]> {
-  const supabase = await createClient();
+  // Admin client: funciona em kiosk (iPad sem auth) e bypassa RLS corretamente.
+  const supabase = createAdminClient();
 
   // Mostra todas as pendentes do bar — sem filtro de turno.
   // turno_id serve para analytics, não para filtrar o que o caixa vê.
@@ -78,7 +79,7 @@ export async function getComandasPendentes(barId: string, _turnoId: string): Pro
 }
 
 export async function getCaixaInsights(barId: string, turnoId: string): Promise<CaixaInsights> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data: pagamentos } = await supabase.from("pagamentos")
     .select("valor, metodo")
