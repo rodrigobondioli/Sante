@@ -4,15 +4,13 @@ interface DashCardProps {
   children: ReactNode;
   style?: CSSProperties;
   className?: string;
-  accentLeft?: string;
 }
 
-export function DashCard({ children, style, className, accentLeft }: DashCardProps) {
+export function DashCard({ children, style, className }: DashCardProps) {
   const base: CSSProperties = {
-    background: "var(--bg-card)",
-    border: "1px solid var(--border)",
-    borderLeft: accentLeft ? `3px solid ${accentLeft}` : "1px solid var(--border)",
-    borderRadius: "var(--radius-lg)",
+    background: "#1C1C1E",
+    border: "1px solid #2C2C2E",
+    borderRadius: 16,
     padding: "20px 24px",
   };
   return (

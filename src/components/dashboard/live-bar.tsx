@@ -103,8 +103,8 @@ export function LiveBar({
     : "crítico";
 
   const overlineStyle: React.CSSProperties = {
-    fontSize: 10, fontWeight: 700, textTransform: "uppercase",
-    letterSpacing: "0.12em", color: "var(--fg-subtle)", margin: "0 0 10px", display: "block",
+    fontSize: 12, fontWeight: 600, color: "#F59E0B",
+    margin: "0 0 10px", display: "block", letterSpacing: "0.01em",
   };
   const valueStyle: React.CSSProperties = {
     fontSize: 40, fontWeight: 800, lineHeight: 1,
@@ -113,7 +113,7 @@ export function LiveBar({
   };
 
   return (
-    <div style={{ padding: "28px 32px 0", borderBottom: "1px solid var(--border)" }}>
+    <div style={{ padding: "28px 32px 0", borderBottom: "1px solid #2C2C2E" }}>
       <div>
 
         {/* ── Status row ── */}
@@ -137,7 +137,7 @@ export function LiveBar({
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", padding: "0 0 24px" }}>
 
           {/* Ticket Médio */}
-          <div style={{ paddingRight: 32, borderRight: "1px solid var(--border)" }}>
+          <div style={{ paddingRight: 32, borderRight: "1px solid #2C2C2E" }}>
             <span style={overlineStyle}>Ticket Médio</span>
             <p style={{ ...valueStyle, color: "var(--fg)" }}>
               {data.pessoas > 0 ? currency.format(ticketMedio) : "—"}
@@ -148,7 +148,7 @@ export function LiveBar({
           </div>
 
           {/* Margem */}
-          <div style={{ paddingLeft: 32, paddingRight: 32, borderRight: "1px solid var(--border)" }}>
+          <div style={{ paddingLeft: 32, paddingRight: 32, borderRight: "1px solid #2C2C2E" }}>
             <span style={overlineStyle}>Margem</span>
             <p style={{ ...valueStyle, color: margemColor }}>
               {margemPct !== null ? `${margemPct.toFixed(0)}%` : "—"}
@@ -170,7 +170,7 @@ export function LiveBar({
         {/* ── Footer: Faturamento · Comandas · Meta ── */}
         <div style={{
           display: "flex", alignItems: "center", gap: 0,
-          borderTop: "1px solid var(--border)",
+          borderTop: "1px solid #2C2C2E",
           padding: "12px 0 20px",
           background: "transparent",
         }}>

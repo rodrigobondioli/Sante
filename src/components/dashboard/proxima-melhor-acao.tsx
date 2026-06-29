@@ -50,13 +50,11 @@ export function ProximaMelhorAcao({
         <div style={{ flex: 1, minWidth: 0 }}>
           <p
             style={{
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: "var(--fg-subtle)",
-              fontFamily: "var(--font-mono)",
+              fontSize: 12,
+              fontWeight: 600,
+              color: "#F59E0B",
               margin: "0 0 12px",
+              letterSpacing: "0.01em",
             }}
           >
             Próxima ação
@@ -64,7 +62,7 @@ export function ProximaMelhorAcao({
 
           <p
             style={{
-              fontSize: 22,
+              fontSize: 24,
               fontWeight: 700,
               color: "var(--fg)",
               margin: "0 0 10px",
@@ -138,18 +136,16 @@ export function ProximaMelhorAcao({
               flexShrink: 0,
               width: 200,
               paddingLeft: 28,
-              borderLeft: "1px solid var(--border)",
+              borderLeft: "1px solid #2C2C2E",
             }}
           >
             <p
               style={{
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                color: "var(--fg-subtle)",
-                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                fontWeight: 600,
+                color: "#F59E0B",
                 margin: "0 0 14px",
+                letterSpacing: "0.01em",
               }}
             >
               Outros de alta margem

@@ -214,7 +214,7 @@ export default async function DashboardPage() {
 
           {/* 0. SUPERBAR AI — acesso rápido no topo */}
           <section>
-            <span style={sectionLabel}>SUPERBAR IA</span>
+          
             <AiHeroInput barId={current.bar.id} alertCount={inteligencia.stage === 2 ? inteligencia.insightsNaoLidos : 0} />
           </section>
 
@@ -258,7 +258,7 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <section>
-              <span style={sectionLabel}>Atenção Agora</span>
+    
               {inteligencia.insightsNaoLidos === 0 ? (
                 <div style={{ ...card, display: "flex", alignItems: "flex-start", gap: 12 }}>
                   <span style={{ fontSize: 13, color: "white", fontWeight: 700, flexShrink: 0, lineHeight: 1.6 }}>✓</span>
@@ -288,7 +288,7 @@ export default async function DashboardPage() {
           {/* 2. NEGÓCIO — último turno + meta do mês */}
           {ultimoTurno && label && (
             <section>
-              <span style={sectionLabel}>Diagnóstico do Turno</span>
+  
 
               {/* Data do turno */}
               <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 12 }}>
@@ -628,7 +628,7 @@ export default async function DashboardPage() {
           {/* Gráfico 7 dias */}
           <div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--fg-subtle)" }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#F59E0B" }}>
                 Receita — 7 dias
               </span>
               <TrendText percent={receitaSemana.percentual} comparativoLabel="vs semana passada" />
@@ -641,7 +641,7 @@ export default async function DashboardPage() {
           {/* Insights / Análises */}
           <div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--fg-subtle)" }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#F59E0B" }}>
                 Inteligência
               </span>
               {inteligencia.stage === 2 && inteligencia.insightsNaoLidos > 0 && (
@@ -661,7 +661,7 @@ export default async function DashboardPage() {
                       background: isCritical ? "color-mix(in srgb, var(--danger) 5%, transparent)" : "transparent",
                       padding: "12px 16px",
                     }}>
-                      <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: cor, margin: "0 0 4px" }}>
+                      <p style={{ fontSize: 11, fontWeight: 600, color: cor, margin: "0 0 4px", letterSpacing: "0.01em" }}>
                         {item.tipo === "action" ? "Crítico" : item.tipo === "opportunity" ? "Oportunidade" : "Info"}
                       </p>
                       <p style={{ fontSize: isCritical ? 13 : 12, fontWeight: isCritical ? 700 : 500, color: "var(--fg)", margin: 0, lineHeight: 1.4 }}>
