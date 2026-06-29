@@ -5,15 +5,11 @@ import { signOut } from "@/lib/auth/actions";
 import { checkPin } from "@/lib/kiosk/actions";
 import { AppHeader } from "@/components/ui/app-header";
 import { Button } from "@/components/ui/button";
+import { ROLE_LABEL } from "@/lib/role-labels";
 
 export type MembroSimples = { id: string; nome: string; role: string; temPin: boolean; fotoUrl?: string | null };
 
 const STORAGE_KEY = "sb_operador";
-
-const ROLE_LABEL: Record<string, string> = {
-  dono: "Dono", gerente: "Gerente", bar_manager: "Bar Manager",
-  bartender: "Bartender", garcom: "Garçom", caixa: "Caixa",
-};
 
 // ─── Tela "Quem é você?" ──────────────────────────────────────────────────────
 function QuemEVoce({

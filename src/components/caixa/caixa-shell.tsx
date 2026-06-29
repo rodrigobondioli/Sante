@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Receipt, LayoutGrid, Clock } from "lucide-react";
 import { CaixaTela } from "./caixa-tela";
 import { AppHeader } from "@/components/ui/app-header";
+import { Button } from "@/components/ui/button";
+import { Toggle } from "@/components/ui/toggle";
 import { abrirTurno, fecharTurno } from "@/lib/dashboard/turno-actions";
 import { registrarPagamento } from "@/lib/caixa/actions";
 import { imprimirConta } from "@/lib/caixa/print-conta";
@@ -12,6 +14,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { ComandaPendente, CaixaInsights } from "@/lib/caixa/queries";
 import type { MesaComStatus } from "@/lib/bartender/queries";
 import type { Comanda, PagamentoMetodo, Turno } from "@/types/database";
+import { METODO_LABEL } from "@/lib/caixa/constants";
 
 type Tab = "comandas" | "mesas" | "turno";
 
@@ -69,18 +72,18 @@ function ComandaPagamentoSheet({
   onClose: () => void;
   onPago: () => void;
 }) {
-  const [itens, setItens]             = useState<ItemAgrupado[]>([]);
-  const [carregando, setCarregando]   = useState(true);
-  const [incluirServico, setIncluirServico] = useState(taxaServicoPct > 0);
-  const [isPending, startTransition]  = useTransition();
-  const [pago, setPago]               = useState(false);
-  const [metodoPago, setMetodoPago]   = useState<PagamentoMetodo | null>(null);
+  const [itens, setItens]                       = useState<ItemAgrupado[]>([]);
+  const [carregando, setCarregando]             = useState(true);
+  const [incluirServico, setIncluirServico]     = useState(taxaServicoPct > 0);
+  const [isPending, startTransition]            = useTransition();
+  const [pago, setPago]                         = useState(false);
+  const [metodoPago, setMetodoPago]             = useState<PagamentoMetodo | null>(null);
+  const [copiado, setCopiado]                   = useState(false);
 
   const taxaDecimal  = taxaServicoPct / 100;
   const servicoValor = Math.round(comanda.total * taxaDecimal * 100) / 100;
   const totalFinal   = comanda.total + (incluirServico ? servicoValor : 0);
 
-  // Carrega itens via Supabase client
   useEffect(() => {
     let mounted = true;
     const supabase = createClient();
@@ -118,21 +121,21 @@ function ComandaPagamentoSheet({
     });
   };
 
+  const nomePessoa = comanda.nome_cliente ?? comanda.identificador ?? null;
+
   const imprimir = () => {
     imprimirConta({
       barNome,
-      mesa: `${mesaLabel}${comanda.nome_cliente ? ` — ${comanda.nome_cliente}` : ""}`,
+      mesa: `${mesaLabel}${nomePessoa ? ` — ${nomePessoa}` : ""}`,
       abertaEm: comanda.aberta_em,
       itens: itens.map(it => ({ nome: it.nome, quantidade: it.qtd, preco_total: it.total })),
       subtotal: comanda.total,
       incluirServico: incluirServico && metodoPago !== "cortesia",
       servicoPct: taxaServicoPct,
       servicoValor,
-      totalFinal: pago ? totalFinal : totalFinal,
+      totalFinal,
     });
   };
-
-  const [copiado, setCopiado] = useState(false);
 
   const compartilhar = async () => {
     const nomeMesa = `${mesaLabel}${nomePessoa ? ` — ${nomePessoa}` : ""}`;
@@ -152,15 +155,8 @@ function ComandaPagamentoSheet({
     ].filter(l => l !== null).join("\n");
 
     if ("share" in navigator) {
-      try {
-        await navigator.share({ text: texto });
-        return;
-      } catch {
-        // usuário cancelou — não faz nada
-        return;
-      }
+      try { await navigator.share({ text: texto }); return; } catch { return; }
     }
-    // fallback: copia para clipboard
     await (navigator as Navigator).clipboard.writeText(texto);
     setCopiado(true);
     setTimeout(() => setCopiado(false), 2500);
@@ -173,8 +169,6 @@ function ComandaPagamentoSheet({
     { id: "debito",   label: "Débito" },
     { id: "cortesia", label: "Cortesia" },
   ];
-
-  const nomePessoa = comanda.nome_cliente ?? comanda.identificador ?? null;
 
   return (
     <>
@@ -201,27 +195,17 @@ function ComandaPagamentoSheet({
               </p>
             </div>
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <button onClick={compartilhar} style={{
-                display: "flex", alignItems: "center", gap: 6,
-                padding: "8px 12px", borderRadius: 8,
-                background: copiado ? "color-mix(in srgb, var(--ok) 15%, transparent)" : "rgba(255,255,255,0.06)",
-                border: copiado ? "1px solid color-mix(in srgb, var(--ok) 35%, transparent)" : "1px solid rgba(255,255,255,0.1)",
-                color: copiado ? "var(--ok)" : "var(--fg-subtle)", fontSize: 12, fontWeight: 600, cursor: "pointer",
-                transition: "all 200ms",
-              }}>
+              <Button variant="secondary" size="sm"
+                onClick={compartilhar}
+                style={copiado ? { color: "var(--ok)", borderColor: "color-mix(in srgb, var(--ok) 35%, transparent)" } : undefined}>
                 {copiado ? "✓ Copiado" : "↗ Compartilhar"}
-              </button>
-              <button onClick={imprimir} style={{
-                display: "flex", alignItems: "center", gap: 6,
-                padding: "8px 12px", borderRadius: 8,
-                background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
-                color: "var(--fg-subtle)", fontSize: 12, fontWeight: 600, cursor: "pointer",
-              }}>
+              </Button>
+              <Button variant="secondary" size="sm" onClick={imprimir}>
                 <IconPrint /> Imprimir
-              </button>
-              <button onClick={onClose} style={{
+              </Button>
+              <button onClick={onClose} className="[-webkit-tap-highlight-color:transparent]" style={{
                 width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center",
-                background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+                background: "var(--bg-hover)", border: "1px solid var(--border)",
                 borderRadius: "50%", cursor: "pointer", color: "var(--fg-subtle)",
               }}>
                 <IconX />
@@ -248,10 +232,10 @@ function ComandaPagamentoSheet({
                   padding: "11px 0", borderBottom: "1px solid var(--border)",
                 }}>
                   <span style={{ fontSize: 14, color: "var(--fg)" }}>
-                    <span style={{ fontWeight: 700, fontFamily: "var(--font-sans)", marginRight: 6 }}>{it.qtd}×</span>
+                    <span style={{ fontWeight: 700, marginRight: 6 }}>{it.qtd}×</span>
                     {it.nome}
                   </span>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: "var(--fg)", fontFamily: "var(--font-sans)", whiteSpace: "nowrap", marginLeft: 12 }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: "var(--fg)", whiteSpace: "nowrap", marginLeft: 12, fontVariantNumeric: "tabular-nums" }}>
                     {currency.format(it.total)}
                   </span>
                 </div>
@@ -263,29 +247,15 @@ function ComandaPagamentoSheet({
         {/* Totais + pagamento */}
         <div style={{ padding: "12px 20px 36px", flexShrink: 0, borderTop: "1px solid var(--border)" }}>
           {/* Serviço toggle */}
-          {!pago && (
+          {!pago && taxaServicoPct > 0 && (
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6, padding: "8px 0" }}>
-              <span style={{ fontSize: 13, color: "var(--fg-subtle)" }}>Serviço {taxaServicoPct}%</span>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ fontSize: 13, color: "var(--fg-subtle)", fontFamily: "var(--font-sans)" }}>
-                  {currency.format(servicoValor)}
-                </span>
-                <button
-                  onClick={() => setIncluirServico(v => !v)}
-                  style={{
-                    width: 42, height: 24, borderRadius: 12, border: "none", cursor: "pointer",
-                    background: incluirServico ? "color-mix(in srgb, var(--accent-bright) 70%, transparent)" : "rgba(255,255,255,0.12)",
-                    position: "relative", transition: "background 200ms",
-                    WebkitTapHighlightColor: "transparent",
-                  }}
-                >
-                  <span style={{
-                    position: "absolute", top: 3, width: 18, height: 18, borderRadius: "50%",
-                    background: "white", transition: "left 200ms",
-                    left: incluirServico ? 21 : 3,
-                  }} />
-                </button>
+                <Toggle checked={incluirServico} onChange={setIncluirServico} />
+                <span style={{ fontSize: 13, color: "var(--fg-subtle)" }}>Serviço {taxaServicoPct}%</span>
               </div>
+              <span style={{ fontSize: 13, color: "var(--fg-subtle)", fontVariantNumeric: "tabular-nums" }}>
+                {currency.format(servicoValor)}
+              </span>
             </div>
           )}
 
@@ -297,7 +267,7 @@ function ComandaPagamentoSheet({
             <span style={{ fontSize: 16, fontWeight: 700, color: "var(--fg)" }}>
               {pago ? "Pago" : "Total"}
             </span>
-            <span style={{ fontSize: 28, fontWeight: 900, color: "var(--fg)", fontFamily: "var(--font-sans)", letterSpacing: "-0.5px" }}>
+            <span style={{ fontSize: 28, fontWeight: 900, color: "var(--fg)", letterSpacing: "-0.5px", fontVariantNumeric: "tabular-nums" }}>
               {currency.format(totalFinal)}
             </span>
           </div>
@@ -310,38 +280,22 @@ function ComandaPagamentoSheet({
                 border: "1px solid color-mix(in srgb, var(--ok) 25%, transparent)",
                 color: "var(--ok)", fontSize: 15, fontWeight: 700,
               }}>
-                ✓ Pago via {metodoPago === "pix" ? "Pix" : metodoPago === "dinheiro" ? "Dinheiro" :
-                  metodoPago === "credito" ? "Crédito" : metodoPago === "debito" ? "Débito" : "Cortesia"}
+                ✓ Pago via {metodoPago ? (METODO_LABEL[metodoPago] ?? metodoPago) : "—"}
               </div>
-              <button onClick={onPago} style={{
-                padding: "14px", borderRadius: 8, border: "none",
-                background: "var(--accent-bright)", color: "#000",
-                fontSize: 15, fontWeight: 700, cursor: "pointer",
-              }}>
-                Fechar
-              </button>
+              <Button variant="op" className="w-full" onClick={onPago}>Fechar</Button>
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
               {METODOS.map(m => (
-                <button
+                <Button
                   key={m.id}
-                  onClick={() => !isPending && pagar(m.id)}
+                  variant={m.id === "cortesia" ? "op-secondary" : "op"}
                   disabled={isPending}
-                  style={{
-                    padding: "14px 8px", borderRadius: 8, border: "none",
-                    background: m.id === "cortesia"
-                      ? "rgba(255,255,255,0.05)"
-                      : "var(--accent-bright)",
-                    color: m.id === "cortesia" ? "var(--fg-subtle)" : "#000",
-                    fontSize: 14, fontWeight: 700, cursor: isPending ? "not-allowed" : "pointer",
-                    opacity: isPending ? 0.6 : 1,
-                    gridColumn: m.id === "cortesia" ? "span 2" : undefined,
-                    WebkitTapHighlightColor: "transparent",
-                  }}
+                  onClick={() => !isPending && pagar(m.id)}
+                  style={m.id === "cortesia" ? { gridColumn: "span 2" } : undefined}
                 >
                   {isPending ? "..." : m.label}
-                </button>
+                </Button>
               ))}
             </div>
           )}
@@ -373,7 +327,7 @@ function TabMesas({ mesas, barNome, taxaServicoPct = 10 }: { mesas: MesaComStatu
           Mesas
         </p>
         <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
-          <p style={{ fontSize: 20, fontWeight: 800, color: "var(--fg)", margin: 0, fontFamily: "var(--font-sans)", letterSpacing: "-0.3px" }}>
+          <p style={{ fontSize: 20, fontWeight: 800, color: "var(--fg)", margin: 0, letterSpacing: "-0.3px" }}>
             {totalOcupadas > 0 ? `${totalOcupadas} ocupada${totalOcupadas > 1 ? "s" : ""}` : "Todas livres"}
           </p>
           {aguardandoCount > 0 && (
@@ -399,7 +353,7 @@ function TabMesas({ mesas, barNome, taxaServicoPct = 10 }: { mesas: MesaComStatu
         </div>
       </div>
 
-      {/* Mesas ocupadas — cards expandidos com lista de pessoas */}
+      {/* Mesas ocupadas */}
       <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: livres.length > 0 ? 24 : 0 }}>
         {ocupadas.map((mesaStatus) => {
           const { mesa, comandas } = mesaStatus;
@@ -408,32 +362,28 @@ function TabMesas({ mesas, barNome, taxaServicoPct = 10 }: { mesas: MesaComStatu
           const totalValor    = comandas.reduce((sum, c) => sum + c.total, 0);
           const maisAntiga    = comandas.reduce((a, b) => a.aberta_em < b.aberta_em ? a : b);
 
-          const bg = hasAguardando
-            ? "var(--warn-bg)"
-            : "color-mix(in srgb, var(--accent-bright) 9%, transparent)";
+          const bg     = hasAguardando ? "var(--bg-elevated)" : "var(--bg-card)";
           const border = hasAguardando
-            ? "1.5px solid color-mix(in srgb, var(--warn) 45%, transparent)"
-            : "1px solid color-mix(in srgb, var(--accent-bright) 22%, transparent)";
+            ? "1px solid var(--accent)"
+            : "1px solid var(--border)";
 
           return (
             <div key={mesa.id} style={{ background: bg, border, borderRadius: 8, overflow: "hidden" }}>
-              {/* Cabeçalho da mesa */}
               <div style={{
                 display: "flex", justifyContent: "space-between", alignItems: "center",
-                padding: "12px 16px", borderBottom: "1px solid rgba(255,255,255,0.07)",
+                padding: "12px 16px", borderBottom: "1px solid var(--border)",
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{ fontSize: 14, fontWeight: 800, color: "var(--fg)" }}>{mesaLabel}</span>
-                  <span style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", display: "flex", alignItems: "center", gap: 3 }}>
+                  <span style={{ fontSize: 10, color: "var(--fg-subtle)", display: "flex", alignItems: "center", gap: 3 }}>
                     <IconClock />{tempoAbertaCaixa(maisAntiga.aberta_em)}
                   </span>
                 </div>
-                <span style={{ fontSize: 16, fontWeight: 900, fontFamily: "var(--font-sans)", color: "var(--fg)", letterSpacing: "-0.4px" }}>
+                <span style={{ fontSize: 16, fontWeight: 900, color: "var(--fg)", letterSpacing: "-0.4px", fontVariantNumeric: "tabular-nums" }}>
                   {currency.format(totalValor)}
                 </span>
               </div>
 
-              {/* Linha por pessoa */}
               {comandas.map((c, i) => {
                 const label     = c.nome_cliente ?? c.identificador ?? `Comanda ${i + 1}`;
                 const querPagar = c.status === "aguardando_pagamento";
@@ -441,12 +391,12 @@ function TabMesas({ mesas, barNome, taxaServicoPct = 10 }: { mesas: MesaComStatu
                   <button
                     key={c.id}
                     onClick={() => setPagamentoAberto({ comanda: c, mesaLabel })}
+                    className="[-webkit-tap-highlight-color:transparent]"
                     style={{
                       width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center",
                       padding: "12px 16px", border: "none",
-                      borderBottom: "1px solid rgba(255,255,255,0.05)",
+                      borderBottom: "1px solid var(--border)",
                       background: "transparent", cursor: "pointer", textAlign: "left",
-                      WebkitTapHighlightColor: "transparent",
                     }}
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -454,15 +404,15 @@ function TabMesas({ mesas, barNome, taxaServicoPct = 10 }: { mesas: MesaComStatu
                       {querPagar && (
                         <span style={{
                           fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 4,
-                          background: "var(--warn-bg)",
-                          color: "var(--warn)", textTransform: "uppercase" as const, letterSpacing: "0.06em",
+                          background: "var(--warn-bg)", color: "var(--warn)",
+                          textTransform: "uppercase" as const, letterSpacing: "0.06em",
                         }}>
                           Pagar
                         </span>
                       )}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <span style={{ fontSize: 14, fontWeight: 700, fontFamily: "var(--font-sans)", color: "var(--fg)" }}>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: "var(--fg)", fontVariantNumeric: "tabular-nums" }}>
                         {currency.format(c.total)}
                       </span>
                       <span style={{ color: "var(--fg-subtle)" }}><IconChevron /></span>
@@ -475,7 +425,7 @@ function TabMesas({ mesas, barNome, taxaServicoPct = 10 }: { mesas: MesaComStatu
         })}
       </div>
 
-      {/* Mesas livres — compactas */}
+      {/* Mesas livres */}
       {livres.length > 0 && (
         <div>
           <p style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px" }}>
@@ -485,10 +435,10 @@ function TabMesas({ mesas, barNome, taxaServicoPct = 10 }: { mesas: MesaComStatu
             {livres.map(({ mesa }) => (
               <div key={mesa.id} style={{
                 padding: "10px 12px", borderRadius: 8,
-                background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)",
+                background: "var(--bg-card)", border: "1px solid var(--border)",
                 textAlign: "center",
               }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.25)" }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--fg-subtle)" }}>
                   {mesa.nome ?? mesa.numero}
                 </span>
               </div>
@@ -497,7 +447,6 @@ function TabMesas({ mesas, barNome, taxaServicoPct = 10 }: { mesas: MesaComStatu
         </div>
       )}
 
-      {/* Sheet de pagamento */}
       {pagamentoAberto && (
         <ComandaPagamentoSheet
           comanda={pagamentoAberto.comanda}
@@ -505,10 +454,7 @@ function TabMesas({ mesas, barNome, taxaServicoPct = 10 }: { mesas: MesaComStatu
           barNome={barNome}
           taxaServicoPct={taxaServicoPct}
           onClose={() => setPagamentoAberto(null)}
-          onPago={() => {
-            setPagamentoAberto(null);
-            router.refresh();
-          }}
+          onPago={() => { setPagamentoAberto(null); router.refresh(); }}
         />
       )}
     </div>
@@ -556,7 +502,7 @@ function TabTurno({ turno, barNome }: { turno: Turno | null; barNome: string }) 
         <p style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 6px" }}>
           {barNome}
         </p>
-        <p style={{ fontSize: 22, fontWeight: 800, color: turno ? "var(--ok)" : "var(--fg-subtle)", margin: 0, fontFamily: "var(--font-sans)" }}>
+        <p style={{ fontSize: 22, fontWeight: 800, color: turno ? "var(--ok)" : "var(--fg-subtle)", margin: 0 }}>
           {turno ? `● Turno aberto` : "○ Nenhum turno"}
         </p>
         {turno && duracao && (
@@ -564,7 +510,7 @@ function TabTurno({ turno, barNome }: { turno: Turno | null; barNome: string }) 
         )}
       </div>
 
-      {/* Stats do turno */}
+      {/* Stats */}
       {turno && (
         <div style={{ display: "flex", gap: 10 }}>
           {[
@@ -577,7 +523,7 @@ function TabTurno({ turno, barNome }: { turno: Turno | null; barNome: string }) 
               borderRadius: 8, border: "1px solid var(--border)",
             }}>
               <p style={{ fontSize: 11, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 4px" }}>{s.label}</p>
-              <p style={{ fontSize: 20, fontWeight: 800, color: "var(--fg)", margin: 0, fontFamily: "var(--font-sans)" }}>{s.value}</p>
+              <p style={{ fontSize: 20, fontWeight: 800, color: "var(--fg)", margin: 0, fontVariantNumeric: "tabular-nums" }}>{s.value}</p>
             </div>
           ))}
         </div>
@@ -597,33 +543,15 @@ function TabTurno({ turno, barNome }: { turno: Turno | null; barNome: string }) 
 
       {/* Ação */}
       {turno ? (
-        <button
-          onClick={fechar}
-          disabled={isPending}
-          style={{
-            padding: "18px", borderRadius: 8, border: "none",
-            background: "color-mix(in srgb, var(--danger) 12%, transparent)",
-            color: "var(--danger)", fontSize: 16, fontWeight: 700,
-            cursor: isPending ? "not-allowed" : "pointer",
-            opacity: isPending ? 0.6 : 1, transition: "opacity 150ms",
-          }}
-        >
+        <Button variant="danger" disabled={isPending} className="w-full py-[18px] text-base"
+          onClick={fechar}>
           {isPending ? "Encerrando..." : "Encerrar turno"}
-        </button>
+        </Button>
       ) : (
-        <button
-          onClick={abrir}
-          disabled={isPending}
-          style={{
-            padding: "18px", borderRadius: 8, border: "none",
-            background: "var(--accent-bright)", color: "#000",
-            fontSize: 16, fontWeight: 700,
-            cursor: isPending ? "not-allowed" : "pointer",
-            opacity: isPending ? 0.6 : 1, transition: "opacity 150ms",
-          }}
-        >
+        <Button variant="op" disabled={isPending} className="w-full py-[18px] text-base"
+          onClick={abrir}>
           {isPending ? "Abrindo..." : "Abrir turno"}
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -679,6 +607,7 @@ export function CaixaShell({
             <button
               key={id}
               onClick={() => setTab(id)}
+              className="[-webkit-tap-highlight-color:transparent]"
               style={{
                 display: "flex", flexDirection: "column",
                 alignItems: "center", justifyContent: "center",
@@ -688,10 +617,9 @@ export function CaixaShell({
                 color: ativo ? "var(--fg)" : "var(--fg-subtle)",
                 cursor: "pointer", position: "relative",
                 transition: "background 150ms, color 150ms",
-                WebkitTapHighlightColor: "transparent",
               }}
             >
-              <Icon style={{ width: 24, height: 24, color: ativo ? "var(--accent-bright)" : "var(--fg-subtle)" }} />
+              <Icon style={{ width: 24, height: 24, color: ativo ? "var(--accent)" : "var(--fg-subtle)" }} />
               <span style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>
                 {label}
               </span>
@@ -699,7 +627,7 @@ export function CaixaShell({
                 <span style={{
                   position: "absolute", top: 8, right: 8,
                   minWidth: 18, height: 18, borderRadius: 9,
-                  background: ativo ? "rgba(255,255,255,0.25)" : "var(--danger)",
+                  background: "var(--danger)",
                   color: "#fff", fontSize: 10, fontWeight: 700,
                   display: "flex", alignItems: "center", justifyContent: "center",
                   padding: "0 4px",
@@ -763,14 +691,14 @@ export function CaixaShell({
               <button
                 key={id}
                 onClick={() => setTab(id)}
+                className="[-webkit-tap-highlight-color:transparent]"
                 style={{
                   flex: 1, display: "flex", flexDirection: "column",
                   alignItems: "center", justifyContent: "center",
                   gap: 5, padding: "12px 4px 14px",
                   border: "none", background: "transparent",
-                  color: ativo ? "var(--accent-bright)" : "var(--fg-subtle)",
+                  color: ativo ? "var(--accent)" : "var(--fg-subtle)",
                   cursor: "pointer", position: "relative",
-                  WebkitTapHighlightColor: "transparent",
                   transition: "color 150ms",
                 }}
               >

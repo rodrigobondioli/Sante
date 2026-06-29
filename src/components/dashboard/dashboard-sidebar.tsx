@@ -12,6 +12,7 @@ import type { BarRole, Bar } from "@/types/database";
 import { Drawer } from "@/components/ui/drawer";
 import { SettingsButton } from "./settings-button";
 import type { AlertaEstoque } from "@/lib/dashboard/queries";
+import { ROLE_LABEL } from "@/lib/role-labels";
 
 const links = [
   { href: "/dashboard",                    label: "Operação ao Vivo", icon: LayoutDashboard },
@@ -25,11 +26,6 @@ const links = [
   { href: "/dashboard/equipe",             label: "Equipe",           icon: Users },
   { href: "/caixa",                        label: "Caixa",            icon: Wallet },
 ];
-
-const ROLE_LABEL: Record<string, string> = {
-  dono: "Dono", gerente: "Gerente", bar_manager: "Gerente",
-  caixa: "Caixa", bartender: "Bartender", garcom: "Garçom",
-};
 
 interface DashboardSidebarProps {
   barNome: string;

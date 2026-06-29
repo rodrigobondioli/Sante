@@ -9,15 +9,7 @@ import { SettingsButton } from "./settings-button";
 import { AppHeader } from "@/components/ui/app-header";
 import type { BarRole, Bar } from "@/types/database";
 import type { AlertaEstoque } from "@/lib/dashboard/queries";
-
-const ROLE_LABEL: Record<BarRole, string> = {
-  dono:        "Dono",
-  gerente:     "Gerente",
-  bar_manager: "Manager",
-  bartender:   "Bartender",
-  garcom:      "Garçom",
-  caixa:       "Caixa",
-};
+import { ROLE_LABEL } from "@/lib/role-labels";
 
 interface DashboardLayoutClientProps {
   barNome: string;
