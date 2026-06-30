@@ -8,9 +8,9 @@ interface DashCardProps {
 
 export function DashCard({ children, style, className }: DashCardProps) {
   const base: CSSProperties = {
-    background: "#1C1C1E",
-    border: "1px solid #2C2C2E",
-    borderRadius: 16,
+    background: "var(--bg-card)",
+    border: "1px solid var(--border)",
+    borderRadius: "var(--radius-lg)",
     padding: "20px 24px",
   };
   return (

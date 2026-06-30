@@ -537,66 +537,26 @@ export default async function DashboardPage() {
   const proximaAcaoTexto = inteligencia.stage === 2 && insightsSorted.length > 0 ? insightsSorted[0].texto : null;
 
   return (
-    <div className="flex flex-col" style={{ overflowX: "hidden", width: "100%" }}>
+    <div style={{ display: "flex", flexDirection: "column", width: "100%", overflowX: "hidden" }}>
+      <div style={{ padding: "32px 40px 64px", display: "flex", flexDirection: "column", gap: 24, maxWidth: 1400, width: "100%" }}>
 
-      {/* ━━ ZONA 1 — Pulso do Turno (full-width, sem padding) ━━ */}
-      <LiveBar
-        turnoId={turno.id}
-        barId={current.bar.id}
-        faturamentoInicial={kpis.faturamento}
-        pessoasInicial={kpis.comandasAbertas}
-        drinksInicial={liveStats.drinks}
-        margemEstimada={cmvAtual}
-        comparacaoFaturamento={comparacao.faturamento}
-        comparacaoTicket={comparacao.ticketMedio}
-        comparacaoCmv={comparacao.cmv}
-        cmvParcial={cmvParcial}
-        dataFormatada={dataFormatada}
-        metaProgresso={metaProgresso}
-        metaFalta={metaFalta}
-        metaAtingida={metaAtingida}
-        meta={meta}
-      />
+        {/* ── HEADER ── */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--fg)", margin: 0, letterSpacing: "-0.02em" }}>
+              Operação ao Vivo
+            </h1>
+            <p style={{ fontSize: 13, color: "var(--fg-subtle)", margin: "4px 0 0" }}>
+              {dataFormatada}
+            </p>
+          </div>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: "7px 14px" }}>
+            <span className="animate-live-pulse" style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--ok)", display: "block", flexShrink: 0 }} />
+            <span style={{ fontSize: 11, fontWeight: 700, color: "var(--ok)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Ao Vivo</span>
+          </div>
+        </div>
 
-
-      {/* ── CONTENT ── */}
-      <div style={{ padding: "24px 32px 64px", display: "flex", flexDirection: "column", gap: 24 }}>
-
-        {/* ═══ STATUS BANNER — diagnóstico em linguagem natural ═══ */}
-        <StatusBanner
-          cmvPct={cmvAtual}
-          cmvDelta={comparacao.cmv}
-          ticketDelta={comparacao.ticketMedio}
-          cmvParcial={cmvParcial}
-          topProdutoProblema={produtosTop5.length > 0 && (cmvAtual ?? 0) >= 42 ? null : null}
-        />
-
-        {/* ═══ APRENDIZADO (stage 1 only) ═══ */}
-        {inteligencia.stage === 1 && (
-          <DashCard style={{ padding: "16px 20px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)", margin: 0 }}>Superbar está aprendendo sobre seu bar</p>
-              <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>
-                {inteligencia.diasAtivo < 7 ? `${7 - inteligencia.diasAtivo} dias restantes`
-                  : inteligencia.comandas < 30 ? `${30 - inteligencia.comandas} comandas restantes`
-                  : "calculando…"}
-              </span>
-            </div>
-            {[{ label: "30 comandas", atual: inteligencia.comandas, meta: 30 }, { label: "7 dias de operação", atual: inteligencia.diasAtivo, meta: 7 }].map(item => (
-              <div key={item.label} style={{ marginBottom: 10 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                  <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>{item.atual >= item.meta ? "✓" : "○"} {item.label}</span>
-                  <span style={{ fontSize: 11, color: "var(--fg-muted)", fontVariantNumeric: "tabular-nums" }}>{item.atual}/{item.meta}</span>
-                </div>
-                <div style={{ background: "var(--border-strong)", borderRadius: 2, height: 2, overflow: "hidden" }}>
-                  <div style={{ background: "var(--accent)", borderRadius: 2, height: 2, width: `${Math.min(Math.round((item.atual / item.meta) * 100), 100)}%`, transition: "width 0.6s" }} />
-                </div>
-              </div>
-            ))}
-          </DashCard>
-        )}
-
-        {/* ═══ PRÓXIMA AÇÃO — hero full-width ═══ */}
+        {/* ── ALFA PANEL — AI Recommendation ── */}
         {produtosTop5.length > 0 && produtosTop5[0].margemPercentual !== null ? (
           <ProximaMelhorAcao
             produtoNome={produtosTop5[0].produtoNome}
@@ -613,7 +573,27 @@ export default async function DashboardPage() {
           />
         ) : null}
 
-        {/* ═══ AI CHAT — chips contextuais ═══ */}
+        {/* ── KPI STRIP ── */}
+        <LiveBar
+          turnoId={turno.id}
+          barId={current.bar.id}
+          faturamentoInicial={kpis.faturamento}
+          pessoasInicial={kpis.comandasAbertas}
+          drinksInicial={liveStats.drinks}
+          margemEstimada={cmvAtual}
+          comparacaoFaturamento={comparacao.faturamento}
+          comparacaoTicket={comparacao.ticketMedio}
+          comparacaoCmv={comparacao.cmv}
+          cmvParcial={cmvParcial}
+          metaProgresso={metaProgresso}
+          metaFalta={metaFalta}
+          metaAtingida={metaAtingida}
+          meta={meta}
+        />
+
+
+
+        {/* ── AI CHAT ── */}
         <AiHeroInput
           barId={current.bar.id}
           alertCount={nAction}
@@ -622,129 +602,140 @@ export default async function DashboardPage() {
           produtoSugerido={produtosTop5.length > 0 ? produtosTop5[0].produtoNome : null}
         />
 
-        {/* ═══ SECUNDÁRIAS — Gráfico + Insights lado a lado ═══ */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+        {/* ── BOTTOM — 3 colunas ── */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
 
-          {/* Gráfico 7 dias */}
-          <div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-              <span style={{ fontSize: 12, fontWeight: 500, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                Receita — 7 dias
-              </span>
-              <TrendText percent={receitaSemana.percentual} comparativoLabel="vs semana passada" />
+          {/* Col 1 — Receita 7 dias */}
+          <DashCard style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Receita — 7 dias</span>
+              <TrendText percent={receitaSemana.percentual} comparativoLabel="vs semana" />
             </div>
-            <DashCard style={{ height: 190 }}>
+            <div style={{ flex: 1, minHeight: 120 }}>
               <BarChart data={pontosReceita} fill />
-            </DashCard>
-          </div>
-
-          {/* Insights / Análises */}
-          <div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-              <span style={{ fontSize: 12, fontWeight: 500, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                Inteligência
-              </span>
-              {inteligencia.stage === 2 && inteligencia.insightsNaoLidos > 0 && (
-                <a href="/dashboard/inteligencia" style={{ fontSize: 11, color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}>
-                  {inteligencia.insightsNaoLidos} análise{inteligencia.insightsNaoLidos !== 1 ? "s" : ""} →
-                </a>
-              )}
             </div>
-            {inteligencia.stage === 2 && todosInsights.length > 0 ? (
-              <DashCard style={{ padding: 0, overflow: "hidden", height: 190 }}>
-                {insightsSorted.slice(0, 3).map((item, i) => {
-                  const cor = item.tipo === "action" ? "var(--danger)" : item.tipo === "opportunity" ? "var(--ok)" : "var(--fg-subtle)";
-                  const isCritical = item.tipo === "action";
-                  return (
-                    <div key={i} style={{
-                      borderBottom: i < Math.min(insightsSorted.length, 3) - 1 ? "1px solid var(--border)" : "none",
-                      background: isCritical ? "color-mix(in srgb, var(--danger) 5%, transparent)" : "transparent",
-                      padding: "12px 16px",
-                    }}>
-                      <p style={{ fontSize: 10, fontWeight: 700, color: cor, margin: "0 0 4px", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                        {item.tipo === "action" ? "Crítico" : item.tipo === "opportunity" ? "Oportunidade" : "Info"}
-                      </p>
-                      <p style={{ fontSize: isCritical ? 13 : 12, fontWeight: isCritical ? 700 : 500, color: "var(--fg)", margin: 0, lineHeight: 1.4 }}>
-                        {item.texto}
-                      </p>
-                      {item.impactoReais !== undefined && (
-                        <p style={{ fontSize: 12, fontWeight: 700, color: isCritical ? "var(--danger)" : "var(--ok)", fontVariantNumeric: "tabular-nums", margin: "3px 0 0" }}>
-                          {item.impactoReais < 0 ? `−${currency.format(Math.abs(item.impactoReais))}` : `+${currency.format(item.impactoReais)}`}
-                        </p>
-                      )}
-                    </div>
-                  );
-                })}
-              </DashCard>
-            ) : inteligencia.stage === 2 ? (
-              <DashCard style={{ height: 190, display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ fontSize: 18, color: "var(--ok)" }}>✓</span>
-                <div>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)", margin: "0 0 3px" }}>Tudo sob controle</p>
-                  <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>CMV · Ticket · Estoque</p>
-                </div>
-              </DashCard>
-            ) : (
-              <DashCard style={{ height: 190 }}>
-                <CardOverline>Análises automáticas</CardOverline>
-                <p style={{ fontSize: 12, color: "var(--fg-subtle)", marginTop: 8, lineHeight: 1.6 }}>
-                  Disponível após 30 comandas e 7 dias de operação.
-                </p>
-                <div style={{ marginTop: 12 }}>
-                  {[{ label: "30 comandas", atual: inteligencia.comandas, meta: 30 }, { label: "7 dias", atual: inteligencia.diasAtivo, meta: 7 }].map(item => (
-                    <div key={item.label} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                      <div style={{ flex: 1, height: 2, background: "var(--border-strong)", borderRadius: 2, overflow: "hidden" }}>
-                        <div style={{ height: 2, background: "var(--accent)", borderRadius: 2, width: `${Math.min(Math.round((item.atual / item.meta) * 100), 100)}%` }} />
-                      </div>
-                      <span style={{ fontSize: 10, color: "var(--fg-subtle)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>{item.label} {item.atual}/{item.meta}</span>
-                    </div>
-                  ))}
-                </div>
-              </DashCard>
-            )}
-          </div>
-        </div>
+          </DashCard>
 
-        {/* ═══ BOTTOM — 2 cards ═══ */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+          {/* Col 2 — Melhores do Cardápio */}
+          <DashCard style={{ display: "flex", flexDirection: "column", padding: 0, overflow: "hidden" }}>
+            <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--border)" }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Melhores do Cardápio</span>
+            </div>
+            {produtosTop5.slice(0, 5).map((p, i) => (
+              <div key={p.produtoId} style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "11px 20px",
+                borderBottom: i < Math.min(produtosTop5.length, 5) - 1 ? "1px solid var(--border)" : "none",
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                  <span style={{ fontSize: 11, color: "var(--fg-subtle)", fontVariantNumeric: "tabular-nums", width: 14, flexShrink: 0 }}>{i + 1}</span>
+                  <span style={{ fontSize: 13, color: "var(--fg)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {p.produtoNome}
+                  </span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+                  {p.margemPercentual !== null && (
+                    <span style={{ fontSize: 11, color: "var(--fg-muted)", fontVariantNumeric: "tabular-nums" }}>
+                      {p.margemPercentual.toFixed(0)}% mg
+                    </span>
+                  )}
+                  <span style={{ fontSize: 12, fontWeight: 600, color: "var(--fg-muted)", fontVariantNumeric: "tabular-nums" }}>
+                    {currency.format(p.faturamento)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </DashCard>
 
-          {/* Vendas por hora */}
-          <DashCard>
-            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
-              <CardOverline style={{ marginBottom: 0 }}>Vendas por hora</CardOverline>
-              {pico && <span style={{ fontSize: 11, color: "var(--fg-muted)", fontVariantNumeric: "tabular-nums" }}>Pico {pico.hora}h</span>}
+          {/* Col 3 — Vendas por hora */}
+          <DashCard style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Vendas por hora</span>
+              {pico && (
+                <span style={{ fontSize: 11, color: "var(--fg-muted)", fontVariantNumeric: "tabular-nums" }}>Pico {pico.hora}h</span>
+              )}
             </div>
             {pontosHora.length >= 2 ? (
               <VendasPorHoraChart pontos={pontosHora} />
             ) : (
-              <div style={{ paddingTop: 4 }}>
-                <p style={{ fontSize: 12, color: "var(--fg-subtle)" }}>Aguardando pedidos…</p>
-                {mixPgto.length > 0 && (
-                  <p style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)", marginTop: 6, fontVariantNumeric: "tabular-nums" }}>
-                    {labelMetodo(mixPgto[0].metodo)} · {mixPgto[0].percentual}%
-                  </p>
-                )}
-              </div>
+              <p style={{ fontSize: 12, color: "var(--fg-subtle)", margin: 0 }}>Aguardando pedidos…</p>
             )}
           </DashCard>
 
+        </div>
+
+        {/* ── RODAPÉ — Inteligência + Estoque ── */}
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16 }}>
+
+          {/* Inteligência */}
+          {inteligencia.stage === 2 && todosInsights.length > 0 ? (
+            <DashCard style={{ padding: 0, overflow: "hidden" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", borderBottom: "1px solid var(--border)" }}>
+                <span style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Inteligência</span>
+                {inteligencia.insightsNaoLidos > 0 && (
+                  <a href="/dashboard/inteligencia" style={{ fontSize: 11, color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}>
+                    {inteligencia.insightsNaoLidos} nova{inteligencia.insightsNaoLidos !== 1 ? "s" : ""} →
+                  </a>
+                )}
+              </div>
+              {insightsSorted.slice(0, 3).map((item, i) => {
+                const cor = item.tipo === "action" ? "var(--danger)" : item.tipo === "opportunity" ? "var(--ok)" : "var(--fg-subtle)";
+                return (
+                  <div key={i} style={{
+                    padding: "12px 20px",
+                    borderBottom: i < 2 ? "1px solid var(--border)" : "none",
+                    background: item.tipo === "action" ? "color-mix(in srgb, var(--danger) 4%, transparent)" : "transparent",
+                  }}>
+                    <p style={{ fontSize: 10, fontWeight: 700, color: cor, margin: "0 0 3px", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                      {item.tipo === "action" ? "Crítico" : item.tipo === "opportunity" ? "Oportunidade" : "Info"}
+                    </p>
+                    <p style={{ fontSize: 13, color: "var(--fg)", margin: 0, lineHeight: 1.5 }}>{item.texto}</p>
+                    {item.impactoReais !== undefined && (
+                      <p style={{ fontSize: 12, fontWeight: 700, color: item.tipo === "action" ? "var(--danger)" : "var(--ok)", fontVariantNumeric: "tabular-nums", margin: "3px 0 0" }}>
+                        {item.impactoReais < 0 ? `−${currency.format(Math.abs(item.impactoReais))}` : `+${currency.format(item.impactoReais)}`}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </DashCard>
+          ) : (
+            <DashCard>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Inteligência</span>
+              <p style={{ fontSize: 12, color: "var(--fg-subtle)", marginTop: 10, lineHeight: 1.6 }}>
+                {inteligencia.stage === 2
+                  ? "Tudo sob controle — sem alertas ativos."
+                  : "Disponível após 30 comandas e 7 dias de operação."}
+              </p>
+              {inteligencia.stage === 1 && (
+                <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+                  {[{ label: "Comandas", atual: inteligencia.comandas, meta: 30 }, { label: "Dias", atual: inteligencia.diasAtivo, meta: 7 }].map(item => (
+                    <div key={item.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ fontSize: 10, color: "var(--fg-subtle)", width: 70 }}>{item.label} {item.atual}/{item.meta}</span>
+                      <div style={{ flex: 1, height: 2, background: "var(--border)", borderRadius: 2, overflow: "hidden" }}>
+                        <div style={{ height: 2, background: "var(--accent)", borderRadius: 2, width: `${Math.min(Math.round((item.atual / item.meta) * 100), 100)}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </DashCard>
+          )}
+
           {/* Estoque */}
-          <DashCard>
-            <CardOverline>Estoque</CardOverline>
-            {alertas.length > 0 ? (
-              <>
-                <p style={{ fontSize: "2rem", fontWeight: 700, color: "var(--danger)", fontFamily: "var(--font-mono)", lineHeight: 1, margin: "8px 0 4px" }}>
-                  {alertas.length}
-                </p>
-                <p style={{ fontSize: 11, color: "var(--fg-subtle)" }}>{alertas.length === 1 ? "item crítico" : "itens críticos"}</p>
-              </>
-            ) : (
-              <>
-                <p style={{ fontSize: "2rem", fontWeight: 700, color: "var(--ok)", fontFamily: "var(--font-mono)", lineHeight: 1, margin: "8px 0 4px" }}>OK</p>
-                <p style={{ fontSize: 11, color: "var(--fg-subtle)" }}>nenhum alerta</p>
-              </>
-            )}
-            <a href="/dashboard/estoque" style={{ display: "inline-block", marginTop: 10, fontSize: 12, color: "var(--fg-subtle)", textDecoration: "none" }}>
+          <DashCard style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <span style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Estoque</span>
+            <div>
+              <p style={{ fontSize: 36, fontWeight: 700, lineHeight: 1, margin: "12px 0 4px", fontVariantNumeric: "tabular-nums", color: alertas.length > 0 ? "var(--danger)" : "var(--ok)" }}>
+                {alertas.length > 0 ? alertas.length : "OK"}
+              </p>
+              <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>
+                {alertas.length > 0 ? (alertas.length === 1 ? "item crítico" : "itens críticos") : "nenhum alerta"}
+              </p>
+            </div>
+            <a href="/dashboard/estoque" style={{ fontSize: 12, color: "var(--fg-subtle)", textDecoration: "none" }}>
               Ver estoque →
             </a>
           </DashCard>
