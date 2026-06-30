@@ -28,12 +28,12 @@ interface LiveBarProps {
 
 function MiniSparkline({ values, invert = false }: { values: number[]; invert?: boolean }) {
   if (values.length < 2) return null;
-  const W = 72, H = 24;
+  const W = 56, H = 20;
   const max = Math.max(...values);
   const min = Math.min(...values);
   const range = max - min || 1;
   const xOf = (i: number) => (i / (values.length - 1)) * W;
-  const yOf = (v: number) => H - 2 - ((v - min) / range) * (H - 6);
+  const yOf = (v: number) => H - 2 - ((v - min) / range) * (H - 5);
   const pts = values.map((v, i) => `${xOf(i).toFixed(1)},${yOf(v).toFixed(1)}`).join(" ");
   const last = values[values.length - 1];
   const first = values[0];
@@ -52,7 +52,7 @@ function MiniSparkline({ values, invert = false }: { values: number[]; invert?: 
         strokeLinecap="round"
         opacity="0.6"
       />
-      <circle cx={lx} cy={ly} r="2.5" fill={color} opacity="0.8" />
+      <circle cx={lx} cy={ly} r="2" fill={color} opacity="0.85" />
     </svg>
   );
 }
@@ -62,7 +62,7 @@ function MiniSparkline({ values, invert = false }: { values: number[]; invert?: 
 function Delta({
   pct,
   invert = false,
-  label = "vs. turno ant.",
+  label = "vs. ant.",
 }: {
   pct: number | null | undefined;
   invert?: boolean;
@@ -77,15 +77,15 @@ function Delta({
       style={{
         display: "inline-flex",
         alignItems: "center",
-        gap: 4,
-        marginTop: 6,
-        fontSize: 10,
+        gap: 3,
+        marginTop: 4,
+        fontSize: 9,
         fontWeight: 700,
         color,
         background: "var(--bg)",
         border: "1px solid var(--border)",
-        borderRadius: 6,
-        padding: "2px 8px",
+        borderRadius: 4,
+        padding: "1px 6px",
         fontVariantNumeric: "tabular-nums",
         letterSpacing: "0.04em",
         width: "fit-content",
@@ -181,24 +181,24 @@ export function LiveBar({
     background: "var(--bg-card)",
     border: "1px solid var(--border)",
     borderRadius: "var(--radius-xl)",
-    padding: "20px 24px",
+    padding: "14px 18px",
     display: "flex",
     flexDirection: "column",
-    gap: 4,
+    gap: 3,
   };
 
   const labelStyle: React.CSSProperties = {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: 600,
     color: "var(--fg-subtle)",
     textTransform: "uppercase",
-    letterSpacing: "0.1em",
-    marginBottom: 4,
+    letterSpacing: "0.08em",
+    marginBottom: 2,
     display: "block",
   };
 
   const valueStyle: React.CSSProperties = {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 700,
     lineHeight: 1,
     fontVariantNumeric: "tabular-nums",
@@ -208,22 +208,48 @@ export function LiveBar({
   };
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 12, flexShrink: 0 }}>
 
-      {/* ── Gasto por Mesa ── */}
-      <div style={cardStyle} title="Faturamento total do turno dividido pelo número de comandas abertas">
+      {/* ── Faturado no Turno (HERÓI) ── */}
+      <div style={cardStyle} title="Soma de tudo que foi vendido desde a abertura do turno.">
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-          <span style={labelStyle}>Gasto por Mesa</span>
-          {historicoTicket && historicoTicket.length >= 2 && (
-            <MiniSparkline values={historicoTicket} />
+          <span style={labelStyle}>Faturado no Turno</span>
+          {historicoFaturamento && historicoFaturamento.length >= 2 && (
+            <MiniSparkline values={historicoFaturamento} />
           )}
         </div>
-        <span style={valueStyle}>
-          {data.pessoas > 0 ? currency.format(ticketMedio) : "—"}
+        <span style={{ ...valueStyle, fontSize: 36 }}>
+          {currency.format(data.faturamento)}
         </span>
-        {data.pessoas > 0
-          ? <Delta pct={comparacaoTicket} />
-          : <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>nenhuma mesa aberta</span>}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 2 }}>
+          <Delta pct={comparacaoFaturamento} />
+          {data.pessoas > 0 && (
+            <span style={{ fontSize: 10, color: "var(--fg-subtle)", fontVariantNumeric: "tabular-nums" }}>
+              {data.pessoas} {data.pessoas === 1 ? "mesa aberta" : "mesas abertas"}
+            </span>
+          )}
+        </div>
+        {meta > 0 && (
+          <div style={{ marginTop: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+              <span style={{ fontSize: 9, color: "var(--fg-subtle)" }}>Meta {currency.format(meta)}</span>
+              <span style={{ fontSize: 9, color: metaAtingida ? "var(--ok)" : "var(--fg-subtle)", fontVariantNumeric: "tabular-nums" }}>
+                {metaProgresso}%
+              </span>
+            </div>
+            <div style={{ height: 2, background: "var(--border)", borderRadius: 2, overflow: "hidden" }}>
+              <div
+                style={{
+                  height: 2,
+                  background: metaAtingida ? "var(--ok)" : "var(--accent)",
+                  borderRadius: 2,
+                  width: `${Math.min(metaProgresso, 100)}%`,
+                  transition: "width 0.6s",
+                }}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Margem do Turno ── */}
@@ -236,14 +262,14 @@ export function LiveBar({
           style={{
             display: "inline-flex",
             alignItems: "center",
-            marginTop: 6,
-            fontSize: 10,
+            marginTop: 4,
+            fontSize: 9,
             fontWeight: 700,
             color: margemColor,
             background: "var(--bg)",
             border: "1px solid var(--border)",
-            borderRadius: 6,
-            padding: "2px 8px",
+            borderRadius: 4,
+            padding: "1px 6px",
             letterSpacing: "0.06em",
             textTransform: "uppercase",
             width: "fit-content",
@@ -256,9 +282,9 @@ export function LiveBar({
       {/* ── Custo dos Produtos (CMV) ── */}
       <div style={cardStyle} title="Custo do produto ÷ receita total. Abaixo de 36% é saudável. Acima de 42% está sangrando.">
         <span style={labelStyle}>
-          Custo dos Produtos
+          Custo (CMV)
           {cmvPct !== null && cmvPct >= 42 && (
-            <span style={{ color: "var(--danger)", marginLeft: 6, fontSize: 10 }}>▲ acima do limite</span>
+            <span style={{ color: "var(--danger)", marginLeft: 5, fontSize: 9 }}>▲</span>
           )}
         </span>
         <span style={valueStyle}>
@@ -267,48 +293,20 @@ export function LiveBar({
         <Delta pct={comparacaoCmv} invert />
       </div>
 
-      {/* ── Faturado no Turno + Meta ── */}
-      <div style={cardStyle} title="Soma de tudo que foi vendido desde a abertura do turno.">
+      {/* ── Gasto por Mesa ── */}
+      <div style={cardStyle} title="Faturamento total do turno dividido pelo número de comandas abertas">
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-          <span style={labelStyle}>Faturado no Turno</span>
-          {historicoFaturamento && historicoFaturamento.length >= 2 && (
-            <MiniSparkline values={historicoFaturamento} />
+          <span style={labelStyle}>Ticket Médio</span>
+          {historicoTicket && historicoTicket.length >= 2 && (
+            <MiniSparkline values={historicoTicket} />
           )}
         </div>
         <span style={valueStyle}>
-          {currency.format(data.faturamento)}
+          {data.pessoas > 0 ? currency.format(ticketMedio) : "—"}
         </span>
-        <Delta pct={comparacaoFaturamento} />
-        {meta > 0 && (
-          <div style={{ marginTop: 8 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-              <span style={{ fontSize: 10, color: "var(--fg-subtle)" }}>Meta {currency.format(meta)}</span>
-              <span
-                style={{
-                  fontSize: 10,
-                  color: metaAtingida ? "var(--ok)" : "var(--fg-subtle)",
-                  fontVariantNumeric: "tabular-nums",
-                }}
-              >
-                {metaProgresso}%
-              </span>
-            </div>
-            <div style={{ height: 3, background: "var(--border)", borderRadius: 2, overflow: "hidden" }}>
-              <div
-                style={{
-                  height: 3,
-                  background: metaAtingida ? "var(--ok)" : "var(--accent)",
-                  borderRadius: 2,
-                  width: `${Math.min(metaProgresso, 100)}%`,
-                  transition: "width 0.6s",
-                }}
-              />
-            </div>
-            {metaAtingida && (
-              <span style={{ fontSize: 10, color: "var(--ok)", marginTop: 4, display: "block" }}>meta batida ✓</span>
-            )}
-          </div>
-        )}
+        {data.pessoas > 0
+          ? <Delta pct={comparacaoTicket} />
+          : <span style={{ fontSize: 10, color: "var(--fg-subtle)", marginTop: 4, display: "block" }}>sem mesas abertas</span>}
       </div>
 
     </div>

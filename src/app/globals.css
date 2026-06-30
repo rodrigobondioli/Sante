@@ -33,6 +33,10 @@
   --warn:            #F59E0B;  --warn-bg:   rgba(245,158,11,0.10);
   --danger:          #DC2626;  --danger-bg: rgba(220,38,38,0.10);
 
+  /* ── AI card surface ── */
+  --bg-ai:           #EEF2FF;
+  --border-ai:       #C7D2FE;
+
   /* ── Raios ── */
   --radius-sm:   4px;
   --radius-md:   8px;
@@ -74,6 +78,10 @@
   --ok:              #22C55E;  --ok-bg:     rgba(34,197,94,0.08);
   --warn:            #F59E0B;  --warn-bg:   rgba(245,158,11,0.08);
   --danger:          #EF4444;  --danger-bg: rgba(239,68,68,0.08);
+
+  /* ── AI card surface ── */
+  --bg-ai:           #141824;  /* deep navy — Próxima Melhor Ação */
+  --border-ai:       #1E2640;  /* border on AI card */
 }
 
 @theme {
