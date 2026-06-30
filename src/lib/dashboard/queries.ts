@@ -450,3 +450,39 @@ export async function getPrimeirosPassos(barId: string, userId: string): Promise
     nTurnos:   turnos.count   ?? 0,
   };
 }
+
+// ── Histórico de turnos para sparklines ────────────────────────────────────
+
+export interface HistoricoTurnos {
+  faturamento: number[];
+  ticketMedio: number[];
+}
+
+/**
+ * Retorna os últimos N turnos fechados (do mais antigo ao mais recente)
+ * para exibir sparklines nos KPI cards do LiveBar.
+ */
+export async function getHistoricoTurnos(barId: string, limit = 7): Promise<HistoricoTurnos | null> {
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from("turnos")
+    .select("total_vendas, total_comandas")
+    .eq("bar_id", barId)
+    .eq("status", "fechado")
+    .order("fechado_em", { ascending: false })
+    .limit(limit)
+    .returns<{ total_vendas: number; total_comandas: number }[]>();
+
+  if (!data || data.length < 2) return null;
+
+  const reversed = [...data].reverse(); // mais antigo → mais recente (esquerda → direita)
+  return {
+    faturamento: reversed.map(t => Number(t.total_vendas)),
+    ticketMedio: reversed.map(t =>
+      Number(t.total_comandas) > 0
+        ? Number(t.total_vendas) / Number(t.total_comandas)
+        : 0
+    ),
+  };
+}

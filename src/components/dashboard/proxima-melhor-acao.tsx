@@ -138,7 +138,7 @@ export function ProximaMelhorAcao({
       <div style={{
         background: "var(--bg-card)",
         border: "1px solid var(--border)",
-        borderRadius: "var(--radius-lg)",
+        borderRadius: "var(--radius-xl)",
         padding: "28px 32px",
         display: "flex",
         flexDirection: "column",
@@ -206,7 +206,7 @@ export function ProximaMelhorAcao({
         <div style={{
           background: "var(--bg-card)",
           border: "1px solid var(--border)",
-          borderRadius: "var(--radius-lg)",
+          borderRadius: "var(--radius-xl)",
           padding: "20px 20px 16px",
           display: "flex",
           flexDirection: "column",

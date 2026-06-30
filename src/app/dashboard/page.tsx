@@ -20,6 +20,7 @@ import {
   getLiveStats,
   getPrimeirosPassos,
   getUltimoTurnoFechado,
+  getHistoricoTurnos,
 } from "@/lib/dashboard/queries";
 import { getInteligenciaStage } from "@/lib/inteligencia/queries";
 import { categorizarProdutos, calcularCmv, calcularCoberturaReceita } from "@/lib/dashboard/menu-engineering";
@@ -439,7 +440,7 @@ export default async function DashboardPage() {
     );
   }
 
-  const [kpis, alertas, produtosVendidos, metaMes, liveStats, pontosHora, rankingMesas, mixPgto, tempos, inteligencia] = await Promise.all([
+  const [kpis, alertas, produtosVendidos, metaMes, liveStats, pontosHora, rankingMesas, mixPgto, tempos, inteligencia, historicoTurnos] = await Promise.all([
     getKpisTurno(turno),
     getAlertasEstoque(current.bar.id),
     getProdutosVendidosTurno(current.bar.id, turno.id),
@@ -450,6 +451,7 @@ export default async function DashboardPage() {
     getMixPagamento(current.bar.id, turno.id),
     getTempoMedioPreparo(current.bar.id, turno.id),
     getInteligenciaStage(current.bar.id),
+    getHistoricoTurnos(current.bar.id),
   ]);
 
   const comparacao = await getKpisComparacao(
@@ -540,11 +542,98 @@ export default async function DashboardPage() {
   }
   const proximaAcaoTexto = inteligencia.stage === 2 && insightsSorted.length > 0 ? insightsSorted[0].texto : null;
 
+  // Alertas críticos de AI (tipo "action")
+  const alertasAction = insightsSorted.filter(i => i.tipo === "action");
+  const temAlertas = alertas.length > 0 || alertasAction.length > 0;
+
   return (
     <div style={{ display: "flex", flexDirection: "column", width: "100%", overflowX: "hidden" }}>
       <div className="lg:px-10" style={{ paddingTop: 32, paddingBottom: 64, display: "flex", flexDirection: "column", gap: 24 }}>
 
-        {/* ── ALFA PANEL — AI Recommendation ── */}
+        {/* ── 1. KPI STRIP — ao vivo, primeira coisa que o dono vê ── */}
+        <LiveBar
+          turnoId={turno.id}
+          barId={current.bar.id}
+          faturamentoInicial={kpis.faturamento}
+          pessoasInicial={kpis.comandasAbertas}
+          drinksInicial={liveStats.drinks}
+          margemEstimada={cmvAtual}
+          comparacaoFaturamento={comparacao.faturamento}
+          comparacaoTicket={comparacao.ticketMedio}
+          comparacaoCmv={comparacao.cmv}
+          cmvParcial={cmvParcial}
+          metaProgresso={metaProgresso}
+          metaFalta={metaFalta}
+          metaAtingida={metaAtingida}
+          meta={meta}
+          historicoFaturamento={historicoTurnos?.faturamento}
+          historicoTicket={historicoTurnos?.ticketMedio}
+        />
+
+        {/* ── 2. ALERT STRIP — exceções surfaceadas acima do fold ── */}
+        {temAlertas && (
+          <div style={{
+            background: "var(--bg-card)",
+            border: "1px solid var(--border)",
+            borderRadius: "var(--radius-xl)",
+            overflow: "hidden",
+          }}>
+            {alertas.length > 0 && (
+              <a
+                href="/dashboard/estoque"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "12px 20px",
+                  borderBottom: alertasAction.length > 0 ? "1px solid var(--border)" : "none",
+                  textDecoration: "none",
+                }}
+              >
+                <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--danger)", flexShrink: 0 }} />
+                <span style={{ flex: 1, fontSize: 13, color: "var(--fg)", fontWeight: 500 }}>
+                  {alertas.length} {alertas.length === 1 ? "item" : "itens"} em risco no balcão — pode faltar antes do turno fechar
+                </span>
+                <span style={{ fontSize: 12, color: "var(--fg-subtle)", flexShrink: 0, whiteSpace: "nowrap" }}>Ver estoque →</span>
+              </a>
+            )}
+            {alertasAction.slice(0, 3).map((item, i) => (
+              <a
+                key={i}
+                href="/dashboard/inteligencia"
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 12,
+                  padding: "12px 20px",
+                  borderBottom: i < Math.min(alertasAction.length, 3) - 1 ? "1px solid var(--border)" : "none",
+                  textDecoration: "none",
+                }}
+              >
+                <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--warn)", flexShrink: 0, marginTop: 5 }} />
+                <span style={{ flex: 1, fontSize: 13, color: "var(--fg)", fontWeight: 500, lineHeight: 1.5 }}>
+                  {item.texto}
+                </span>
+                {item.impactoReais !== undefined && (
+                  <span style={{
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: item.impactoReais < 0 ? "var(--danger)" : "var(--ok)",
+                    fontVariantNumeric: "tabular-nums",
+                    flexShrink: 0,
+                    whiteSpace: "nowrap",
+                  }}>
+                    {item.impactoReais < 0
+                      ? `−${currency.format(Math.abs(item.impactoReais))}`
+                      : `+${currency.format(item.impactoReais)}`}
+                  </span>
+                )}
+              </a>
+            ))}
+          </div>
+        )}
+
+        {/* ── 3. ALFA PANEL — AI Recommendation ── */}
         {produtosTop5.length > 0 && produtosTop5[0].margemPercentual !== null ? (
           <ProximaMelhorAcao
             produtoNome={produtosTop5[0].produtoNome}
@@ -561,27 +650,7 @@ export default async function DashboardPage() {
           />
         ) : null}
 
-        {/* ── KPI STRIP ── */}
-        <LiveBar
-          turnoId={turno.id}
-          barId={current.bar.id}
-          faturamentoInicial={kpis.faturamento}
-          pessoasInicial={kpis.comandasAbertas}
-          drinksInicial={liveStats.drinks}
-          margemEstimada={cmvAtual}
-          comparacaoFaturamento={comparacao.faturamento}
-          comparacaoTicket={comparacao.ticketMedio}
-          comparacaoCmv={comparacao.cmv}
-          cmvParcial={cmvParcial}
-          metaProgresso={metaProgresso}
-          metaFalta={metaFalta}
-          metaAtingida={metaAtingida}
-          meta={meta}
-        />
-
-
-
-        {/* ── AI CHAT ── */}
+        {/* ── 4. AI CHAT ── */}
         <AiHeroInput
           barId={current.bar.id}
           alertCount={nAction}
@@ -590,7 +659,7 @@ export default async function DashboardPage() {
           produtoSugerido={produtosTop5.length > 0 ? produtosTop5[0].produtoNome : null}
         />
 
-        {/* ── BOTTOM — 3 colunas ── */}
+        {/* ── 5. ANALYTICS — 3 colunas ── */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
 
           {/* Col 1 — Receita 7 dias */}
@@ -650,82 +719,6 @@ export default async function DashboardPage() {
             ) : (
               <p style={{ fontSize: 12, color: "var(--fg-subtle)", margin: 0 }}>Nenhum pedido ainda. O movimento aparece aqui em tempo real.</p>
             )}
-          </DashCard>
-
-        </div>
-
-        {/* ── RODAPÉ — Inteligência + Estoque ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16 }}>
-
-          {/* Inteligência */}
-          {inteligencia.stage === 2 && todosInsights.length > 0 ? (
-            <DashCard style={{ padding: 0, overflow: "hidden" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", borderBottom: "1px solid var(--border)" }}>
-                <span style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Alertas do Sistema</span>
-                {inteligencia.insightsNaoLidos > 0 && (
-                  <a href="/dashboard/inteligencia" style={{ fontSize: 11, color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}>
-                    {inteligencia.insightsNaoLidos} nova{inteligencia.insightsNaoLidos !== 1 ? "s" : ""} →
-                  </a>
-                )}
-              </div>
-              {insightsSorted.slice(0, 3).map((item, i) => {
-                const cor = item.tipo === "action" ? "var(--danger)" : item.tipo === "opportunity" ? "var(--ok)" : "var(--fg-subtle)";
-                return (
-                  <div key={i} style={{
-                    padding: "12px 20px",
-                    borderBottom: i < 2 ? "1px solid var(--border)" : "none",
-                    background: item.tipo === "action" ? "color-mix(in srgb, var(--danger) 4%, transparent)" : "transparent",
-                  }}>
-                    <p style={{ fontSize: 10, fontWeight: 700, color: cor, margin: "0 0 3px", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                      {item.tipo === "action" ? "Crítico" : item.tipo === "opportunity" ? "Oportunidade" : "Info"}
-                    </p>
-                    <p style={{ fontSize: 13, color: "var(--fg)", margin: 0, lineHeight: 1.5 }}>{item.texto}</p>
-                    {item.impactoReais !== undefined && (
-                      <p style={{ fontSize: 12, fontWeight: 700, color: item.tipo === "action" ? "var(--danger)" : "var(--ok)", fontVariantNumeric: "tabular-nums", margin: "3px 0 0" }}>
-                        {item.impactoReais < 0 ? `−${currency.format(Math.abs(item.impactoReais))}` : `+${currency.format(item.impactoReais)}`}
-                      </p>
-                    )}
-                  </div>
-                );
-              })}
-            </DashCard>
-          ) : (
-            <DashCard>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Alertas do Sistema</span>
-              <p style={{ fontSize: 12, color: "var(--fg-subtle)", marginTop: 10, lineHeight: 1.6 }}>
-                {inteligencia.stage === 2
-                  ? "Operação limpa. Nenhum alerta ativo no momento."
-                  : "Disponível após 30 comandas e 7 dias de operação."}
-              </p>
-              {inteligencia.stage === 1 && (
-                <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-                  {[{ label: "Comandas", atual: inteligencia.comandas, meta: 30 }, { label: "Dias", atual: inteligencia.diasAtivo, meta: 7 }].map(item => (
-                    <div key={item.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <span style={{ fontSize: 10, color: "var(--fg-subtle)", width: 70 }}>{item.label} {item.atual}/{item.meta}</span>
-                      <div style={{ flex: 1, height: 2, background: "var(--border)", borderRadius: 2, overflow: "hidden" }}>
-                        <div style={{ height: 2, background: "var(--accent)", borderRadius: 2, width: `${Math.min(Math.round((item.atual / item.meta) * 100), 100)}%` }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </DashCard>
-          )}
-
-          {/* Estoque */}
-          <DashCard style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-            <span style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Vai Faltar no Balcão</span>
-            <div>
-              <p style={{ fontSize: 36, fontWeight: 700, lineHeight: 1, margin: "12px 0 4px", fontVariantNumeric: "tabular-nums", color: alertas.length > 0 ? "var(--danger)" : "var(--ok)" }}>
-                {alertas.length > 0 ? alertas.length : "OK"}
-              </p>
-              <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>
-                {alertas.length > 0 ? (alertas.length === 1 ? "item em risco" : "itens em risco") : "tudo abastecido"}
-              </p>
-            </div>
-            <a href="/dashboard/estoque" style={{ fontSize: 12, color: "var(--fg-subtle)", textDecoration: "none" }}>
-              Ver estoque →
-            </a>
           </DashCard>
 
         </div>
