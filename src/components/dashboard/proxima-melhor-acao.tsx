@@ -30,19 +30,18 @@ export function ProximaMelhorAcao({
   const rankingFiltrado = ranking.filter(p => p.margemPercentual !== null).slice(0, 4);
 
   return (
-    <div style={{
-      display: "grid",
-      gridTemplateColumns: "1fr auto",
-      gap: 0,
-      background: "var(--bg-card)",
-      border: "1px solid var(--border)",
-      borderRadius: "var(--radius-lg)",
-      overflow: "hidden",
-      minHeight: 160,
-    }}>
+    <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 16 }}>
 
       {/* ── Card esquerdo — destaque principal ── */}
-      <div style={{ padding: "28px 32px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+      <div style={{
+        background: "var(--bg-card)",
+        border: "1px solid var(--border)",
+        borderRadius: "var(--radius-lg)",
+        padding: "28px 32px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
+      }}>
         {/* Overline */}
         <span style={{
           display: "inline-flex",
@@ -56,93 +55,94 @@ export function ProximaMelhorAcao({
           background: "transparent",
           padding: "3px 10px",
           borderRadius: 9999,
-          marginBottom: 16,
         }}>
           Superbar AI · Bebida mais lucrativa do momento
         </span>
 
-        {/* Produto + margem em destaque */}
-        <div style={{ flex: 1 }}>
-          <p style={{
-            fontSize: "clamp(22px, 2.4vw, 32px)",
-            fontWeight: 700,
-            color: "#FFFFFF",
-            margin: "0 0 6px",
-            lineHeight: 1.15,
-            letterSpacing: "-0.03em",
-          }}>
-            {produtoNome}
-          </p>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-            <span style={{
-              fontSize: 13,
-              fontWeight: 700,
-              color: "#22C55E",
-              background: "transparent",
-              border: "1px solid var(--border)",
-              borderRadius: 9999,
-              padding: "2px 10px",
-              fontVariantNumeric: "tabular-nums",
-            }}>
-              {percent.format(margemPercentual ?? 0)}% margem
-            </span>
-            {faturamento > 0 && (
-              <span style={{ fontSize: 12, color: "#A1A1AA", fontVariantNumeric: "tabular-nums" }}>
-                {currency.format(faturamento)} gerado hoje
-              </span>
-            )}
-          </div>
+        {/* Nome do produto */}
+        <p style={{
+          fontSize: "clamp(22px, 2.4vw, 32px)",
+          fontWeight: 700,
+          color: "#FFFFFF",
+          margin: 0,
+          lineHeight: 1.15,
+          letterSpacing: "-0.03em",
+        }}>
+          {produtoNome}
+        </p>
 
-          {/* Razão */}
-          <p style={{ fontSize: 13, color: "#A1A1AA", lineHeight: 1.6, margin: 0, maxWidth: 520 }}>
-            {isSubofertado
-              ? `Apareceu pouco hoje — sugerir ativamente nas próximas 2h pode mais que dobrar as vendas com zero esforço.`
-              : `Já lidera em vendas. Manter no topo das sugestões é o caminho de menor esforço para crescer a receita.`}
-          </p>
+        {/* Margem + faturamento */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={{
+            fontSize: 13,
+            fontWeight: 700,
+            color: "#22C55E",
+            border: "1px solid var(--border)",
+            borderRadius: 9999,
+            padding: "2px 10px",
+            fontVariantNumeric: "tabular-nums",
+          }}>
+            {percent.format(margemPercentual ?? 0)}% margem
+          </span>
+          {faturamento > 0 && (
+            <span style={{ fontSize: 12, color: "#A1A1AA", fontVariantNumeric: "tabular-nums" }}>
+              {currency.format(faturamento)} gerado hoje
+            </span>
+          )}
         </div>
+
+        {/* Razão */}
+        <p style={{ fontSize: 13, color: "#A1A1AA", lineHeight: 1.6, margin: 0, maxWidth: 520 }}>
+          {isSubofertado
+            ? `Apareceu pouco hoje — sugerir ativamente nas próximas 2h pode mais que dobrar as vendas com zero esforço.`
+            : `Já lidera em vendas. Manter no topo das sugestões é o caminho de menor esforço para crescer a receita.`}
+        </p>
       </div>
 
-      {/* ── Divisor vertical ── */}
+      {/* ── Card direito — outros de alta margem ── */}
       {rankingFiltrado.length > 0 && (
-        <div style={{ display: "flex" }}>
-          <div style={{ width: 1, background: "var(--border)", alignSelf: "stretch" }} />
+        <div style={{
+          background: "var(--bg-card)",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--radius-lg)",
+          padding: "24px 28px",
+          display: "flex",
+          flexDirection: "column",
+          minWidth: 240,
+        }}>
+          <p style={{
+            fontSize: 9,
+            fontWeight: 700,
+            color: "#A1A1AA",
+            textTransform: "uppercase",
+            letterSpacing: "0.14em",
+            margin: "0 0 16px",
+          }}>
+            Outros de alta margem
+          </p>
 
-          {/* Card direito — outros de alta margem */}
-          <div style={{ padding: "28px 28px", display: "flex", flexDirection: "column", minWidth: 220 }}>
-            <p style={{
-              fontSize: 9,
-              fontWeight: 700,
-              color: "#A1A1AA",
-              textTransform: "uppercase",
-              letterSpacing: "0.14em",
-              margin: "0 0 16px",
-            }}>
-              Outros de alta margem
-            </p>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1, justifyContent: "center" }}>
-              {rankingFiltrado.map((p, i) => (
-                <div key={p.produtoId} style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 16,
-                  paddingBottom: i < rankingFiltrado.length - 1 ? 12 : 0,
-                  borderBottom: i < rankingFiltrado.length - 1 ? "1px solid var(--border)" : "none",
+          <div style={{ display: "flex", flexDirection: "column", flex: 1, justifyContent: "center" }}>
+            {rankingFiltrado.map((p, i) => (
+              <div key={p.produtoId} style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 24,
+                padding: "10px 0",
+                borderBottom: i < rankingFiltrado.length - 1 ? "1px solid var(--border)" : "none",
+              }}>
+                <span style={{ fontSize: 13, color: "#FFFFFF" }}>{p.produtoNome}</span>
+                <span style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: "#22C55E",
+                  fontVariantNumeric: "tabular-nums",
+                  flexShrink: 0,
                 }}>
-                  <span style={{ fontSize: 13, color: "#FFFFFF" }}>{p.produtoNome}</span>
-                  <span style={{
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: "#22C55E",
-                    fontVariantNumeric: "tabular-nums",
-                    flexShrink: 0,
-                  }}>
-                    {percent.format(p.margemPercentual ?? 0)}%
-                  </span>
-                </div>
-              ))}
-            </div>
+                  {percent.format(p.margemPercentual ?? 0)}%
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       )}
