@@ -145,20 +145,20 @@ export function LiveBar({
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
 
-      {/* Ticket Médio */}
-      <div style={cardStyle}>
-        <span style={labelStyle}>Ticket Médio</span>
+      {/* Gasto por Mesa */}
+      <div style={cardStyle} title="Faturamento total do turno dividido pelo número de comandas abertas">
+        <span style={labelStyle}>Gasto por Mesa</span>
         <span style={valueStyle}>
           {data.pessoas > 0 ? currency.format(ticketMedio) : "—"}
         </span>
         {data.pessoas > 0
           ? <Delta pct={comparacaoTicket} />
-          : <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>sem comandas</span>}
+          : <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>nenhuma mesa aberta</span>}
       </div>
 
       {/* Margem */}
-      <div style={cardStyle}>
-        <span style={labelStyle}>Margem</span>
+      <div style={cardStyle} title="O que sobra depois de pagar o custo dos produtos. 100% menos o CMV.">
+        <span style={labelStyle}>Margem do Turno</span>
         <span style={valueStyle}>
           {margemPct !== null ? `${margemPct.toFixed(0)}%` : "—"}
         </span>
@@ -182,11 +182,11 @@ export function LiveBar({
       </div>
 
       {/* CMV */}
-      <div style={cardStyle}>
+      <div style={cardStyle} title="Custo do produto ÷ receita total. Abaixo de 36% é saudável. Acima de 42% está sangrando.">
         <span style={labelStyle}>
-          CMV
+          Custo dos Produtos
           {cmvPct !== null && cmvPct >= 42 && (
-            <span style={{ color: "var(--danger)", marginLeft: 6, fontSize: 10 }}>▲ alerta</span>
+            <span style={{ color: "var(--danger)", marginLeft: 6, fontSize: 10 }}>▲ acima do limite</span>
           )}
         </span>
         <span style={valueStyle}>
@@ -195,9 +195,9 @@ export function LiveBar({
         <Delta pct={comparacaoCmv} invert />
       </div>
 
-      {/* Faturamento + Meta */}
-      <div style={cardStyle}>
-        <span style={labelStyle}>Fat. Atual</span>
+      {/* Faturado no Turno + Meta */}
+      <div style={cardStyle} title="Soma de tudo que foi vendido desde a abertura do turno.">
+        <span style={labelStyle}>Faturado no Turno</span>
         <span style={valueStyle}>
           {currency.format(data.faturamento)}
         </span>
@@ -220,7 +220,7 @@ export function LiveBar({
               }} />
             </div>
             {metaAtingida && (
-              <span style={{ fontSize: 10, color: "var(--ok)", marginTop: 4, display: "block" }}>meta atingida ✓</span>
+              <span style={{ fontSize: 10, color: "var(--ok)", marginTop: 4, display: "block" }}>meta batida ✓</span>
             )}
           </div>
         )}

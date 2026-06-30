@@ -43,40 +43,43 @@ const dataExtenso = new Intl.DateTimeFormat("pt-BR", { weekday: "short", day: "2
 
 function VendasPorHoraChart({ pontos }: { pontos: PontoPico[] }) {
   if (pontos.length < 2) return null;
-  const W = 600, H = 120, padL = 4, padR = 4, padT = 6, padB = 24;
+  const W = 600, H = 120, padL = 4, padR = 4, padT = 8, padB = 24;
   const chartW = W - padL - padR;
   const chartH = H - padT - padB;
   const maxVal = Math.max(...pontos.map(p => p.drinks), 1);
   const n = pontos.length;
-  const barW = Math.max(Math.floor((chartW / n) * 0.65), 4);
-  const gap = chartW / n;
   const maxIdx = pontos.reduce((mi, p, i, arr) => p.drinks > arr[mi].drinks ? i : mi, 0);
-  // Grid lines
-  const gridLines = [0.25, 0.5, 0.75, 1].map(f => padT + chartH - f * chartH);
+  const xOf = (i: number) => padL + (i / (n - 1)) * chartW;
+  const yOf = (v: number) => padT + chartH - (v / maxVal) * chartH;
+  // Step-line: para cada ponto vai horizontal até o próximo, depois vertical
+  const stepPath = pontos.map((p, i) => {
+    const x = xOf(i);
+    const y = yOf(p.drinks);
+    if (i === 0) return `M ${x.toFixed(1)} ${y.toFixed(1)}`;
+    const xPrev = xOf(i - 1);
+    return `H ${((x + xPrev) / 2).toFixed(1)} V ${y.toFixed(1)} H ${x.toFixed(1)}`;
+  }).join(" ");
+  const areaClose = `V ${(padT + chartH).toFixed(1)} H ${padL} Z`;
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: 120 }} preserveAspectRatio="none">
-      {/* Grid horizontal */}
-      {gridLines.map((y, i) => (
-        <line key={i} x1={padL} y1={y} x2={W - padR} y2={y} stroke="#2C2C2E" strokeWidth="1" />
-      ))}
-      {/* Barras */}
-      {pontos.map((p, i) => {
-        const barH = Math.max((p.drinks / maxVal) * chartH, 1);
-        const x = padL + i * gap + (gap - barW) / 2;
-        const y = padT + chartH - barH;
-        const isPeak = i === maxIdx;
-        return (
-          <rect key={i} x={x.toFixed(1)} y={y.toFixed(1)} width={barW} height={barH.toFixed(1)}
-            fill={isPeak ? "#FF6F00" : "#F59E0B"} />
-        );
-      })}
+      <defs>
+        <linearGradient id="stepGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.18" />
+          <stop offset="100%" stopColor="#F59E0B" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      {/* Área sob a step-line */}
+      <path d={`${stepPath} ${areaClose}`} fill="url(#stepGrad)" />
+      {/* Step-line */}
+      <path d={stepPath} fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinejoin="miter" />
+      {/* Ponto de pico */}
+      <circle cx={xOf(maxIdx).toFixed(1)} cy={yOf(pontos[maxIdx].drinks).toFixed(1)} r="3.5" fill="#FF6F00" />
       {/* Labels hora */}
       {pontos.map((p, i) => {
         const show = i === 0 || i === n - 1 || i === maxIdx || i % Math.ceil(n / 5) === 0;
         if (!show) return null;
-        const x = padL + i * gap + gap / 2;
         return (
-          <text key={i} x={x.toFixed(1)} y={H - 4} textAnchor="middle" fontSize="9" fill="#A1A1AA" fontFamily="Inter, sans-serif">
+          <text key={i} x={xOf(i).toFixed(1)} y={H - 4} textAnchor="middle" fontSize="9" fill="#A1A1AA" fontFamily="Inter, sans-serif">
             {p.hora}h
           </text>
         );
@@ -593,7 +596,7 @@ export default async function DashboardPage() {
           {/* Col 1 — Receita 7 dias */}
           <DashCard style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Receita — 7 dias</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Receita dos últimos 7 dias</span>
               <TrendText percent={receitaSemana.percentual} comparativoLabel="vs semana" />
             </div>
             <div style={{ flex: 1, minHeight: 120 }}>
@@ -604,7 +607,7 @@ export default async function DashboardPage() {
           {/* Col 2 — Melhores do Cardápio */}
           <DashCard style={{ display: "flex", flexDirection: "column", padding: 0, overflow: "hidden" }}>
             <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--border)" }}>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Melhores do Cardápio</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Os Mais Pedidos</span>
             </div>
             {produtosTop5.slice(0, 5).map((p, i) => (
               <div key={p.produtoId} style={{
@@ -637,15 +640,15 @@ export default async function DashboardPage() {
           {/* Col 3 — Vendas por hora */}
           <DashCard style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Vendas por hora</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Movimento por Hora</span>
               {pico && (
-                <span style={{ fontSize: 11, color: "var(--fg-muted)", fontVariantNumeric: "tabular-nums" }}>Pico {pico.hora}h</span>
+                <span style={{ fontSize: 11, color: "var(--fg-muted)", fontVariantNumeric: "tabular-nums" }}>Pico às {pico.hora}h</span>
               )}
             </div>
             {pontosHora.length >= 2 ? (
               <VendasPorHoraChart pontos={pontosHora} />
             ) : (
-              <p style={{ fontSize: 12, color: "var(--fg-subtle)", margin: 0 }}>Aguardando pedidos…</p>
+              <p style={{ fontSize: 12, color: "var(--fg-subtle)", margin: 0 }}>Nenhum pedido ainda. O movimento aparece aqui em tempo real.</p>
             )}
           </DashCard>
 
@@ -658,7 +661,7 @@ export default async function DashboardPage() {
           {inteligencia.stage === 2 && todosInsights.length > 0 ? (
             <DashCard style={{ padding: 0, overflow: "hidden" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", borderBottom: "1px solid var(--border)" }}>
-                <span style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Inteligência</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Alertas do Sistema</span>
                 {inteligencia.insightsNaoLidos > 0 && (
                   <a href="/dashboard/inteligencia" style={{ fontSize: 11, color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}>
                     {inteligencia.insightsNaoLidos} nova{inteligencia.insightsNaoLidos !== 1 ? "s" : ""} →
@@ -688,10 +691,10 @@ export default async function DashboardPage() {
             </DashCard>
           ) : (
             <DashCard>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Inteligência</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Alertas do Sistema</span>
               <p style={{ fontSize: 12, color: "var(--fg-subtle)", marginTop: 10, lineHeight: 1.6 }}>
                 {inteligencia.stage === 2
-                  ? "Tudo sob controle — sem alertas ativos."
+                  ? "Operação limpa. Nenhum alerta ativo no momento."
                   : "Disponível após 30 comandas e 7 dias de operação."}
               </p>
               {inteligencia.stage === 1 && (
@@ -711,13 +714,13 @@ export default async function DashboardPage() {
 
           {/* Estoque */}
           <DashCard style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-            <span style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Estoque</span>
+            <span style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-subtle)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Vai Faltar no Balcão</span>
             <div>
               <p style={{ fontSize: 36, fontWeight: 700, lineHeight: 1, margin: "12px 0 4px", fontVariantNumeric: "tabular-nums", color: alertas.length > 0 ? "var(--danger)" : "var(--ok)" }}>
                 {alertas.length > 0 ? alertas.length : "OK"}
               </p>
               <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>
-                {alertas.length > 0 ? (alertas.length === 1 ? "item crítico" : "itens críticos") : "nenhum alerta"}
+                {alertas.length > 0 ? (alertas.length === 1 ? "item em risco" : "itens em risco") : "tudo abastecido"}
               </p>
             </div>
             <a href="/dashboard/estoque" style={{ fontSize: 12, color: "var(--fg-subtle)", textDecoration: "none" }}>
