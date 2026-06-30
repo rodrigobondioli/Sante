@@ -168,7 +168,7 @@ export function AiHeroInput({
             onClick={() => ask(question)}
             disabled={loading || !question.trim()}
             style={{
-              background: question.trim() && !loading ? 'var(--accent)' : 'var(--border-strong)',
+              background: 'var(--accent)',
               border: 'none',
               borderRadius: 9999,
               width: 38,
