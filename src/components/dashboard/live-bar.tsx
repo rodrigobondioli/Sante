@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+const currencyNum = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
 
 interface LiveBarProps {
   turnoId: string;
@@ -180,7 +181,7 @@ export function LiveBar({
   const cardStyle: React.CSSProperties = {
     background: "var(--bg-card)",
     border: "1px solid var(--border)",
-    borderRadius: "var(--radius-xl)",
+    borderRadius: "var(--radius-2xl)",
     padding: "14px 18px",
     display: "flex",
     flexDirection: "column",
@@ -218,9 +219,12 @@ export function LiveBar({
             <MiniSparkline values={historicoFaturamento} />
           )}
         </div>
-        <span style={{ ...valueStyle, fontSize: 36 }}>
-          {currency.format(data.faturamento)}
-        </span>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 4, lineHeight: 1, marginTop: 4 }}>
+          <span style={{ fontSize: 18, fontWeight: 300, color: "var(--fg)", opacity: 0.45, paddingTop: 8, letterSpacing: 0 }}>R$</span>
+          <span style={{ fontSize: 52, fontWeight: 300, letterSpacing: "-0.04em", fontVariantNumeric: "tabular-nums", color: "var(--fg)", lineHeight: 1 }}>
+            {currencyNum.format(Math.round(data.faturamento))}
+          </span>
+        </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 2 }}>
           <Delta pct={comparacaoFaturamento} />
           {data.pessoas > 0 && (

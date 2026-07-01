@@ -1,3 +1,4 @@
+import { AlertCircle, Gauge, Star } from "lucide-react";
 import { TrendText } from "@/components/ui/trend-text";
 import { BarChart } from "@/components/ui/bar-chart";
 import { CategoriaBadge } from "@/components/dashboard/categoria-badge";
@@ -50,32 +51,41 @@ function VendasPorHoraChart({ pontos }: { pontos: PontoPico[] }) {
   const maxVal = Math.max(...pontos.map(p => p.drinks), 1);
   const n = pontos.length;
   const maxIdx = pontos.reduce((mi, p, i, arr) => p.drinks > arr[mi].drinks ? i : mi, 0);
-  const xOf = (i: number) => padL + (i / (n - 1)) * chartW;
-  const yOf = (v: number) => padT + chartH - (v / maxVal) * chartH;
-  const stepPath = pontos.map((p, i) => {
-    const x = xOf(i);
-    const y = yOf(p.drinks);
-    if (i === 0) return `M ${x.toFixed(1)} ${y.toFixed(1)}`;
-    const xPrev = xOf(i - 1);
-    return `H ${((x + xPrev) / 2).toFixed(1)} V ${y.toFixed(1)} H ${x.toFixed(1)}`;
-  }).join(" ");
+  const pts = pontos.map((p, i) => ({
+    x: padL + (i / (n - 1)) * chartW,
+    y: padT + chartH - (p.drinks / maxVal) * chartH,
+  }));
+  // Catmull-Rom cubic bezier
+  const tension = 0.4;
+  let linePath = `M ${pts[0].x.toFixed(2)},${pts[0].y.toFixed(2)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[Math.min(pts.length - 1, i + 2)];
+    const cp1x = p1.x + (p2.x - p0.x) * tension / 3;
+    const cp1y = p1.y + (p2.y - p0.y) * tension / 3;
+    const cp2x = p2.x - (p3.x - p1.x) * tension / 3;
+    const cp2y = p2.y - (p3.y - p1.y) * tension / 3;
+    linePath += ` C ${cp1x.toFixed(2)},${cp1y.toFixed(2)} ${cp2x.toFixed(2)},${cp2y.toFixed(2)} ${p2.x.toFixed(2)},${p2.y.toFixed(2)}`;
+  }
   const areaClose = `V ${(padT + chartH).toFixed(1)} H ${padL} Z`;
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "100%", display: "block" }} preserveAspectRatio="none">
       <defs>
-        <linearGradient id="stepGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.20" />
-          <stop offset="100%" stopColor="#F59E0B" stopOpacity="0" />
+        <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.22" />
+          <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
         </linearGradient>
       </defs>
-      <path d={`${stepPath} ${areaClose}`} fill="url(#stepGrad)" />
-      <path d={stepPath} fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinejoin="miter" />
-      <circle cx={xOf(maxIdx).toFixed(1)} cy={yOf(pontos[maxIdx].drinks).toFixed(1)} r="3.5" fill="#FF6F00" />
+      <path d={`${linePath} ${areaClose}`} fill="url(#chartGrad)" />
+      <path d={linePath} fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={pts[maxIdx].x.toFixed(2)} cy={pts[maxIdx].y.toFixed(2)} r="4" fill="var(--accent)" opacity="0.9" />
       {pontos.map((p, i) => {
         const show = i === 0 || i === n - 1 || i === maxIdx || i % Math.ceil(n / 5) === 0;
         if (!show) return null;
         return (
-          <text key={i} x={xOf(i).toFixed(1)} y={H - 4} textAnchor="middle" fontSize="9" fill="#A1A1AA" fontFamily="Inter, sans-serif">
+          <text key={i} x={pts[i].x.toFixed(2)} y={H - 4} textAnchor="middle" fontSize="9" fill="var(--fg-subtle)" fontFamily="Inter, sans-serif">
             {p.hora}h
           </text>
         );
@@ -590,7 +600,7 @@ export default async function DashboardPage() {
         <div style={{
           background: "var(--bg-card)",
           border: "1px solid var(--border)",
-          borderRadius: "var(--radius-xl)",
+          borderRadius: "var(--radius-2xl)",
           padding: "20px 24px",
           display: "flex",
           flexDirection: "column",
@@ -650,7 +660,7 @@ export default async function DashboardPage() {
         <div style={{
           background: "var(--bg-card)",
           border: "1px solid var(--border)",
-          borderRadius: "var(--radius-xl)",
+          borderRadius: "var(--radius-2xl)",
           padding: "20px 24px",
           display: "flex",
           flexDirection: "column",
@@ -763,7 +773,7 @@ export default async function DashboardPage() {
           <div style={{
             background: "var(--bg-ai)",
             border: "1px solid var(--border-ai)",
-            borderRadius: "var(--radius-xl)",
+            borderRadius: "var(--radius-2xl)",
             padding: "20px 24px",
             display: "flex",
             flexDirection: "column",
@@ -792,14 +802,17 @@ export default async function DashboardPage() {
         {/* Verdade ou Silêncio */}
         <div style={{
           background: "var(--bg-card)",
-          border: `1px solid ${temAlertas ? "color-mix(in srgb, var(--danger) 30%, var(--border))" : "var(--border)"}`,
-          borderRadius: "var(--radius-xl)",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--radius-2xl)",
           padding: "14px 20px",
           display: "flex",
           flexDirection: "column",
           gap: 6,
         }}>
-          <span style={sectionLabel}>Verdade ou Silêncio</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <AlertCircle size={12} color="var(--fg-subtle)" opacity={0.7} />
+            <span style={sectionLabel}>Verdade ou Silêncio</span>
+          </div>
           <p style={{ fontSize: 18, fontWeight: 700, color: temAlertas ? "var(--danger)" : "var(--fg)", letterSpacing: "-0.02em", margin: 0 }}>
             {temAlertas ? "Atenção" : "Tudo certo"}
           </p>
@@ -822,13 +835,16 @@ export default async function DashboardPage() {
         <div style={{
           background: "var(--bg-card)",
           border: "1px solid var(--border)",
-          borderRadius: "var(--radius-xl)",
+          borderRadius: "var(--radius-2xl)",
           padding: "14px 20px",
           display: "flex",
           flexDirection: "column",
           gap: 6,
         }}>
-          <span style={sectionLabel}>Gargalo Operacional</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <Gauge size={12} color="var(--fg-subtle)" opacity={0.7} />
+            <span style={sectionLabel}>Gargalo Operacional</span>
+          </div>
           <p style={{ fontSize: 18, fontWeight: 700, color: "var(--fg)", letterSpacing: "-0.02em", margin: "0 0 4px" }}>
             Operação ao vivo
           </p>
@@ -867,14 +883,17 @@ export default async function DashboardPage() {
         <div style={{
           background: "var(--bg-card)",
           border: "1px solid var(--border)",
-          borderRadius: "var(--radius-xl)",
+          borderRadius: "var(--radius-2xl)",
           padding: "14px 20px",
           display: "flex",
           flexDirection: "column",
           gap: 6,
           overflow: "hidden",
         }}>
-          <span style={sectionLabel}>Menu Engineering</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <Star size={12} color="var(--fg-subtle)" opacity={0.7} />
+            <span style={sectionLabel}>Menu Engineering</span>
+          </div>
           <p style={{ fontSize: 18, fontWeight: 700, color: "var(--fg)", letterSpacing: "-0.02em", margin: "0 0 4px" }}>
             Produtos e margem
           </p>

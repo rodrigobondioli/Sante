@@ -33,7 +33,7 @@ export function ProximaMelhorAcao({
     <div style={{
       background: "var(--bg-ai)",
       border: "1px solid var(--border-ai)",
-      borderRadius: "var(--radius-xl)",
+      borderRadius: "var(--radius-2xl)",
       padding: "20px 24px",
       display: "flex",
       flexDirection: "column",
